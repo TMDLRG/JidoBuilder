@@ -4,6 +4,14 @@
 
 The delivered Builder implementation does **not** satisfy the source-of-truth plan or the stakeholder-operability standard. The plan requires a complete no-code manager-facing system that exposes Jido capability breadth and visibly executes real runtime behavior in UI; current implementation exposes only a small shell of pages and stream viewers. The current web layer has only seven routes and mostly static copy; critical business actions (hire, assign, organize, observe, recover, govern) are not executable from the UI. Runtime wrappers exist for hiring, signal dispatch, persistence, debug, directives, and discovery, but those modules are not wired into LiveView surfaces, so stakeholder-visible operation is not proven. Internal docs explicitly mark most capabilities as deferred, including core lifecycle, dispatch, observability controls, pods, codegen, and no-code workflows. Existing tests and Playwright checks primarily validate page rendering and text visibility, not end-to-end operator outcomes. Scenario-certification docs claim non-technical completion for advanced scenarios, but referenced flows are not present as routes or working controls, creating a trust risk. I could not run `mix test`/`mix phx.routes` in this environment because Hex dependencies could not be fetched (HTTP 403 through tunnel), so runtime verification is limited to static-code audit.
 
+## Confidence rubric
+
+- **Tier A — Runtime-verified:** claim confirmed by executed runtime checks (tests/server/routes) in this audit environment.
+- **Tier B — Static-code verified:** claim confirmed directly from source/docs inspection, but not executed in this environment.
+- **Tier C — Inferred:** claim is reasoned from available evidence but not directly verified in code execution.
+
+Use this rubric for all confidence statements below; because runtime commands were blocked by dependency fetch failures, confidence is intentionally biased toward **Tier B (static-audit confidence)** unless explicitly stated otherwise.
+
 
 
 **Evidence anchors**
@@ -31,7 +39,7 @@ The delivered Builder implementation does **not** satisfy the source-of-truth pl
 4. Capability map and verification docs mark nearly all core capabilities as `deferred`, including start/stop/list/count, directives, state ops, discovery, and monitoring controls.  
 5. Runtime integration modules exist but have no references from web layer, indicating present-but-unwired backend capability.
 
-**Confidence:** 5/5 (direct code/document evidence).
+**Confidence:** 4/5 (**Tier B — Static-code verified**). Rationale: verdict is strongly supported by direct source/doc inspection, but no runtime execution was completed in this environment.
 
 **Evidence anchors**
 - Fact 1 (plan demands broad no-code + real execution visibility):  
@@ -77,7 +85,7 @@ The delivered Builder implementation does **not** satisfy the source-of-truth pl
 
 **Stakeholder risk level: Critical** (demo trust loss likely within minutes).
 
-**Confidence:** 5/5.
+**Confidence:** 4/5 (**Tier B — Static-code verified**). Rationale: UI surfaces and missing controls are directly visible in source/docs, but not runtime-tested in this environment.
 
 ---
 
@@ -91,7 +99,7 @@ The delivered Builder implementation does **not** satisfy the source-of-truth pl
 - **Runtime fidelity:** Partial. Backend wrappers for many Jido primitives exist, but end-user execution path is not wired through UI.  
 - **Testing/verification fidelity:** Fail for acceptance reality. Existing tests primarily confirm render/text and synthetic PubSub insertion; they do not prove layman operational workflows.
 
-**Confidence:** 5/5.
+**Confidence:** 4/5 (**Tier B — Static-code verified**). Rationale: conformance gaps are explicit in plan/docs/router evidence, while runtime validation was not executed in this environment.
 
 ---
 
@@ -105,7 +113,7 @@ The delivered Builder implementation does **not** satisfy the source-of-truth pl
 - Onboarding suitability is weak: docs “smoke test” is to verify headings/labels, not accomplish work.
 - A basic business user cannot complete core goals (hire, assign, monitor completion, organize hierarchy, recover from failure) unaided.
 
-**Confidence:** 4/5 (UI runtime not launched due dependency-block, but LiveView source is direct).
+**Confidence:** 4/5 (**Tier B — Static-code verified**). Rationale: UX conclusions come from direct UI source review; runtime walk-through with live server could not be executed.
 
 ---
 
@@ -118,7 +126,7 @@ The delivered Builder implementation does **not** satisfy the source-of-truth pl
 - Gap: No dedicated Activity/Trace/Audit operational screens in router/nav.
 - Gap: No proven user-triggered execution chain from UI control to runtime event generation.
 
-**Confidence:** 4/5.
+**Confidence:** 3/5 (**Tier B — Static-code verified**). Rationale: stream/runtime wiring is visible in code, but end-to-end operator-triggered execution was not runtime-verified.
 
 ---
 
@@ -131,7 +139,7 @@ The delivered Builder implementation does **not** satisfy the source-of-truth pl
 - Codegen app exists, but no surfaced block editor in current web routes.
 - For current implementation, non-developer users cannot perform intended workflows without developer intervention.
 
-**Confidence:** 5/5.
+**Confidence:** 4/5 (**Tier B — Static-code verified**). Rationale: no-code gaps are explicit in route/surface coverage and docs, while runtime usability was not exercised interactively.
 
 ---
 
@@ -146,7 +154,7 @@ The delivered Builder implementation does **not** satisfy the source-of-truth pl
 - **“Schedules”** implies temporal control; no cron creation/cancel controls.
 - **Scenario certification** asserts objective execution coverage for advanced scenarios not represented in the route/UI/test implementation shown.
 
-**Confidence:** 5/5.
+**Confidence:** 4/5 (**Tier B — Static-code verified**). Rationale: misleading labels are directly observable in page implementations and headings, but user-facing runtime demos were not executed.
 
 ---
 
@@ -163,6 +171,8 @@ Evidence sources used:
 Not verified due environment limitation:
 - Live running server behavior against real dependencies.
 - End-to-end runtime execution from browser actions (controls missing in code regardless).
+
+**Confidence:** 5/5 (**Tier B — Static-code verified**). Rationale: this section is a direct inventory of inspected sources and explicitly documents blocked runtime checks.
 
 ---
 
@@ -202,6 +212,8 @@ Not verified due environment limitation:
 | Debug panel | Yes | Runtime debug wrapper | No | Not proven | No | No | Present-but-unwired | No route | High |
 | Error policy | Yes | Mentioned deferred | No | No | No | No | Missing | No UI/test evidence | High |
 | Orphans / Adoption | Yes | Plan coverage | No | No | No | No | Missing | No route | Medium |
+
+**Confidence:** 4/5 (**Tier B — Static-code verified**). Rationale: matrix statuses are grounded in inspected routes/modules/docs, with runtime-status columns kept conservative because checks were not executed.
 
 ---
 
@@ -270,6 +282,8 @@ Not verified due environment limitation:
 - Layman usable: no.
 - Expectation satisfied: no.
 
+**Confidence:** 4/5 (**Tier B — Static-code verified**). Rationale: each surface assessment comes from direct LiveView/router inspection, not runtime interaction.
+
 ---
 
 # 11. Runtime / Execution Audit
@@ -284,6 +298,8 @@ Not verified due environment limitation:
 - **Real codegen compile path:** backend pieces exist; no layman-facing block editor workflow demonstrated.
 
 Overall runtime verdict: **developer-facing partial foundation, stakeholder-facing execution not proven end-to-end**.
+
+**Confidence:** 3/5 (**Tier B — Static-code verified**). Rationale: runtime module presence is directly verified in code, but runtime behavior in this environment was not executed.
 
 ---
 
@@ -302,6 +318,8 @@ Stakeholder story audit (create template -> hire -> assign -> observe -> underst
 9. **Trust actions are real**: not established; UI mostly headings and passive streams.
 
 **Story break point:** step 1 for most users; step 2 even if seeded data exists.
+
+**Confidence:** 3/5 (**Tier B — Static-code verified**). Rationale: breakpoints are inferred from absent UI paths and controls in code, without executing full user journeys.
 
 ---
 
@@ -391,6 +409,7 @@ Stakeholder story audit (create template -> hire -> assign -> observe -> underst
   Identifiers: execution-attempt note; dependency declarations requiring Hex fetch  
   Distinctive string: `HTTP 403 through tunnel`
 
+**Confidence:** 4/5 (**Tier B — Static-code verified**). Rationale: all gaps are tied to concrete source evidence; severity/impact is still an audit judgment.
 
 ---
 
@@ -425,6 +444,8 @@ Stakeholder story audit (create template -> hire -> assign -> observe -> underst
 - Final state and audit entry visible in UI.
 - No hidden CLI/Elixir steps needed.
 
+**Confidence:** 3/5 (**Tier C — Inferred**). Rationale: prioritization is a prescriptive recommendation based on observed gaps, not a directly verifiable code fact.
+
 ---
 
 # 15. Ship / No-Ship Recommendation
@@ -432,3 +453,5 @@ Stakeholder story audit (create template -> hire -> assign -> observe -> underst
 **Recommendation: No-Ship**
 
 This build should not be presented as the intended Builder to layman stakeholders. Evidence suggests a scaffolded foundation with partial runtime plumbing, but not a credible no-code operational product. At most, it can be positioned internally as a technical baseline/prototype with explicit caveats: “navigation shell + event stream proof-of-concept, major operator capabilities deferred.” Ship decision should change only after the critical path (hire -> assign -> observe -> manage) is demonstrably complete in UI and documented claims are brought into strict alignment with implementation truth.
+
+**Confidence:** 4/5 (**Tier B — Static-code verified**). Rationale: recommendation is strongly supported by static evidence, with runtime confidence intentionally limited due non-executed checks.
