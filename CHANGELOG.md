@@ -2,6 +2,22 @@
 
 <!-- changelog -->
 
+## Unreleased
+
+### Features
+
+- **feat(builder-docs):** add Definition-of-Done release checklist that maps each DoD bullet to objective evidence artifacts.
+- **feat(builder-docs):** add scenario certification document for mandatory non-technical UI-only execution.
+
+### Documentation
+
+- **docs(changelog):** add conventional-commit formatted release notes for Builder release readiness artifacts.
+
+### User-visible changes
+
+- Added `builder/docs/release_checklist.md` to provide release gates and explicit evidence requirements for each DoD item.
+- Added `builder/docs/scenario_certification.md` to provide scenario-by-scenario proof requirements showing workflows are executable without editing Elixir.
+
 ## [v2.2.0](https://github.com/agentjido/jido/compare/v2.1.0...v2.2.0) (2026-03-29)
 
 
