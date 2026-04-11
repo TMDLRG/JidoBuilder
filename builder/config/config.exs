@@ -1,7 +1,15 @@
 import Config
 
+config :jido_builder_core,
+  ecto_repos: [JidoBuilderCore.Repo],
+  generators: [timestamp_type: :utc_datetime_usec]
+
+config :jido_builder_core, JidoBuilderCore.Repo,
+  migration_primary_key: [type: :id],
+  migration_timestamps: [type: :utc_datetime_usec]
+
 config :jido_builder_web,
-  ecto_repos: [],
+  ecto_repos: [JidoBuilderCore.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 config :jido_builder_web, JidoBuilderWeb.Endpoint,

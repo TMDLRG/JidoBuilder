@@ -1,5 +1,10 @@
 import Config
 
+config :jido_builder_core, JidoBuilderCore.Repo,
+  database: Path.expand("../jido_builder_test.db", __DIR__),
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: 5
+
 config :jido_builder_web, JidoBuilderWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base: "test-secret-key-base-change-me",

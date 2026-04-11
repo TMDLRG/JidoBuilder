@@ -1,5 +1,11 @@
 import Config
 
+config :jido_builder_core, JidoBuilderCore.Repo,
+  database: Path.expand("../jido_builder_dev.db", __DIR__),
+  pool_size: 10,
+  show_sensitive_data_on_connection_error: true,
+  stacktrace: true
+
 config :jido_builder_web, JidoBuilderWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4000],
   check_origin: false,
