@@ -1,7 +1,7 @@
 defmodule JidoBuilderCodegenTest do
   use ExUnit.Case, async: false
 
-  alias JidoBuilderCodegen.CompileQueue
+  alias JidoBuilderCodegen.{CompileQueue, FileWriter, Templates}
 
   setup do
     tmp_dir = Path.join(System.tmp_dir!(), "jido_codegen_#{System.unique_integer([:positive])}")
@@ -15,6 +15,14 @@ defmodule JidoBuilderCodegenTest do
 
     {:ok, queue} = start_supervised(CompileQueue)
     {:ok, queue: queue, tmp_dir: tmp_dir}
+  end
+
+  test "template render for action emits module source" do
+    block = %{type: :action, module: "Generated.ActionOne", name: "a1", description: "generated"}
+
+    assert {:ok, source} = Templates.render(block)
+    assert source =~ "defmodule Generated.ActionOne"
+    assert source =~ "use Jido.Action"
   end
 
   test "compiles curated action block", %{queue: queue} do
@@ -35,28 +43,18 @@ defmodule JidoBuilderCodegenTest do
              CompileQueue.enqueue(queue, request)
   end
 
-  test "rolls back written file when compile fails", %{queue: queue, tmp_dir: tmp_dir} do
+  test "compile rollback restores previous file contents", %{queue: queue, tmp_dir: tmp_dir} do
     file = Path.join(tmp_dir, "broken.ex")
-    File.write!(file, "defmodule Broken do\n  def ok, do: :ok\nend\n")
+    original = "defmodule Broken do\n  def ok, do: :ok\nend\n"
+    File.write!(file, original)
 
-    request = %{
-      blocks: [
-        %{type: :action, module: "Broken", name: "a1", description: "\"\"\""}
-      ]
-    }
+    request = %{blocks: [%{type: :action, module: "Broken", name: "a1", description: "\"\"\""}]}
 
     assert {:error, %{errors: [_ | _]}} = CompileQueue.enqueue(queue, request)
-    assert File.read!(file) == "defmodule Broken do\n  def ok, do: :ok\nend\n"
+    assert File.read!(file) == original
   end
 
-  test "rejects writes outside generated directory", %{queue: queue} do
-    request = %{
-      blocks: [
-        %{type: :unknown, module: "../evil", name: "bad", description: "bad"}
-      ]
-    }
-
-    assert {:error, %{errors: ["invalid block schema"], writes: []}} =
-             CompileQueue.enqueue(queue, request)
+  test "sandbox path enforcement blocks escape attempts" do
+    assert {:error, :path_outside_generated_lib} = FileWriter.write("../escape.ex", "bad")
   end
 end

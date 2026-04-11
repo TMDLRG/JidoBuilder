@@ -1,0 +1,57 @@
+name: Builder CI
+
+on:
+  pull_request:
+    paths:
+      - 'builder/**'
+      - '.github/workflows/builder-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'builder/**'
+      - '.github/workflows/builder-ci.yml'
+
+jobs:
+  builder:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: builder
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.18.4'
+          otp-version: '27.3'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Elixir deps
+        run: mix deps.get
+
+      - name: Check format
+        run: mix format --check-formatted
+
+      - name: Compile with warnings denied
+        run: mix compile --warnings-as-errors
+
+      - name: Run test suite
+        run: mix test
+
+      - name: Install E2E deps
+        working-directory: builder/e2e
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: builder/e2e
+        run: npx playwright install --with-deps chromium
+
+      - name: Run headless E2E
+        working-directory: builder/e2e
+        run: npm test
