@@ -4,6 +4,26 @@
 
 The delivered Builder implementation does **not** satisfy the source-of-truth plan or the stakeholder-operability standard. The plan requires a complete no-code manager-facing system that exposes Jido capability breadth and visibly executes real runtime behavior in UI; current implementation exposes only a small shell of pages and stream viewers. The current web layer has only seven routes and mostly static copy; critical business actions (hire, assign, organize, observe, recover, govern) are not executable from the UI. Runtime wrappers exist for hiring, signal dispatch, persistence, debug, directives, and discovery, but those modules are not wired into LiveView surfaces, so stakeholder-visible operation is not proven. Internal docs explicitly mark most capabilities as deferred, including core lifecycle, dispatch, observability controls, pods, codegen, and no-code workflows. Existing tests and Playwright checks primarily validate page rendering and text visibility, not end-to-end operator outcomes. Scenario-certification docs claim non-technical completion for advanced scenarios, but referenced flows are not present as routes or working controls, creating a trust risk. I could not run `mix test`/`mix phx.routes` in this environment because Hex dependencies could not be fetched (HTTP 403 through tunnel), so runtime verification is limited to static-code audit.
 
+
+
+**Evidence anchors**
+- Claim: Verdict is **No-Ship** due to missing operator-critical UI execution paths.  
+  Paths: `BUILDER_PLAN.md`; `builder/apps/jido_builder_web/lib/jido_builder_web/router.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/roster_live.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/workflow_builder_live.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/teams_live.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/schedules_live.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/settings_live.ex`  
+  Identifiers: `JidoBuilderWeb.Router`, `live("/roster", ...)`, `live("/workflows", ...)`, `JidoBuilderWeb.RosterLive.render/1`, `JidoBuilderWeb.WorkflowBuilderLive.render/1`, `JidoBuilderWeb.TeamsLive.render/1`, `JidoBuilderWeb.SchedulesLive.render/1`, `JidoBuilderWeb.SettingsLive.render/1`  
+  Distinctive string: `Build and hire agents into pods.`
+- Claim: Runtime wrappers exist but are not visibly wired through web UI handlers.  
+  Paths: `builder/apps/jido_builder_runtime/lib/jido_builder_runtime/hiring.ex`; `builder/apps/jido_builder_runtime/lib/jido_builder_runtime/signals.ex`; `builder/apps/jido_builder_runtime/lib/jido_builder_runtime/persistence.ex`; `builder/apps/jido_builder_runtime/lib/jido_builder_runtime/debug.ex`; `builder/apps/jido_builder_runtime/lib/jido_builder_runtime/directive_emitter.ex`; `builder/apps/jido_builder_runtime/lib/jido_builder_runtime/discovery.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/`  
+  Identifiers: `JidoBuilderRuntime.Hiring`, `JidoBuilderRuntime.Signals`, `JidoBuilderRuntime.Persistence`, `JidoBuilderRuntime.Debug`, `JidoBuilderRuntime.DirectiveEmitter`, `JidoBuilderRuntime.Discovery`  
+  Distinctive string: `defmodule JidoBuilderRuntime.Hiring do`
+- Claim: Internal docs already mark broad capability surface as deferred.  
+  Paths: `builder/docs/verification.md`; `builder/docs/capability_map.md`  
+  Identifiers: verification table `Status` column; capability map rows for lifecycle/dispatch/observe/directives/state ops  
+  Distinctive string: `| Start agent | Roster → Hire wizard | A | Jido.start_agent/3 | deferred |`
+- Claim: Scenario certification and test focus are not equivalent to operational stakeholder outcomes.  
+  Paths: `builder/docs/scenario_certification.md`; `builder/apps/jido_builder_web/test/`; `builder/e2e/tests/`  
+  Identifiers: scenario status tables; LiveView assertions; Playwright expectations  
+  Distinctive string: `toHaveText` / `rendered =~`
+
 **Top 5 decisive facts**
 1. Plan mandates complete no-code exposure of all Jido capabilities and real execution visibility; delivered surfaces are only a narrow subset.  
 2. Router exposes only Home, Roster, Agent detail, Workflows, Schedules, Teams, Settings; all other required surfaces are absent.  
@@ -12,6 +32,29 @@ The delivered Builder implementation does **not** satisfy the source-of-truth pl
 5. Runtime integration modules exist but have no references from web layer, indicating present-but-unwired backend capability.
 
 **Confidence:** 5/5 (direct code/document evidence).
+
+**Evidence anchors**
+- Fact 1 (plan demands broad no-code + real execution visibility):  
+  Paths: `BUILDER_PLAN.md`; `builder/docs/verification.md`  
+  Identifiers: mission/scope requirements; verification `Status` and `Blocker/Gap ID` columns  
+  Distinctive string: `no-code`
+- Fact 2 (router only exposes seven surfaces):  
+  Paths: `builder/apps/jido_builder_web/lib/jido_builder_web/router.ex`  
+  Identifiers: `JidoBuilderWeb.Router`, `live_session :default`, seven `live/3` declarations  
+  Distinctive string: `live("/settings", SettingsLive, :index)`
+- Fact 3 (Roster/Schedules/Teams/Settings are placeholders):  
+  Paths: `builder/apps/jido_builder_web/lib/jido_builder_web/live/roster_live.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/schedules_live.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/teams_live.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/settings_live.ex`  
+  Identifiers: `render/1` in each LiveView  
+  Distinctive strings: `Build and hire agents into pods.` / `Manage recurring runs and temporal triggers.` / `Coordinate pods of specialized agents.` / `Project and runtime settings.`
+- Fact 4 (core capability coverage marked deferred):  
+  Paths: `builder/docs/verification.md`; `builder/docs/capability_map.md`  
+  Identifiers: `Jido.start_agent/3`, `Jido.AgentServer.cast/2`, `Jido.Agent.Directive.*`, `Jido.Agent.StateOp.*`, `Jido.Observe*` rows  
+  Distinctive string: `| deferred |`
+- Fact 5 (runtime modules present but web references absent):  
+  Paths: `builder/apps/jido_builder_runtime/lib/jido_builder_runtime/`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/`  
+  Identifiers: `JidoBuilderRuntime.Hiring`, `JidoBuilderRuntime.Dispatch`, `JidoBuilderRuntime.Persistence`, `JidoBuilderRuntime.Debug`  
+  Distinctive string: `defmodule JidoBuilderRuntime.`
+
 
 ---
 
@@ -311,6 +354,43 @@ Stakeholder story audit (create template -> hire -> assign -> observe -> underst
    Plan impact: operational readiness risk.  
    Evidence: dependency fetch blocked in this environment.  
    Fix: provide vendor/cache strategy or offline dependency mirror guidance.
+
+
+
+**Evidence anchors**
+- G-001 (core operator journey missing):  
+  Paths: `builder/apps/jido_builder_web/lib/jido_builder_web/live/roster_live.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/workflow_builder_live.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/teams_live.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/schedules_live.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/settings_live.ex`  
+  Identifiers: `render/1`, `page_title` assigns  
+  Distinctive string: `Roster / Hire Wizard`
+- G-002 (capability-to-UI mismatch):  
+  Paths: `builder/docs/capability_map.md`; `builder/docs/verification.md`; `builder/apps/jido_builder_web/lib/jido_builder_web/router.ex`  
+  Identifiers: capability rows with `deferred`; router `live/3` entries  
+  Distinctive string: `GAP-MVP-`
+- G-003 (runtime modules unwired to UI):  
+  Paths: `builder/apps/jido_builder_runtime/lib/jido_builder_runtime/hiring.ex`; `builder/apps/jido_builder_runtime/lib/jido_builder_runtime/signals.ex`; `builder/apps/jido_builder_runtime/lib/jido_builder_runtime/persistence.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/`  
+  Identifiers: runtime facade modules vs LiveView `handle_event/3` presence/absence  
+  Distinctive string: `defmodule JidoBuilderRuntime.Signals do`
+- G-004 (truthfulness/docs contradiction):  
+  Paths: `builder/docs/scenario_certification.md`; `builder/apps/jido_builder_web/lib/jido_builder_web/router.ex`; `builder/e2e/tests/`  
+  Identifiers: scenario completion statements; available routes; e2e assertion targets  
+  Distinctive string: `Scenario`
+- G-005 (observability not layman-operational):  
+  Paths: `builder/apps/jido_builder_web/lib/jido_builder_web/live/dashboard_live.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/agent_live.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/live/workflow_builder_live.ex`  
+  Identifiers: stream rendering helpers for event/status output  
+  Distinctive string: `event_name`
+- G-006 (critical surfaces missing):  
+  Paths: `builder/apps/jido_builder_web/lib/jido_builder_web/router.ex`; `builder/apps/jido_builder_web/lib/jido_builder_web/components/layouts/root.html.heex`  
+  Identifiers: route list and nav link set  
+  Distinctive string: `href={~p"/teams"}`
+- G-007 (validation evidence weak for outcomes):  
+  Paths: `builder/apps/jido_builder_web/test/`; `builder/e2e/tests/`  
+  Identifiers: LiveView render assertions, Playwright text checks  
+  Distinctive string: `assert html =~`
+- G-008 (bootstrap fragility in restricted network):  
+  Paths: `builder/docs/post_build_audit_2026-04-11.md`; `mix.exs`  
+  Identifiers: execution-attempt note; dependency declarations requiring Hex fetch  
+  Distinctive string: `HTTP 403 through tunnel`
+
 
 ---
 
