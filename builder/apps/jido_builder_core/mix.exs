@@ -15,17 +15,17 @@ defmodule JidoBuilderCore.MixProject do
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :ecto_sql],
       mod: {JidoBuilderCore.Application, []}
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:ecto_sql, "~> 3.12"},
+      {:ecto_sqlite3, "~> 0.18"},
       {:jido, path: "../../..", override: true}
     ]
   end
