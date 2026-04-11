@@ -30,3 +30,16 @@ config :logger, :console, format: "[$level] $message\n"
 
 config :phoenix, :stacktrace_depth, 20
 config :phoenix, :plug_init_mode, :runtime
+
+config :jido_builder_core, JidoBuilderCore.Vault,
+  ciphers: [
+    default: {
+      Cloak.Ciphers.AES.GCM,
+      tag: "AES.GCM.V1",
+      key:
+        Base.decode64!(
+          System.get_env("JIDO_BUILDER_CLOAK_KEY_DEV") ||
+            "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
+        )
+    }
+  ]

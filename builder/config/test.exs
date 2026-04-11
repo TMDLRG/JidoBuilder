@@ -12,3 +12,16 @@ config :jido_builder_web, JidoBuilderWeb.Endpoint,
 
 config :logger, level: :warning
 config :phoenix, :plug_init_mode, :runtime
+
+config :jido_builder_core, JidoBuilderCore.Vault,
+  ciphers: [
+    default: {
+      Cloak.Ciphers.AES.GCM,
+      tag: "AES.GCM.V1",
+      key:
+        Base.decode64!(
+          System.get_env("JIDO_BUILDER_CLOAK_KEY_TEST") ||
+            "ZmVkY2JhOTg3NjU0MzIxMGZlZGNiYTk4NzY1NDMyMTA="
+        )
+    }
+  ]
