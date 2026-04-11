@@ -6,6 +6,7 @@ defmodule JidoBuilderWeb.ConnCase do
       @endpoint JidoBuilderWeb.Endpoint
       use Phoenix.ConnTest
       import Phoenix.LiveViewTest
+      unquote(JidoBuilderWeb.verified_routes())
     end
   end
 
