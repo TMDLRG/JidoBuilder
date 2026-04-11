@@ -6,6 +6,7 @@ defmodule JidoBuilderCore.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      JidoBuilderCore.Vault,
       JidoBuilderCore.Repo
     ]
 

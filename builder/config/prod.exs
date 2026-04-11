@@ -10,3 +10,15 @@ config :jido_builder_web, JidoBuilderWeb.Endpoint,
   server: true
 
 config :logger, level: :info
+
+config :jido_builder_core, JidoBuilderCore.Vault,
+  ciphers: [
+    default: {
+      Cloak.Ciphers.AES.GCM,
+      tag: "AES.GCM.V1",
+      key:
+        Base.decode64!(
+          System.get_env("JIDO_BUILDER_CLOAK_KEY") || raise("JIDO_BUILDER_CLOAK_KEY is missing")
+        )
+    }
+  ]

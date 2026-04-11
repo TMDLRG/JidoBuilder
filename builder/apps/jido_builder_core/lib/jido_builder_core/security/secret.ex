@@ -1,9 +1,11 @@
 defmodule JidoBuilderCore.Security.Secret do
   use JidoBuilderCore.Schema
 
+  @derive {Inspect, except: [:encrypted_value]}
+
   schema "secrets" do
     field(:name, :string)
-    field(:encrypted_value, :string)
+    field(:encrypted_value, JidoBuilderCore.Encrypted.Binary)
     field(:key_id, :string)
     field(:metadata, :map, default: %{})
 

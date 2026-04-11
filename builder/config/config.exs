@@ -8,6 +8,19 @@ config :jido_builder_core, JidoBuilderCore.Repo,
   migration_primary_key: [type: :id],
   migration_timestamps: [type: :utc_datetime_usec]
 
+config :jido_builder_core, JidoBuilderCore.Vault,
+  ciphers: [
+    default: {
+      Cloak.Ciphers.AES.GCM,
+      tag: "AES.GCM.V1",
+      key:
+        Base.decode64!(
+          System.get_env("JIDO_BUILDER_CLOAK_KEY") ||
+            "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
+        )
+    }
+  ]
+
 config :jido_builder_web,
   ecto_repos: [JidoBuilderCore.Repo],
   generators: [timestamp_type: :utc_datetime]
