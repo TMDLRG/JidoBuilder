@@ -422,15 +422,55 @@ Stakeholder story audit (create template -> hire -> assign -> observe -> underst
 
 ## Critical before any stakeholder demo
 1. Remove/flag non-functional labels and docs that imply unavailable controls.
+   - [ ] User action available in UI: reviewer can trigger “View implemented flow” or equivalent CTA from each previously misleading surface.
+   - [ ] Runtime side effect observed: selecting the CTA emits a runtime “capability_check” (or equivalent) event confirming real backing behavior.
+   - [ ] User-facing status/result displayed: UI clearly renders supported vs unavailable capabilities with plain-language status.
+   - [ ] Audit/event record visible: activity/audit feed shows the reviewer action and resulting capability status event.
+   - [ ] Negative path/error remediation displayed: when a capability is unavailable, UI shows remediation text/link (e.g., roadmap item or alternative flow).
 2. Implement the single truth path: **Hire agent -> assign signal -> observe progress -> stop agent** entirely from UI.
+   - [ ] User action available in UI: operator can perform hire, assign, observe, and stop from visible controls without CLI.
+   - [ ] Runtime side effect observed: each action produces corresponding lifecycle/signal runtime events and state transitions.
+   - [ ] User-facing status/result displayed: each step shows success/failure state, updated agent status, and current workflow progress.
+   - [ ] Audit/event record visible: complete end-to-end chain appears in Activity/Audit with correlation id or linked run id.
+   - [ ] Negative path/error remediation displayed: invalid hire/assign/stop paths show actionable remediation (retry, required fields, dependency/state conflict hints).
 3. Add explicit runtime outcome panels (success/error/details/next action) for layman users.
+   - [ ] User action available in UI: operator can open an outcome panel for the latest run/action from each core screen.
+   - [ ] Runtime side effect observed: panel reflects live runtime response payload updates (pending -> success/error).
+   - [ ] User-facing status/result displayed: panel includes plain-language result, key details, and recommended next action.
+   - [ ] Audit/event record visible: a linked event/audit entry is accessible directly from the panel.
+   - [ ] Negative path/error remediation displayed: error state includes reason category and concrete remediation steps with retry option.
 4. Add minimum Activity + Audit screen with human-readable event semantics.
+   - [ ] User action available in UI: operator can open Activity/Audit screens, filter by agent/run, and inspect event details.
+   - [ ] Runtime side effect observed: new actions from any core flow appear in near-real-time in Activity/Audit.
+   - [ ] User-facing status/result displayed: each event row translates technical data into layman-readable outcome/status language.
+   - [ ] Audit/event record visible: immutable record includes actor, timestamp, action, result, and correlation metadata.
+   - [ ] Negative path/error remediation displayed: failed events show remediation guidance and link back to the initiating surface.
 
 ## High priority for product credibility
 1. Deliver real Workflow Builder MVP (create steps, run workflow, inspect per-step status).
+   - [ ] User action available in UI: user can create/edit steps and start a workflow run from builder controls.
+   - [ ] Runtime side effect observed: run request creates executable workflow instance and emits per-step execution events.
+   - [ ] User-facing status/result displayed: builder shows per-step status, current step, and terminal run result.
+   - [ ] Audit/event record visible: workflow run and each step transition are queryable in Activity/Audit.
+   - [ ] Negative path/error remediation displayed: step failure surfaces cause, failing step id, and guided retry/fix path.
 2. Deliver Teams/Pods MVP (create team, add members, broadcast, observe fan-out).
+   - [ ] User action available in UI: manager can create a pod, add/remove members, and send a broadcast from Teams screen.
+   - [ ] Runtime side effect observed: member assignment/broadcast produces runtime membership and fan-out delivery events.
+   - [ ] User-facing status/result displayed: UI shows pod roster changes and broadcast delivery summary (delivered/failed counts).
+   - [ ] Audit/event record visible: pod mutations and broadcast outcomes are visible in audit history.
+   - [ ] Negative path/error remediation displayed: invalid membership/broadcast errors include fix guidance and retry path.
 3. Deliver Schedules MVP (create/cancel cron with observable agent receipt).
+   - [ ] User action available in UI: scheduler UI supports create, pause/cancel, and list schedule operations.
+   - [ ] Runtime side effect observed: schedule create/cancel changes runtime schedule registry and triggers due deliveries.
+   - [ ] User-facing status/result displayed: schedule list shows current state, next run, and last run result.
+   - [ ] Audit/event record visible: schedule lifecycle and fired delivery events appear in audit/event views.
+   - [ ] Negative path/error remediation displayed: invalid cron/conflict errors show exact issue plus corrective examples.
 4. Wire debug controls and error policy basics into UI with safe defaults.
+   - [ ] User action available in UI: operator can toggle debug scope and select error policy defaults from Settings/Debug controls.
+   - [ ] Runtime side effect observed: debug/policy changes are applied to runtime behavior and reflected in subsequent executions.
+   - [ ] User-facing status/result displayed: UI confirms active debug level/error policy and scope of effect.
+   - [ ] Audit/event record visible: policy/debug changes are logged with actor and timestamp in audit trail.
+   - [ ] Negative path/error remediation displayed: invalid or unsafe configuration attempts are blocked with safe fallback guidance.
 
 ## Medium priority for completeness
 1. Templates/Skills/Discovery surfaces.
