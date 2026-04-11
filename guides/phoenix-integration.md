@@ -434,6 +434,16 @@ end
 
 Visit `/counter/my-counter` in multiple browser tabs. Changes sync in real-time.
 
+
+## Org Console Screen Set (LiveView Example)
+
+For a complete multi-screen operations console (home, roster, profile, assignments, workflow designer, teams/pods, schedules, monitors, settings), see:
+
+- `guides/examples/phoenix_org_console/README.md`
+- `guides/examples/phoenix_org_console/lib/my_app_web/live/org_console/`
+
+The example defaults to non-technical wording and includes an advanced-mode toggle for Jido terminology. It also wires all destructive actions to explicit confirmation dialogs with consequence text.
+
 ## Next Steps
 
 - [Signals](signals.md) — Signal routing and creation
