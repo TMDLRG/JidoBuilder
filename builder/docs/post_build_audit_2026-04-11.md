@@ -325,6 +325,8 @@ Stakeholder story audit (create template -> hire -> assign -> observe -> underst
 
 # 13. Gap Register
 
+## Product/UX/Runtime conformance gaps (ship blockers)
+
 1. **G-001 — Core operator journey missing (Critical)**  
    Stakeholder impact: cannot hire/assign/manage agents.  
    Plan impact: violates core mission and no-code non-negotiable.  
@@ -367,10 +369,13 @@ Stakeholder story audit (create template -> hire -> assign -> observe -> underst
    Evidence: LiveView and Playwright tests assert headings/text visibility.  
    Fix: add E2E assertions for real action->runtime->UI outcome chain.
 
-8. **G-008 — Environment/bootstrap fragility (Medium)**  
+## Audit reproducibility/environment risks (non-product blockers)
+
+1. **G-008 — Environment/bootstrap fragility (Medium)**  
    Stakeholder impact: audit and demo reproducibility risk in locked networks.  
    Plan impact: operational readiness risk.  
    Evidence: dependency fetch blocked in this environment.  
+   Clarification: this does not reduce the validity of purely static findings, but it does block runtime confirmation in this environment.  
    Fix: provide vendor/cache strategy or offline dependency mirror guidance.
 
 
