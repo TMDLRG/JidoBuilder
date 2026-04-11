@@ -55,8 +55,7 @@ defmodule JidoBuilderWeb do
 
   defp html_helpers do
     quote do
-      use Phoenix.HTML
-
+      import Phoenix.HTML
       import Phoenix.Component
       import JidoBuilderWeb.CoreComponents
 

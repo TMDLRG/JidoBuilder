@@ -37,16 +37,19 @@ defmodule JidoBuilderRuntime.DirectiveEmitter do
   end
 
   defp emit(config) do
-    with {:ok, signal_type} <- fetch_string(config, :signal_type),
-         payload <- get_value(config, :payload, %{}) do
-      signal = Jido.Signal.new!(signal_type, payload)
-      {:ok, Directive.emit(signal, get_value(config, :dispatch))}
-    rescue
-      error ->
-        {:error,
-         Error.new(:invalid_emit_config, "unable to build emit directive", %{
-           reason: Exception.message(error)
-         })}
+    with {:ok, signal_type} <- fetch_string(config, :signal_type) do
+      payload = get_value(config, :payload, %{})
+
+      try do
+        signal = Jido.Signal.new!(signal_type, payload)
+        {:ok, Directive.emit(signal, get_value(config, :dispatch))}
+      rescue
+        error ->
+          {:error,
+           Error.new(:invalid_emit_config, "unable to build emit directive", %{
+             reason: Exception.message(error)
+           })}
+      end
     end
   end
 

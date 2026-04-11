@@ -11,11 +11,15 @@ defmodule JidoBuilderRuntime.Signals do
   @spec new(map(), String.t(), map(), keyword()) :: result(Jido.Signal.t())
   def new(context, type, data \\ %{}, opts \\ []) do
     with {:ok, _ctx} <- Context.validate(context) do
-      {:ok, Jido.Signal.new!(type, data, opts)}
-    rescue
-      error ->
-        {:error,
-         Error.new(:invalid_signal, "unable to create signal", %{error: Exception.message(error)})}
+      try do
+        {:ok, Jido.Signal.new!(type, data, opts)}
+      rescue
+        error ->
+          {:error,
+           Error.new(:invalid_signal, "unable to create signal", %{
+             error: Exception.message(error)
+           })}
+      end
     end
   end
 

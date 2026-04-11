@@ -25,6 +25,9 @@ jido-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 
+# Local toolchain (pixi/scoop binaries used for testing)
+/.tools/
+
 # Elixir Language Server
 .elixir_ls/
 

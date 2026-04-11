@@ -7,7 +7,7 @@ defmodule JidoBuilderCore.Security.Integration do
     field(:name, :string)
     field(:provider, :string)
     field(:status, :string)
-    field(:config, JidoBuilderCore.Encrypted.Map, default: %{})
+    field(:config, JidoBuilderCore.Encrypted.Map)
 
     belongs_to(:workspace, JidoBuilderCore.Agents.Workspace)
 

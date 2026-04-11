@@ -33,6 +33,8 @@ defmodule JidoBuilderWeb.MixProject do
       {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
       {:bandit, "~> 1.5"},
       {:jason, "~> 1.4"},
+      {:telemetry_metrics, "~> 1.0"},
+      {:telemetry_poller, "~> 1.0"},
       {:jido_builder_core, in_umbrella: true},
       {:jido_builder_runtime, in_umbrella: true},
       {:jido_builder_codegen, in_umbrella: true},

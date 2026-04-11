@@ -19,7 +19,7 @@ defmodule JidoBuilderRuntime.DynamicAgent do
   alias JidoBuilderCore.Repo
   alias JidoBuilderRuntime.{Dispatch, DynamicPlugin, DynamicSensor, Error}
 
-  @spec from_template(pos_integer(), map()) :: {:ok, t()} | {:error, Error.t()}
+  @spec from_template(pos_integer(), map()) :: {:ok, Jido.Agent.t()} | {:error, Error.t()}
   def from_template(template_id, attrs \\ %{}) when is_integer(template_id) and is_map(attrs) do
     with %Template{} <-
            Repo.get(Template, template_id) ||
@@ -28,21 +28,20 @@ defmodule JidoBuilderRuntime.DynamicAgent do
          {:ok, action_slugs} <- action_slug_allow_list(template_id),
          {:ok, plugins} <- DynamicPlugin.mounts_for_template(template_id),
          {:ok, sensors} <- DynamicSensor.mounts_for_template(template_id) do
-      new_attrs =
+      state =
         attrs
         |> Map.put(:template_id, template_id)
         |> Map.put_new(:enabled_action_slugs, action_slugs)
         |> Map.put_new(:runtime_state, %{plugins: plugins, sensors: sensors})
 
-      __MODULE__.new(new_attrs)
-      |> case do
-        {:ok, agent} ->
-          {:ok, agent}
-
-        {:error, reason} ->
+      try do
+        agent = __MODULE__.new(state: state)
+        {:ok, agent}
+      rescue
+        error ->
           {:error,
            Error.new(:agent_build_failed, "unable to build dynamic agent", %{
-             reason: inspect(reason)
+             reason: Exception.message(error)
            })}
       end
     else
@@ -50,9 +49,9 @@ defmodule JidoBuilderRuntime.DynamicAgent do
     end
   end
 
-  @spec dispatch_action(t(), String.t()) :: {:ok, module()} | {:error, Error.t()}
+  @spec dispatch_action(Jido.Agent.t(), String.t()) :: {:ok, module()} | {:error, Error.t()}
   def dispatch_action(
-        %__MODULE__{template_id: template_id, enabled_action_slugs: slugs},
+        %Jido.Agent{state: %{template_id: template_id, enabled_action_slugs: slugs}},
         signal_type
       ) do
     with {:ok, %{module: module}} <- Dispatch.resolve_route(template_id, signal_type, slugs) do
