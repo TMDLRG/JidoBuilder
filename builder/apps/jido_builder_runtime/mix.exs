@@ -27,6 +27,7 @@ defmodule JidoBuilderRuntime.MixProject do
   defp deps do
     [
       {:jido_builder_core, in_umbrella: true},
+      {:phoenix_pubsub, "~> 2.1"},
       {:jido, path: "../../..", override: true}
     ]
   end
