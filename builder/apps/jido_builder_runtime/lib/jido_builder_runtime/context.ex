@@ -25,7 +25,7 @@ defmodule JidoBuilderRuntime.Context do
         {:error, Error.new(:invalid_context, "actor is required", %{field: :actor})}
 
       true ->
-        {:ok, Map.put_new(ctx, :jido_instance, Jido)}
+        {:ok, Map.put_new(ctx, :jido_instance, JidoBuilderRuntime.Jido)}
     end
   end
 

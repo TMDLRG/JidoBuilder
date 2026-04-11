@@ -7,12 +7,13 @@ defmodule JidoBuilderRuntime.Application do
 
   @impl true
   def start(_type, _args) do
+    Jido.Discovery.init_async()
+
     children = [
+      JidoBuilderRuntime.Jido,
       JidoBuilderRuntime.TelemetryBridge
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: JidoBuilderRuntime.Supervisor]
     Supervisor.start_link(children, opts)
   end
