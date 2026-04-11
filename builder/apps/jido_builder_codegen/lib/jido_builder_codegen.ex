@@ -1,18 +1,8 @@
 defmodule JidoBuilderCodegen do
-  @moduledoc """
-  Documentation for `JidoBuilderCodegen`.
-  """
+  @moduledoc false
 
-  @doc """
-  Hello world.
+  alias JidoBuilderCodegen.CompileQueue
 
-  ## Examples
-
-      iex> JidoBuilderCodegen.hello()
-      :world
-
-  """
-  def hello do
-    :world
-  end
+  @spec compile(map()) :: {:ok, map()} | {:error, map()}
+  def compile(request), do: CompileQueue.enqueue(request)
 end
