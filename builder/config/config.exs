@@ -52,4 +52,15 @@ config :tailwind,
 
 config :phoenix, :json_library, Jason
 
+config :jido_builder,
+  features: [
+    redis_enabled: System.get_env("JIDO_BUILDER_REDIS_ENABLED", "false") == "true",
+    llm_enabled: System.get_env("JIDO_BUILDER_LLM_ENABLED", "false") == "true"
+  ],
+  integrations: [
+    redis_url: System.get_env("JIDO_BUILDER_REDIS_URL", "redis://127.0.0.1:6379/0"),
+    llm_provider: System.get_env("JIDO_BUILDER_LLM_PROVIDER", "none"),
+    llm_api_base: System.get_env("JIDO_BUILDER_LLM_API_BASE", "")
+  ]
+
 import_config "#{config_env()}.exs"
