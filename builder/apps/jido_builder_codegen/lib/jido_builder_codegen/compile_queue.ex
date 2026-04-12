@@ -19,11 +19,19 @@ defmodule JidoBuilderCodegen.CompileQueue do
 
   defp run_compile(%{blocks: blocks} = request) do
     with :ok <- validate_blocks(blocks),
-         {:ok, writes} <- write_blocks(blocks),
-         {:ok, diagnostics} <- Compiler.compile(Enum.map(writes, & &1.path)) do
-      Jido.Discovery.refresh()
-      persist_attempt(request, "success", diagnostics, writes)
-      {:ok, diagnostics}
+         {:ok, writes} <- write_blocks(blocks) do
+      case Compiler.compile(Enum.map(writes, & &1.path)) do
+        {:ok, diagnostics} ->
+          Jido.Discovery.refresh()
+          persist_attempt(request, "success", diagnostics, writes)
+          {:ok, diagnostics}
+
+        {:error, reason} ->
+          rollback(writes)
+          reason_with_writes = Map.put(reason, :writes, writes)
+          persist_attempt(request, "failed", reason_with_writes, writes)
+          {:error, reason_with_writes}
+      end
     else
       {:error, reason} = error ->
         rollback(Map.get(reason, :writes, []))
