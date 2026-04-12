@@ -3,13 +3,21 @@ defmodule JidoBuilderRuntime.IntegrationRuntimeTest do
   use ExUnit.Case, async: false
 
   alias JidoBuilderRuntime.{Context, Hiring}
+  alias JidoBuilderCore.Agents, as: CoreAgents
   alias Ecto.Adapters.SQL.Sandbox
 
   setup_all do
     :ok = Sandbox.checkout(JidoBuilderCore.Repo)
     # Shared mode lets runtime descendants spawned outside the test process use this checked-out owner connection.
     :ok = Sandbox.mode(JidoBuilderCore.Repo, {:shared, self()})
-    :ok
+
+    {:ok, workspace} =
+      CoreAgents.create_workspace(
+        %{name: "integration-test-workspace", slug: "integration-test-workspace"},
+        "integration-setup"
+      )
+
+    [workspace_id: workspace.id]
   end
 
   defmodule MinimalRuntimeAgent do
@@ -19,8 +27,8 @@ defmodule JidoBuilderRuntime.IntegrationRuntimeTest do
       schema: [counter: [type: :integer, default: 0]]
   end
 
-  test "hire/list/count/whereis/stop uses real Jido runtime" do
-    context = %{workspace_id: 1, actor: "integration", partition: :runtime_test}
+  test "hire/list/count/whereis/stop uses real Jido runtime", %{workspace_id: workspace_id} do
+    context = %{workspace_id: workspace_id, actor: "integration", partition: :runtime_test}
     agent_id = "runtime-agent-#{System.unique_integer([:positive])}"
 
     assert {:ok, pid} = Hiring.start(context, MinimalRuntimeAgent, id: agent_id)
