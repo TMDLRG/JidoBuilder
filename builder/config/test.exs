@@ -7,7 +7,7 @@ config :jido_builder_core, JidoBuilderCore.Repo,
 
 config :jido_builder_web, JidoBuilderWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "test-secret-key-base-change-me",
+  secret_key_base: String.duplicate("test-secret-key-base-change-me-", 3) |> binary_part(0, 64),
   server: false
 
 config :logger, level: :warning
