@@ -3,7 +3,7 @@ defmodule JidoBuilderCore.Workflows do
 
   alias JidoBuilderCore.Audit
   alias JidoBuilderCore.Repo
-  alias JidoBuilderCore.Workflows.{Workflow, WorkflowStep}
+  alias JidoBuilderCore.Workflows.{Workflow, WorkflowStep, WorkflowEdge}
 
   def list_workflows(workspace_id) do
     Workflow
@@ -60,3 +60,19 @@ defmodule JidoBuilderCore.Workflows do
 
   defp maybe_audit(error, _actor, _action), do: error
 end
+
+
+  def list_workflow_edges(workflow_id) do
+    WorkflowEdge
+    |> where([e], e.workflow_id == ^workflow_id)
+    |> Repo.all()
+  end
+
+  def create_workflow_edge(attrs, actor),
+    do: insert_with_audit(WorkflowEdge, attrs, actor, "workflows.edges.create")
+
+  def delete_workflow_edge(edge, actor) do
+    edge
+    |> Repo.delete()
+    |> maybe_audit(actor, "workflows.edges.delete")
+  end

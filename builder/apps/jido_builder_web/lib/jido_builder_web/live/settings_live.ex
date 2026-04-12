@@ -16,7 +16,7 @@ defmodule JidoBuilderWeb.SettingsLive do
        workspace_id: workspace_id,
        integrations: integrations,
        secrets: secrets,
-       form_error: nil
+       form_error: nil, toast: nil
      )}
   end
 
@@ -29,7 +29,7 @@ defmodule JidoBuilderWeb.SettingsLive do
     case Security.write_secret(atomize(merged), user.email) do
       {:ok, _} ->
         secrets = Security.list_secrets_for_ui(%{workspace_id: workspace_id})
-        {:noreply, assign(socket, secrets: secrets, form_error: nil)}
+        {:noreply, assign(socket, secrets: secrets, form_error: nil, toast: nil)}
 
       {:error, changeset} ->
         {:noreply, assign(socket, form_error: inspect(changeset.errors))}
@@ -40,8 +40,9 @@ defmodule JidoBuilderWeb.SettingsLive do
   def render(assigns) do
     ~H"""
     <.page_header><%= @page_title %></.page_header>
+    <.toast :if={@toast} title={@toast.title} message={@toast.message} variant="info" />
 
-    <section class="mt-6">
+    <.card class="mt-6"><:header>Integrations</:header>
       <h2 class="text-sm font-semibold mb-2">Integrations</h2>
       <ul class="space-y-1 text-sm">
         <li :for={integ <- @integrations} class="border-b pb-1">
@@ -51,9 +52,9 @@ defmodule JidoBuilderWeb.SettingsLive do
         </li>
       </ul>
       <p :if={@integrations == []} class="text-sm text-zinc-500">No integrations.</p>
-    </section>
+    </.card>
 
-    <section class="mt-6">
+    <.card class="mt-6"><:header>Secrets</:header>
       <h2 class="text-sm font-semibold mb-2">Secrets</h2>
       <ul class="space-y-1 text-sm">
         <li :for={secret <- @secrets} class="border-b pb-1">
@@ -62,9 +63,9 @@ defmodule JidoBuilderWeb.SettingsLive do
         </li>
       </ul>
       <p :if={@secrets == []} class="text-sm text-zinc-500">No secrets.</p>
-    </section>
+    </.card>
 
-    <section class="mt-6 max-w-md">
+    <.card class="mt-6 max-w-md"><:header>Add Secret</:header>
       <h2 class="text-sm font-semibold mb-2">Add Secret</h2>
       <form id="secret-form" phx-submit="create_secret" class="space-y-3">
         <div>
@@ -80,7 +81,7 @@ defmodule JidoBuilderWeb.SettingsLive do
         </button>
       </form>
       <p :if={@form_error} class="mt-2 text-red-600 text-xs"><%= @form_error %></p>
-    </section>
+    </.card>
     """
   end
 

@@ -23,7 +23,7 @@ defmodule JidoBuilderWeb.SchedulesLive do
        workspace_id: workspace_id,
        schedules: schedules,
        templates: templates,
-       form_error: nil
+       form_error: nil, toast: nil
      )}
   end
 
@@ -35,7 +35,7 @@ defmodule JidoBuilderWeb.SchedulesLive do
     case Templates.create_schedule(attrs, user.email) do
       {:ok, _sched} ->
         schedules = Templates.list_template_schedules(workspace_id)
-        {:noreply, assign(socket, schedules: schedules, form_error: nil)}
+        {:noreply, assign(socket, schedules: schedules, form_error: nil, toast: nil)}
 
       {:error, changeset} ->
         {:noreply, assign(socket, form_error: inspect(changeset.errors))}
@@ -56,9 +56,10 @@ defmodule JidoBuilderWeb.SchedulesLive do
   def render(assigns) do
     ~H"""
     <.page_header><%= @page_title %></.page_header>
+    <.toast :if={@toast} title={@toast.title} message={@toast.message} variant="info" />
     <p class="text-sm text-zinc-500 mb-4">Manage recurring runs and temporal triggers.</p>
 
-    <section class="mt-4 max-w-lg">
+    <.card class="mt-4 max-w-lg"><:header>New Schedule</:header>
       <h2 class="text-sm font-semibold mb-2">New Schedule</h2>
       <form id="schedule-form" phx-submit="create_schedule" class="space-y-3">
         <div>
@@ -85,9 +86,9 @@ defmodule JidoBuilderWeb.SchedulesLive do
         </button>
       </form>
       <p :if={@form_error} class="mt-2 text-red-600 text-xs"><%= @form_error %></p>
-    </section>
+    </.card>
 
-    <section class="mt-8">
+    <.card class="mt-8"><:header>Scheduled Jobs</:header>
       <h2 class="text-sm font-semibold mb-2">Scheduled Jobs</h2>
       <ul id="schedule-list" class="space-y-2 text-sm">
         <li :for={sched <- @schedules} id={"sched-#{sched.id}"} class="flex items-center gap-4 border-b pb-2">
@@ -109,7 +110,7 @@ defmodule JidoBuilderWeb.SchedulesLive do
       <p :if={@schedules == []} class="text-sm text-zinc-500">
         No schedules configured for this workspace.
       </p>
-    </section>
+    </.card>
     """
   end
 

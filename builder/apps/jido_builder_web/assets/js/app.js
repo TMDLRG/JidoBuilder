@@ -2,6 +2,29 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import WorkflowDag from "./hooks/workflow_dag"
+import JsonTree from "./hooks/json_tree"
+import ExecutionTimeline from "./hooks/execution_timeline"
+
+const Sidebar = {
+  mounted() {
+    const apply = (collapsed) => {
+      const sidebar = this.el.querySelector("#app-sidebar")
+      if (!sidebar) return
+      sidebar.style.width = collapsed ? "4rem" : "16rem"
+      localStorage.setItem("builder.sidebar.collapsed", collapsed ? "1" : "0")
+    }
+
+    let collapsed = localStorage.getItem("builder.sidebar.collapsed") === "1"
+    apply(collapsed)
+
+    this.el.querySelectorAll('[data-role="sidebar-toggle"]').forEach((btn) => {
+      btn.addEventListener("click", () => {
+        collapsed = !collapsed
+        apply(collapsed)
+      })
+    })
+  }
+}
 
 const Download = {
   mounted() {
@@ -22,7 +45,7 @@ const Download = {
 const csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   params: {_csrf_token: csrfToken},
-  hooks: { WorkflowDag, Download }
+  hooks: { WorkflowDag, Sidebar, JsonTree, ExecutionTimeline, Download }
 })
 
 liveSocket.connect()

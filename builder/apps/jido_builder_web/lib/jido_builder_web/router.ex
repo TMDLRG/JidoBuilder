@@ -42,6 +42,8 @@ defmodule JidoBuilderWeb.Router do
       live("/roster", RosterLive, :index)
       live("/agents/:id", AgentLive, :show)
       live("/workflows", WorkflowBuilderLive, :index)
+      live("/execution", ExecutionLive, :index)
+      live("/execution/:agent_id", ExecutionLive, :show)
       live("/schedules", SchedulesLive, :index)
       live("/teams", TeamsLive, :index)
       live("/settings", SettingsLive, :index)

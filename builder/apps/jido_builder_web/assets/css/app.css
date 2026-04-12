@@ -1,4 +1,33 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-sidebar-900: #18181b;
+  --color-sidebar-800: #27272a;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f4f4f5;
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+  --color-warning: #d97706;
+  --color-info: #2563eb;
+  --radius-card: 0.75rem;
+  --shadow-panel: 0 10px 25px rgba(24, 24, 27, 0.08);
+}
+
 @source "../../lib/jido_builder_web/**/*.{ex,heex}";
 @source "../js/**/*.js";
+
+.ui-card { background: var(--color-surface); border-radius: var(--radius-card); box-shadow: var(--shadow-panel); border: 1px solid #e4e4e7; }
+.ui-card-header, .ui-card-footer { padding: 0.75rem 1rem; border-bottom: 1px solid #f4f4f5; }
+.ui-card-body { padding: 1rem; }
+.ui-btn { border-radius: .5rem; padding: .5rem .85rem; font-size: .875rem; }
+.ui-btn.primary { background: var(--color-brand-600); color: #fff; }
+.ui-btn.secondary { background: #f4f4f5; }
+.ui-badge { border-radius: 999px; padding: 0.1rem .5rem; font-size: .75rem; }
+.ui-badge.success { background: #dcfce7; color: #166534; }
+.ui-badge.danger { background: #fee2e2; color: #991b1b; }
+.ui-input { border: 1px solid #d4d4d8; border-radius: .5rem; padding: .45rem .6rem; width: 100%; }
+.ui-page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+.ui-empty { border: 1px dashed #d4d4d8; border-radius: .75rem; padding: 1.5rem; text-align:center; }
+.ui-modal { position: fixed; inset: 0; background: rgba(24,24,27,.45); display:flex; align-items:center; justify-content:center; }

@@ -11,6 +11,11 @@ defmodule JidoBuilderRuntime.EventBus do
   def agent_topic(workspace_id, agent_id),
     do: "workspace:" <> to_string(workspace_id) <> ":agent:" <> to_string(agent_id) <> ":events"
 
+
+  @spec agent_state_topic(pos_integer(), String.t() | pos_integer()) :: String.t()
+  def agent_state_topic(workspace_id, agent_id),
+    do: "workspace:" <> to_string(workspace_id) <> ":agent:" <> to_string(agent_id) <> ":state"
+
   @spec workflow_topic(pos_integer(), String.t() | pos_integer()) :: String.t()
   def workflow_topic(workspace_id, workflow_id),
     do:

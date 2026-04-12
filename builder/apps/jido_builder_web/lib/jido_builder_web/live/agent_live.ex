@@ -1,82 +1,43 @@
 defmodule JidoBuilderWeb.AgentLive do
   use JidoBuilderWeb, :live_view
 
-  import Ecto.Query
-
-  alias JidoBuilderCore.Agents.AgentInstance
-  alias JidoBuilderCore.{Observability, Repo}
   alias JidoBuilderRuntime.EventBus
-
-  @workspace_id 1
-  @stream_limit 200
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
-    topics = [
-      EventBus.workspace_activity_topic(@workspace_id),
-      EventBus.agent_topic(@workspace_id, id)
-    ]
-
-    # Look up DB-persisted instance if available
-    instance = Repo.one(from a in AgentInstance, where: a.name == ^id, limit: 1)
-    agent_status = if instance, do: instance.status, else: "unknown"
-
-    socket =
-      socket
-      |> assign(
-        page_title: "Agent #{id}",
-        agent_id: id,
-        topics: topics,
-        agent_status: agent_status
-      )
-      |> stream(:agent_events, [], limit: -@stream_limit)
-
     if connected?(socket) do
-      Enum.each(topics, &Phoenix.PubSub.subscribe(JidoBuilder.PubSub, &1))
+      Phoenix.PubSub.subscribe(JidoBuilder.PubSub, EventBus.agent_state_topic(1, id))
     end
 
-    {:ok, socket}
+    {:ok,
+     assign(socket,
+       page_title: "Agent #{id}",
+       agent_id: id,
+       active_tab: "overview",
+       agent_state: %{},
+       events: []
+     )}
   end
 
-  @impl true
-  def terminate(_reason, socket) do
-    Enum.each(socket.assigns.topics, &Phoenix.PubSub.unsubscribe(JidoBuilder.PubSub, &1))
-    :ok
-  end
+  def handle_event("tab", %{"name" => tab}, socket), do: {:noreply, assign(socket, active_tab: tab)}
 
-  @impl true
-  def handle_info({:jido_event, event}, socket) do
-    row = event |> Observability.translate_event() |> Map.put(:id, event.id)
-    {:noreply, stream_insert(socket, :agent_events, row, at: 0, limit: @stream_limit)}
-  end
+  def handle_info({:agent_state_changed, payload}, socket), do: {:noreply, assign(socket, agent_state: payload.state || %{})}
+  def handle_info(_, socket), do: {:noreply, socket}
 
-  def handle_info(_msg, socket), do: {:noreply, socket}
-
-  @impl true
   def render(assigns) do
     ~H"""
-    <.page_header>Agent Detail / Activity Stream</.page_header>
-    <p>Viewing agent <%= @agent_id %>.</p>
-
-    <section class="mt-4 rounded border p-4">
-      <h2 class="text-base font-semibold mb-2">Agent State</h2>
-      <dl class="grid grid-cols-2 gap-2 text-sm">
-        <dt class="text-zinc-500">Name</dt>
-        <dd class="font-mono"><%= @agent_id %></dd>
-        <dt class="text-zinc-500">Status</dt>
-        <dd><%= @agent_status %></dd>
-      </dl>
-    </section>
-
-    <section class="mt-4">
-      <h2 class="text-base font-semibold">Agent Event Stream</h2>
-      <ul id="agent-events" phx-update="stream" class="mt-2 space-y-1 text-sm">
-        <li :for={{dom_id, row} <- @streams.agent_events} id={dom_id} class="py-1">
-          <span class="font-mono"><%= row.label %></span>
-          <span class="ml-2 text-xs text-zinc-600"><%= row.status %></span>
-        </li>
-      </ul>
-    </section>
+    <.page_header>Agent Detail</.page_header>
+    <.tabs active_tab={@active_tab} items={["overview", "state", "signals", "actions"]} />
+    <nav class="mb-4 flex gap-2 text-xs">
+      <button phx-click="tab" phx-value-name="overview">Overview</button>
+      <button phx-click="tab" phx-value-name="state">State Inspector</button>
+      <button phx-click="tab" phx-value-name="signals">Signal History</button>
+      <button phx-click="tab" phx-value-name="actions">Action Log</button>
+    </nav>
+    <.card :if={@active_tab == "overview"}><:header>Overview</:header><p>ID: {@agent_id}</p></.card>
+    <.card :if={@active_tab == "state"}><:header>State Inspector</:header><div id="agent-json-tree" phx-hook="JsonTree" data-json={Jason.encode!(@agent_state)}></div></.card>
+    <.card :if={@active_tab == "signals"}><:header>Signal History</:header><.table id="signals-table" rows={@events}><:col :let={e}>{inspect(e)}</:col></.table></.card>
+    <.card :if={@active_tab == "actions"}><:header>Action Log</:header><p class="text-sm text-zinc-500">No actions yet.</p></.card>
     """
   end
 end

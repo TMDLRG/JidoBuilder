@@ -57,7 +57,9 @@ defmodule JidoBuilderWeb do
     quote do
       import Phoenix.HTML
       import Phoenix.Component
-      import JidoBuilderWeb.CoreComponents
+      import JidoBuilderWeb.CoreComponents, except: [page_header: 1]
+      import JidoBuilderWeb.Icons
+      import JidoBuilderWeb.UI
 
       alias Phoenix.LiveView.JS
 
