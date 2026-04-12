@@ -79,6 +79,15 @@ defmodule JidoBuilderWeb.UserAuth do
   def on_mount(:ensure_authenticated, _params, session, socket) do
     socket = mount_current_user(session, socket)
 
+    socket =
+      try do
+        Phoenix.LiveView.attach_hook(socket, :set_current_path, :handle_params, fn _params, uri, sock ->
+          {:cont, Phoenix.Component.assign(sock, :current_path, URI.parse(uri).path)}
+        end)
+      rescue
+        _ -> Phoenix.Component.assign(socket, :current_path, "/")
+      end
+
     if socket.assigns.current_user do
       {:cont, socket}
     else

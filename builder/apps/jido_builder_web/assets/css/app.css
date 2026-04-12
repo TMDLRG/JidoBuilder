@@ -31,3 +31,18 @@
 .ui-page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
 .ui-empty { border: 1px dashed #d4d4d8; border-radius: .75rem; padding: 1.5rem; text-align:center; }
 .ui-modal { position: fixed; inset: 0; background: rgba(24,24,27,.45); display:flex; align-items:center; justify-content:center; }
+.ui-label { display: block; font-size: .875rem; margin-bottom: .25rem; }
+.ui-alert { border-radius: .5rem; padding: .75rem 1rem; font-size: .875rem; }
+.ui-alert.info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+.ui-alert.danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.ui-alert.success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.ui-alert.warning { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+.ui-table { width: 100%; border-collapse: collapse; }
+.ui-table td, .ui-table th { padding: .5rem .75rem; border-bottom: 1px solid #e4e4e7; text-align: left; }
+.ui-table tr:hover { background: #fafafa; }
+.ui-toast { border-left: 4px solid; }
+.ui-toast.info { border-color: #3b82f6; }
+.ui-toast.success { border-color: #22c55e; }
+.ui-toast.danger { border-color: #ef4444; }
+.ui-stat { transition: box-shadow .15s; }
+.ui-stat:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); }

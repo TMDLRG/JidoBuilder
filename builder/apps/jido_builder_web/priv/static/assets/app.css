@@ -8,7 +8,6 @@
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
     monospace;
     --color-red-50: oklch(97.1% 0.013 17.38);
-    --color-red-100: oklch(93.6% 0.032 17.717);
     --color-red-200: oklch(88.5% 0.062 18.334);
     --color-red-600: oklch(57.7% 0.245 27.325);
     --color-red-700: oklch(50.5% 0.213 27.518);
@@ -17,15 +16,9 @@
     --color-green-600: oklch(62.7% 0.194 149.214);
     --color-green-700: oklch(52.7% 0.154 150.069);
     --color-green-800: oklch(44.8% 0.119 151.328);
-    --color-emerald-100: oklch(95% 0.052 163.051);
-    --color-emerald-400: oklch(76.5% 0.177 163.223);
     --color-emerald-500: oklch(69.6% 0.17 162.48);
     --color-emerald-700: oklch(50.8% 0.118 165.612);
-    --color-blue-100: oklch(93.2% 0.032 255.585);
-    --color-blue-400: oklch(70.7% 0.165 254.624);
     --color-blue-600: oklch(54.6% 0.245 262.881);
-    --color-blue-700: oklch(48.8% 0.243 264.376);
-    --color-purple-400: oklch(71.4% 0.203 305.504);
     --color-zinc-50: oklch(98.5% 0 0);
     --color-zinc-100: oklch(96.7% 0.001 286.375);
     --color-zinc-200: oklch(92% 0.004 286.32);
@@ -292,6 +285,9 @@
   .mt-8 {
     margin-top: calc(var(--spacing) * 8);
   }
+  .mr-2 {
+    margin-right: calc(var(--spacing) * 2);
+  }
   .-mb-px {
     margin-bottom: -1px;
   }
@@ -324,6 +320,9 @@
   }
   .hidden {
     display: none;
+  }
+  .inline {
+    display: inline;
   }
   .inline-flex {
     display: inline-flex;
@@ -549,6 +548,9 @@
   .bg-zinc-200 {
     background-color: var(--color-zinc-200);
   }
+  .bg-zinc-800 {
+    background-color: var(--color-zinc-800);
+  }
   .bg-zinc-900 {
     background-color: var(--color-zinc-900);
   }
@@ -727,6 +729,20 @@
       }
     }
   }
+  .hover\:bg-zinc-800 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-zinc-800);
+      }
+    }
+  }
+  .hover\:text-zinc-200 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-zinc-200);
+      }
+    }
+  }
   .hover\:text-zinc-700 {
     &:hover {
       @media (hover: hover) {
@@ -825,6 +841,66 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.ui-label {
+  display: block;
+  font-size: .875rem;
+  margin-bottom: .25rem;
+}
+.ui-alert {
+  border-radius: .5rem;
+  padding: .75rem 1rem;
+  font-size: .875rem;
+}
+.ui-alert.info {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+.ui-alert.danger {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+.ui-alert.success {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+.ui-alert.warning {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+.ui-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.ui-table td, .ui-table th {
+  padding: .5rem .75rem;
+  border-bottom: 1px solid #e4e4e7;
+  text-align: left;
+}
+.ui-table tr:hover {
+  background: #fafafa;
+}
+.ui-toast {
+  border-left: 4px solid;
+}
+.ui-toast.info {
+  border-color: #3b82f6;
+}
+.ui-toast.success {
+  border-color: #22c55e;
+}
+.ui-toast.danger {
+  border-color: #ef4444;
+}
+.ui-stat {
+  transition: box-shadow .15s;
+}
+.ui-stat:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
 }
 @property --tw-rotate-x {
   syntax: "*";

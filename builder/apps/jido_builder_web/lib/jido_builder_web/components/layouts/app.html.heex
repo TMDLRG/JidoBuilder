@@ -5,10 +5,65 @@
       <button id="sidebar-toggle" data-role="sidebar-toggle" class="text-xs text-zinc-400">⇔</button>
     </div>
     <nav class="flex-1 overflow-y-auto p-3 text-sm space-y-4">
-      <section><p class="text-zinc-500 text-xs mb-1">OPERATE</p><.link navigate={~p"/"}>Dashboard</.link><br/><.link navigate={~p"/roster"}>Agents</.link><br/><.link navigate={~p"/workflows"}>Workflows</.link><br/><.link navigate={~p"/schedules"}>Schedules</.link></section>
-      <section><p class="text-zinc-500 text-xs mb-1">CONFIGURE</p><.link navigate={~p"/templates"}>Templates</.link><br/><.link navigate={~p"/skills"}>Skills</.link><br/><.link navigate={~p"/directives"}>Directives</.link><br/><.link navigate={~p"/teams"}>Teams</.link></section>
-      <section><p class="text-zinc-500 text-xs mb-1">OBSERVE</p><.link navigate={~p"/execution"}>Execution</.link><br/><.link navigate={~p"/traces"}>Traces</.link><br/><.link navigate={~p"/audit"}>Audit</.link><br/><.link navigate={~p"/debug"}>Debug</.link></section>
-      <section><p class="text-zinc-500 text-xs mb-1">ADMIN</p><.link navigate={~p"/settings"}>Settings</.link><br/><.link navigate={~p"/workspaces"}>Workspaces</.link></section>
+      <%
+        cur = assigns[:current_path] || ""
+        active = "block px-2 py-1 rounded bg-zinc-800 text-white"
+        inactive = "block px-2 py-1 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+      %>
+      <section>
+        <p class="text-zinc-500 text-xs mb-1">OPERATE</p>
+        <.link navigate={~p"/"} class={if cur == "/", do: active, else: inactive}>
+          <.icon name="home" class="w-4 h-4 inline mr-2" />Dashboard
+        </.link>
+        <.link navigate={~p"/roster"} class={if String.starts_with?(cur, "/roster"), do: active, else: inactive}>
+          <.icon name="users" class="w-4 h-4 inline mr-2" />Agents
+        </.link>
+        <.link navigate={~p"/workflows"} class={if String.starts_with?(cur, "/workflow"), do: active, else: inactive}>
+          <.icon name="play" class="w-4 h-4 inline mr-2" />Workflows
+        </.link>
+        <.link navigate={~p"/schedules"} class={if String.starts_with?(cur, "/schedule"), do: active, else: inactive}>
+          <.icon name="clock" class="w-4 h-4 inline mr-2" />Schedules
+        </.link>
+      </section>
+      <section>
+        <p class="text-zinc-500 text-xs mb-1">CONFIGURE</p>
+        <.link navigate={~p"/templates"} class={if String.starts_with?(cur, "/template"), do: active, else: inactive}>
+          <.icon name="folder" class="w-4 h-4 inline mr-2" />Templates
+        </.link>
+        <.link navigate={~p"/skills"} class={if String.starts_with?(cur, "/skills"), do: active, else: inactive}>
+          <.icon name="beaker" class="w-4 h-4 inline mr-2" />Skills
+        </.link>
+        <.link navigate={~p"/directives"} class={if String.starts_with?(cur, "/directive"), do: active, else: inactive}>
+          <.icon name="bolt" class="w-4 h-4 inline mr-2" />Directives
+        </.link>
+        <.link navigate={~p"/teams"} class={if String.starts_with?(cur, "/teams"), do: active, else: inactive}>
+          <.icon name="users" class="w-4 h-4 inline mr-2" />Teams
+        </.link>
+      </section>
+      <section>
+        <p class="text-zinc-500 text-xs mb-1">OBSERVE</p>
+        <.link navigate={~p"/execution"} class={if String.starts_with?(cur, "/execution"), do: active, else: inactive}>
+          <.icon name="chart_bar" class="w-4 h-4 inline mr-2" />Execution
+        </.link>
+        <.link navigate={~p"/traces"} class={if String.starts_with?(cur, "/traces"), do: active, else: inactive}>
+          <.icon name="eye" class="w-4 h-4 inline mr-2" />Traces
+        </.link>
+        <.link navigate={~p"/audit"} class={if String.starts_with?(cur, "/audit"), do: active, else: inactive}>
+          <.icon name="eye" class="w-4 h-4 inline mr-2" />Audit
+        </.link>
+        <.link navigate={~p"/debug"} class={if String.starts_with?(cur, "/debug"), do: active, else: inactive}>
+          <.icon name="bug" class="w-4 h-4 inline mr-2" />Debug
+        </.link>
+      </section>
+      <section>
+        <p class="text-zinc-500 text-xs mb-1">ADMIN</p>
+        <.link navigate={~p"/settings"} class={if String.starts_with?(cur, "/settings"), do: active, else: inactive}>
+          <.icon name="cog" class="w-4 h-4 inline mr-2" />Settings
+        </.link>
+        <.link navigate={~p"/workspaces"} class={if String.starts_with?(cur, "/workspaces"), do: active, else: inactive}>
+          <.icon name="folder" class="w-4 h-4 inline mr-2" />Workspaces
+        </.link>
+      </section>
     </nav>
   </aside>
   <div class="flex-1 min-w-0 flex flex-col">
