@@ -19,6 +19,7 @@ defmodule JidoBuilderWeb.DashboardLive do
      )}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <.page_header>Dashboard <:actions><.button>Hire Agent</.button></:actions></.page_header>

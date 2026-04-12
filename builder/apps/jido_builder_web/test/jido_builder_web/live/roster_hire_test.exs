@@ -52,7 +52,7 @@ defmodule JidoBuilderWeb.Live.RosterHireTest do
     # Clicking Hire opens modal with redirect message
     html = lv |> element("button", "Hire") |> render_click()
     assert html =~ "Hire Agent"
-    assert html =~ "assignment console"
+    assert html =~ "Agent name"
 
     # (a) agent appears in the live Jido registry
     agents = Jido.list_agents(JidoBuilderRuntime.Jido)

@@ -10,14 +10,17 @@ defmodule JidoBuilderWeb.ExecutionLive do
     {:ok, assign(socket, page_title: "Execution", agent_id: agent_id, events: [], selected: nil)}
   end
 
+  @impl true
   def handle_event("select_event", %{"id" => id}, socket), do: {:noreply, assign(socket, selected: id)}
 
+  @impl true
   def handle_info({:jido_event, event}, socket) do
     {:noreply, update(socket, :events, &[event | &1])}
   end
 
   def handle_info(_, socket), do: {:noreply, socket}
 
+  @impl true
   def render(assigns) do
     ~H"""
     <.page_header>Execution Monitor</.page_header>

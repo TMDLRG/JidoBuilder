@@ -33,6 +33,7 @@ defmodule JidoBuilderWeb.Skills.IndexLive do
     {:noreply, assign(socket, query: query, filtered: filtered)}
   end
 
+  @impl true
   def handle_event("select", %{"idx" => idx}, socket) do
     index = String.to_integer(idx)
     {:noreply, assign(socket, selected: Enum.at(socket.assigns.filtered, index))}

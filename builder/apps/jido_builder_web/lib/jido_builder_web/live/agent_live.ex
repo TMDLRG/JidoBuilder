@@ -19,11 +19,14 @@ defmodule JidoBuilderWeb.AgentLive do
      )}
   end
 
+  @impl true
   def handle_event("tab", %{"name" => tab}, socket), do: {:noreply, assign(socket, active_tab: tab)}
 
+  @impl true
   def handle_info({:agent_state_changed, payload}, socket), do: {:noreply, assign(socket, agent_state: payload.state || %{})}
   def handle_info(_, socket), do: {:noreply, socket}
 
+  @impl true
   def render(assigns) do
     ~H"""
     <.page_header>Agent Detail</.page_header>

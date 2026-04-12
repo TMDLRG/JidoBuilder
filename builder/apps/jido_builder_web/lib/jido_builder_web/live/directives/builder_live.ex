@@ -35,6 +35,7 @@ defmodule JidoBuilderWeb.Directives.BuilderLive do
     {:noreply, assign(socket, form_data: params, preview: nil, error: nil)}
   end
 
+  @impl true
   def handle_event("preview", %{"directive" => params}, socket) do
     config = normalize(params)
 
