@@ -1,6 +1,8 @@
 defmodule JidoBuilderWeb.DashboardLive do
   use JidoBuilderWeb, :live_view
 
+  import Ecto.Query
+
   alias JidoBuilderRuntime.Roster
 
   @impl true
@@ -10,9 +12,9 @@ defmodule JidoBuilderWeb.DashboardLive do
        page_title: "Dashboard",
        kpis: %{
          running_agents: length(Roster.list(1)),
-         active_workflows: 0,
-         signals_per_hour: 0,
-         recent_errors: 0
+         active_workflows: length(JidoBuilderCore.Workflows.list_workflows(1)),
+         signals_per_hour: signal_count_last_hour(1),
+         recent_errors: length(JidoBuilderCore.Observability.list_recent_errors(1, limit: 100))
        },
        activities: ["Runtime bridge connected", "Agent roster loaded"],
        errors: []
@@ -35,5 +37,16 @@ defmodule JidoBuilderWeb.DashboardLive do
       <.card><:header>Errors</:header><.empty_state title="No active errors" description="You're all clear." icon="check_circle" /></.card>
     </section>
     """
+  end
+
+  defp signal_count_last_hour(workspace_id) do
+    cutoff = DateTime.add(DateTime.utc_now(), -3600, :second)
+
+    JidoBuilderCore.Repo.aggregate(
+      from(s in JidoBuilderCore.Observability.SignalLog,
+        where: s.workspace_id == ^workspace_id and s.inserted_at >= ^cutoff
+      ),
+      :count
+    )
   end
 end
