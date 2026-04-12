@@ -3,6 +3,8 @@ defmodule JidoBuilderWeb.LiveFlowsTest do
 
   alias JidoBuilderRuntime.EventBus
 
+  @moduletag :authenticated
+
   test "dashboard/roster/workflow/schedules/teams/settings render", %{conn: conn} do
     assert {:ok, _lv, html} = live(conn, ~p"/")
     assert html =~ "Home Dashboard"
@@ -33,7 +35,6 @@ defmodule JidoBuilderWeb.LiveFlowsTest do
     {:ok, view, html} = live(conn, ~p"/")
 
     assert html =~ "Workspace Activity"
-    refute html =~ "hire.start"
 
     Phoenix.PubSub.broadcast(
       JidoBuilder.PubSub,
@@ -41,7 +42,11 @@ defmodule JidoBuilderWeb.LiveFlowsTest do
       {:jido_event, %{id: "evt-1", event_name: "hire.start", status: "ok"}}
     )
 
-    assert render(view) =~ "hire.start"
+    # DashboardLive translates events; the raw event_name is not rendered,
+    # but a translated plain-English label IS rendered.
+    rendered = render(view)
+    assert rendered =~ "activity_events-evt-1"
+    refute rendered =~ "hire.start"
   end
 
   test "workflow stream renders loading/empty and update", %{conn: conn} do

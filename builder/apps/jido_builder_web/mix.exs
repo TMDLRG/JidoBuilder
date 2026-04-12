@@ -40,6 +40,8 @@ defmodule JidoBuilderWeb.MixProject do
       {:jido_builder_runtime, in_umbrella: true},
       {:jido_builder_codegen, in_umbrella: true},
       {:jido, path: "../../..", override: true},
+      {:hammer, "~> 6.1"},
+      {:telemetry_metrics_prometheus_core, "~> 1.0"},
       {:lazy_html, ">= 0.1.0", only: :test}
     ]
   end

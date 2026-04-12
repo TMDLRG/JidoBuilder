@@ -52,6 +52,9 @@ config :tailwind,
 
 config :phoenix, :json_library, Jason
 
+config :hammer,
+  backend: {Hammer.Backend.ETS, [expiry_ms: 60_000 * 10, cleanup_interval_ms: 60_000]}
+
 config :jido_builder_runtime, JidoBuilderRuntime.Jido,
   max_tasks: 1000,
   agent_pools: [],

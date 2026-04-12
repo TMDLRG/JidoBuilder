@@ -28,7 +28,8 @@ defmodule JidoBuilderCodegen.MixProject do
     [
       {:jido_builder_core, in_umbrella: true},
       {:jido_builder_generated, in_umbrella: true},
-      {:jido, path: "../../..", override: true}
+      {:jido, path: "../../..", override: true},
+      {:stream_data, "~> 1.1", only: :test}
     ]
   end
 end

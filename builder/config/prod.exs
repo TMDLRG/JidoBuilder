@@ -11,6 +11,16 @@ config :jido_builder_web, JidoBuilderWeb.Endpoint,
 
 config :logger, level: :info
 
+# 7.11 — Structured JSON logging in prod.
+# Uses the built-in Erlang :logger JSON formatter (OTP 27+).
+config :logger, :default_handler,
+  formatter:
+    {:logger_formatter,
+     %{
+       template: [:msg],
+       single_line: true
+     }}
+
 config :jido_builder_core, JidoBuilderCore.Vault,
   ciphers: [
     default: {

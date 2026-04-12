@@ -27,6 +27,7 @@ defmodule JidoBuilderCore.MixProject do
       {:ecto_sql, "~> 3.12"},
       {:ecto_sqlite3, "~> 0.18"},
       {:cloak_ecto, "~> 1.3"},
+      {:pbkdf2_elixir, "~> 2.2"},
       {:jido, path: "../../..", override: true}
     ]
   end

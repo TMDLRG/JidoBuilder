@@ -4,9 +4,7 @@ defmodule JidoBuilderCodegen.Templates.Strategy do
   def render(%{module: mod, description: description}) do
     """
     defmodule #{mod} do
-      @moduledoc \"\"\"
-      #{description}
-      \"\"\"
+      @moduledoc #{inspect(description)}
 
       @behaviour Jido.Agent.Server.Strategy
 

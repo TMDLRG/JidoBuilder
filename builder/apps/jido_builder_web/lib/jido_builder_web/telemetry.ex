@@ -9,7 +9,8 @@ defmodule JidoBuilderWeb.Telemetry do
   @impl true
   def init(_arg) do
     children = [
-      {:telemetry_poller, measurements: periodic_measurements(), period: 10_000}
+      {:telemetry_poller, measurements: periodic_measurements(), period: 10_000},
+      {TelemetryMetricsPrometheus.Core, metrics: metrics()}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

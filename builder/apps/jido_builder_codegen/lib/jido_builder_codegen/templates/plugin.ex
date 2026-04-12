@@ -4,9 +4,7 @@ defmodule JidoBuilderCodegen.Templates.Plugin do
   def render(%{module: mod, description: description}) do
     """
     defmodule #{mod} do
-      @moduledoc \"\"\"
-      #{description}
-      \"\"\"
+      @moduledoc #{inspect(description)}
 
       @behaviour Jido.Agent.Plugin
 

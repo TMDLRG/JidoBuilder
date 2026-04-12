@@ -5,6 +5,99 @@ defmodule JidoBuilderCore.Observability do
   alias JidoBuilderCore.Observability.{DirectiveLog, SignalLog}
   alias JidoBuilderCore.Repo
 
+  @doc """
+  Translates a raw Jido telemetry event map (as produced by
+  `JidoBuilderRuntime.TelemetryBridge.normalize/3`) into a
+  human-readable row suitable for stream display.
+
+  Returns a map with:
+    - `:label`      — plain-English description of what happened
+    - `:status`     — `:success | :error | :running | :unknown`
+    - `:agent_link` — path to the agent detail page, or `nil`
+    - `:ts`         — the measured-at timestamp (passes through)
+    - `:next_hint`  — guidance string shown on `:error` rows, else `nil`
+  """
+  def translate_event(%{} = event) do
+    status = derive_status(event)
+    agent_id = Map.get(event, :agent_id)
+    kind = Map.get(event, :kind, "")
+    metadata = Map.get(event, :metadata, %{})
+    duration_ms = format_duration(Map.get(event, :duration_native))
+    action = Map.get(metadata, :action) || Map.get(metadata, "action")
+
+    label =
+      build_label(kind, status, agent_id, action, duration_ms)
+
+    next_hint =
+      if status == :error do
+        "Open the worker's debug panel to inspect the error."
+      else
+        nil
+      end
+
+    %{
+      label: label,
+      status: status,
+      agent_link: agent_link(agent_id),
+      ts: Map.get(event, :measured_at),
+      next_hint: next_hint
+    }
+  end
+
+  defp derive_status(%{status: s}) do
+    case to_string(s) do
+      s when s in ["stop", "ok", "success"] -> :success
+      "start" -> :running
+      s when s in ["exception", "error"] -> :error
+      _ -> :unknown
+    end
+  end
+
+  defp build_label("cmd", :success, agent_id, action, duration_ms) do
+    base = "Worker #{agent_id || "unknown"}"
+    task = if action, do: " completed task #{action}", else: " completed a task"
+    time = if duration_ms, do: " in #{duration_ms}", else: ""
+    base <> task <> time
+  end
+
+  defp build_label("cmd", :error, agent_id, action, _duration_ms) do
+    base = "Worker #{agent_id || "unknown"}"
+    task = if action, do: " failed on task #{action}", else: " encountered an error"
+    base <> task
+  end
+
+  defp build_label("cmd", :running, agent_id, action, _duration_ms) do
+    task = if action, do: " running #{action}", else: " started a task"
+    "Worker #{agent_id || "unknown"}" <> task
+  end
+
+  defp build_label("signal", status, agent_id, _action, _duration_ms) do
+    "Signal #{status} for #{agent_id || "unknown"}"
+  end
+
+  defp build_label("directive", status, agent_id, _action, _duration_ms) do
+    "Directive #{status} on #{agent_id || "unknown"}"
+  end
+
+  defp build_label("action", :success, agent_id, action, duration_ms) do
+    base = "Action #{action || "unknown"} on #{agent_id || "unknown"}"
+    time = if duration_ms, do: " in #{duration_ms}", else: ""
+    base <> time
+  end
+
+  defp build_label(_kind, status, agent_id, _action, _duration_ms) do
+    "Event #{status} — agent #{agent_id || "unknown"}"
+  end
+
+  defp format_duration(nil), do: nil
+  defp format_duration(native) when is_integer(native) do
+    ms = System.convert_time_unit(native, :native, :millisecond)
+    "#{ms}ms"
+  end
+
+  defp agent_link(nil), do: nil
+  defp agent_link(agent_id), do: "/agents/#{agent_id}"
+
   def log_signal(attrs, actor),
     do: insert_with_audit(SignalLog, attrs, actor, "observability.signals.create")
 

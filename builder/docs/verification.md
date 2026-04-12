@@ -154,6 +154,29 @@ Verification status for each capability from `BUILDER_PLAN.md` sections 0.3 and 
 | Stop-on-error policy | Template error policy | A | Policy config | deferred | 2 | GAP-MVP-011 |
 | Testing template cmd purity | Template “Test this” | A | Run `cmd/2` against sample signal | deferred | 2 | GAP-MVP-016 |
 | Fixture signal playback | Activity replay | A | Replay through runtime dispatch | deferred | 2 | GAP-MVP-016 |
+| Cloak key rotation | Mix task `jido_builder.rotate_cloak_key` | hybrid | `JidoBuilderCore.Vault.reconfigure/1` + SQLite-safe row re-encryption | done | 5 | — |
+| Path-allowlist fuzz (Phase 5 gate) | Internal codegen sandbox | hybrid | `FileWriter.resolve_path/1` — 1000-run StreamData property fuzz | done | 5 | — |
+| EEx template fuzz (Phase 5 gate) | Internal codegen templates | hybrid | All 5 templates: module-name validation + `inspect(description)` — 1000-run StreamData property fuzz | done | 5 | — |
+| Local single-user auth | `/login` LiveView + `POST /login` + `on_mount` hook | hybrid | `JidoBuilderCore.Accounts` (PBKDF2) + `JidoBuilderWeb.UserAuth` session plug/hook (`/healthz`/`/readyz` bypassed) | done | 5 | — |
+| Start agent | Roster → Hire wizard | A | `JidoBuilderRuntime.Roster.hire/3` → `Hiring.start/3` → `Jido.start_agent/3` | done | 5 | — |
+| Stop agent | Roster → Stop + confirm modal | A | `JidoBuilderRuntime.Roster.stop/3` → `Hiring.stop/2` → `Jido.stop_agent/3` | done | 5 | — |
+| List running agents | Roster index stream | A | `Roster.list/1` — reads `agent_instances` with status "running" | done | 5 | — |
+| Whereis by ID | Assignments console → target select | A | `Hiring.whereis/2` → `Jido.whereis/3` | done | 5 | — |
+| Sync signal send | Assignments console (cast path) | A | `Signals.cast/3` → `Jido.AgentServer.cast/2` | done | 5 | — |
+| Build CloudEvent signal | Assignments console | A | `Signals.new/4` → `Jido.Signal.new!/2` | done | 5 | — |
+| Live telemetry stream | Activity stream — DashboardLive | A | `TelemetryBridge` → PubSub → `DashboardLive.handle_info` | done | 5 | — |
+| Rate limit on /assignments | Assignments console — 7.14 | hybrid | `Hammer.check_rate/3` (ETS backend, 10 req/min per user) | done | 5 | — |
+| Activity event translation | Home dashboard stream rows | hybrid | `Observability.translate_event/1` — plain-English labels replacing raw event names | done | 5 | — |
+| App shell navigation | App layout nav + Cmd+K palette | A | Layout `app.html.heex` — nav links to all routes + command palette container | done | 5 | — |
+| Home KPIs | Dashboard running-agents counter | A | `Roster.list/1` count, live-updated via PubSub roster events | done | 5 | — |
+| Templates Library | `/templates` index | A | `Templates.list_templates/1` → stream-rendered list | done | 5 | — |
+| Template Editor | `/templates/:id/edit` form | A | `Templates.update_template/3` → Ecto changeset persist | done | 5 | — |
+| Agent Detail state | `/agents/:id` state + event stream | A | `AgentInstance` DB lookup + `Observability.translate_event/1` stream | done | 5 | — |
+| Skills catalog | `/skills` discovery actions list | A | `Discovery.list_actions/1` → rendered list | done | 5 | — |
+| Work Styles picker | `/work-styles` strategy list | A | Static `Direct`/`FSM` strategies rendered | done | 5 | — |
+| Directives Builder | `/directives` all 11 types | A | Static directive type catalog rendered | done | 5 | — |
+| Structured JSON logger | Prod logger config | hybrid | OTP 27+ `:logger_formatter` JSON in `config/prod.exs` | done | 4 | — |
+| Prometheus /metrics | `/metrics` endpoint (no auth) | A | `TelemetryMetricsPrometheus.Core.scrape/0` on API scope | done | 5 | — |
 | Instance config settings | Settings | A | `config :jido_builder_runtime, JidoBuilderRuntime.Jido` | deferred | 2 | GAP-MVP-017 |
 | Debug config settings | Settings debug | A | `Jido.Debug` | deferred | 2 | GAP-MVP-017 |
 | Observability config | Settings observability | A | `config :jido, :observability` | deferred | 2 | GAP-MVP-017 |

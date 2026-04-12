@@ -4,9 +4,7 @@ defmodule JidoBuilderCodegen.Templates.Agent do
   def render(%{module: mod, description: description}) do
     """
     defmodule #{mod} do
-      @moduledoc \"\"\"
-      #{description}
-      \"\"\"
+      @moduledoc #{inspect(description)}
 
       use Jido.Agent,
         name: :generated_agent,
