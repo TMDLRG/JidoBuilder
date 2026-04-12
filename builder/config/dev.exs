@@ -11,7 +11,7 @@ config :jido_builder_web, JidoBuilderWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "dev-secret-key-base-change-me",
+  secret_key_base: "dev-secret-key-base-change-me-needs-to-be-at-least-64-bytes-long-for-plug-session",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:jido_builder_web, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:jido_builder_web, ~w(--watch)]}

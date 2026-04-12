@@ -39,6 +39,7 @@ defmodule JidoBuilderWeb.EjectorLive do
   @impl true
   def render(assigns) do
     ~H"""
+    <div id="ejector-hook" phx-hook="Download">
     <.page_header><%= @page_title %></.page_header>
     <p class="text-sm text-zinc-500 mb-4">Export a block definition as a standalone Elixir module (no compile).</p>
 
@@ -76,6 +77,7 @@ defmodule JidoBuilderWeb.EjectorLive do
     <button :if={@preview} id="ejector-download" type="button" phx-click="download" class="mt-3 rounded border px-3 py-1 text-xs">Download source</button>
 
     <div :if={@error} id="ejector-error" class="mt-4 text-red-600 text-sm"><%= @error %></div>
+    </div>
     """
   end
 end
