@@ -4,13 +4,13 @@ defmodule JidoBuilderRuntime.BareAgentRoutesTest do
   alias JidoBuilderRuntime.BareAgent
   alias JidoBuilderRuntime.Actions.{Echo, IncrementCounter, LogMessage, TransformData}
 
-  test "bare agent exposes route table" do
+  test "bare agent exposes route table as list of tuples" do
     routes = BareAgent.signal_routes(%{})
 
-    assert routes["ping"] == Echo
-    assert routes["increment"] == IncrementCounter
-    assert routes["transform"] == TransformData
-    assert routes["log"] == LogMessage
+    assert Enum.any?(routes, fn {p, m} -> p == "ping" and m == Echo end)
+    assert Enum.any?(routes, fn {p, m} -> p == "increment" and m == IncrementCounter end)
+    assert Enum.any?(routes, fn {p, m} -> p == "transform" and m == TransformData end)
+    assert Enum.any?(routes, fn {p, m} -> p == "log" and m == LogMessage end)
   end
 
   test "route_for returns not_found for missing route" do
