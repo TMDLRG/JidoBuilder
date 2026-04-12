@@ -52,12 +52,12 @@ config :tailwind,
 
 config :phoenix, :json_library, Jason
 
-config :jido_builder, JidoBuilderRuntime.Jido,
+config :jido_builder_runtime, JidoBuilderRuntime.Jido,
   max_tasks: 1000,
   agent_pools: [],
   storage: {Jido.Storage.ETS, [table: :jido_builder_storage]}
 
-config :jido_builder,
+config :jido_builder_runtime,
   features: [
     redis_enabled: System.get_env("JIDO_BUILDER_REDIS_ENABLED", "false") == "true",
     llm_enabled: System.get_env("JIDO_BUILDER_LLM_ENABLED", "false") == "true"

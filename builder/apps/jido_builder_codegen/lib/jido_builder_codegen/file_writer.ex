@@ -18,7 +18,10 @@ defmodule JidoBuilderCodegen.FileWriter do
   def restore(path, previous), do: File.write(path, previous)
 
   defp resolve_path(relative_path) do
-    root = Application.get_env(:jido_builder_codegen, :generated_lib_dir, @default_root)
+    configured_root =
+      Application.get_env(:jido_builder_codegen, :generated_lib_dir, @default_root)
+
+    root = Path.expand(configured_root)
     expanded = Path.expand(relative_path, root)
 
     if String.starts_with?(expanded, root <> "/") or expanded == root do

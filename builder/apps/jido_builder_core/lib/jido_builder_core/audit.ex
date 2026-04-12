@@ -9,7 +9,11 @@ defmodule JidoBuilderCore.Audit do
   alias JidoBuilderCore.Repo
 
   def log(actor, action, %{__struct__: struct, id: id} = subject, metadata) do
-    workspace_id = Map.get(subject, :workspace_id)
+    workspace_id =
+      case subject do
+        %JidoBuilderCore.Agents.Workspace{} -> id
+        _ -> Map.get(subject, :workspace_id)
+      end
 
     attrs = %{
       workspace_id: workspace_id,
