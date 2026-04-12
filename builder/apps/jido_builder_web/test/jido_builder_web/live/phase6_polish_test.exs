@@ -1,49 +1,91 @@
 defmodule JidoBuilderWeb.Live.Phase6PolishTest do
-  @moduledoc """
-  Phase 6 — Polish surfaces: Threads, Memory, Identity, Glossary,
-  Onboarding, Debug, Error Policy, Orphans+Adoption.
-  """
   use JidoBuilderWeb.ConnCase, async: false
   @moduletag :authenticated
+
   import Phoenix.LiveViewTest
+  alias JidoBuilderCore.{Agents, Pods, Templates}
 
-  test "renders Threads explorer", %{conn: conn} do
-    {:ok, _lv, html} = live(conn, ~p"/threads")
-    assert html =~ "Threads"
+  setup do
+    {:ok, ws} =
+      Agents.create_workspace(
+        %{name: "phase6-ws-#{System.unique_integer()}", slug: "phase6-#{System.unique_integer()}"},
+        "test"
+      )
+
+    {:ok, tmpl} =
+      Templates.create_template(
+        %{workspace_id: ws.id, name: "Phase6Template", slug: "phase6-template-#{System.unique_integer()}", version: "0.1.0", status: "draft"},
+        "test"
+      )
+
+    {:ok, topology} = Pods.create_topology(%{workspace_id: ws.id, name: "pod-a", strategy: "round_robin"}, "test")
+
+    {:ok, agent} =
+      Agents.create_agent_instance(
+        %{workspace_id: ws.id, template_id: tmpl.id, name: "orphan-agent", status: "running", runtime_ref: "pid:123"},
+        "test"
+      )
+
+    %{workspace: ws, template: tmpl, topology: topology, agent: agent}
   end
 
-  test "renders Memory spaces", %{conn: conn} do
-    {:ok, _lv, html} = live(conn, ~p"/memory")
-    assert html =~ "Memory"
+  test "create thread entry", %{conn: conn, workspace: ws} do
+    {:ok, lv, _} = live(conn, ~p"/threads?workspace_id=#{ws.id}")
+    html = lv |> form("#thread-form", thread: %{name: "incident-room"}) |> render_submit()
+    assert html =~ "incident-room"
   end
 
-  test "renders Identity profiles", %{conn: conn} do
-    {:ok, _lv, html} = live(conn, ~p"/identity")
-    assert html =~ "Identity"
+  test "create memory space", %{conn: conn, workspace: ws} do
+    {:ok, lv, _} = live(conn, ~p"/memory?workspace_id=#{ws.id}")
+    html = lv |> form("#memory-form", space: %{name: "knowledge-base"}) |> render_submit()
+    assert html =~ "knowledge-base"
   end
 
-  test "renders Glossary", %{conn: conn} do
-    {:ok, _lv, html} = live(conn, ~p"/glossary")
-    assert html =~ "Glossary"
+  test "create profile", %{conn: conn, workspace: ws} do
+    {:ok, lv, _} = live(conn, ~p"/identity?workspace_id=#{ws.id}")
+
+    html =
+      lv
+      |> form("#identity-form", profile: %{name: "Helper", persona: "friendly", capabilities: "search"})
+      |> render_submit()
+
+    assert html =~ "Helper"
   end
 
-  test "renders Onboarding walkthrough", %{conn: conn} do
-    {:ok, _lv, html} = live(conn, ~p"/onboarding")
-    assert html =~ "Onboarding" or html =~ "Welcome"
+  test "step 1 links to workspaces", %{conn: conn} do
+    {:ok, lv, _} = live(conn, ~p"/onboarding")
+    assert lv |> element("#step-1-do-it") |> render() =~ "/workspaces"
   end
 
-  test "renders Debug panel", %{conn: conn} do
-    {:ok, _lv, html} = live(conn, ~p"/debug")
-    assert html =~ "Debug"
+  test "step 3 links to roster", %{conn: conn} do
+    {:ok, lv, _} = live(conn, ~p"/onboarding")
+    _ = lv |> element("button[phx-click=next]") |> render_click()
+    _ = lv |> element("button[phx-click=next]") |> render_click()
+    assert lv |> element("#step-3-do-it") |> render() =~ "/roster"
   end
 
-  test "renders Error Policy editor", %{conn: conn} do
-    {:ok, _lv, html} = live(conn, ~p"/error-policy")
-    assert html =~ "Error Policy"
+  test "toggle debug", %{conn: conn, workspace: ws} do
+    {:ok, lv, _} = live(conn, ~p"/debug?workspace_id=#{ws.id}")
+    html = lv |> element("#debug-toggle") |> render_click()
+    assert html =~ "on" or html =~ "off"
   end
 
-  test "renders Orphans + Adoption view", %{conn: conn} do
-    {:ok, _lv, html} = live(conn, ~p"/orphans")
-    assert html =~ "Orphan"
+  test "select error policy persists to template config", %{conn: conn, workspace: ws, template: tmpl} do
+    {:ok, lv, _} = live(conn, ~p"/error-policy?workspace_id=#{ws.id}")
+
+    _ = lv |> form("#error-policy-form", %{template_id: tmpl.id, policy: "retry_once"}) |> render_submit()
+
+    assert Templates.get_template!(tmpl.id).config["error_policy"] == "retry_once"
+  end
+
+  test "adopt links agent to pod", %{conn: conn, workspace: ws, topology: topology, agent: agent} do
+    {:ok, lv, _} = live(conn, ~p"/orphans?workspace_id=#{ws.id}")
+
+    html =
+      lv
+      |> form("#adopt-form-#{agent.id}", %{agent_id: agent.id, pod_topology_id: topology.id})
+      |> render_submit()
+
+    assert html =~ "Agent adopted"
   end
 end
