@@ -3,6 +3,14 @@ defmodule JidoBuilderRuntime.IntegrationRuntimeTest do
   use ExUnit.Case, async: false
 
   alias JidoBuilderRuntime.{Context, Hiring}
+  alias Ecto.Adapters.SQL.Sandbox
+
+  setup_all do
+    :ok = Sandbox.checkout(JidoBuilderCore.Repo)
+    # Shared mode lets runtime descendants spawned outside the test process use this checked-out owner connection.
+    :ok = Sandbox.mode(JidoBuilderCore.Repo, {:shared, self()})
+    :ok
+  end
 
   defmodule MinimalRuntimeAgent do
     use Jido.Agent,

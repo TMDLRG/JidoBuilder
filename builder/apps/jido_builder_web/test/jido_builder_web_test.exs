@@ -3,11 +3,6 @@ defmodule JidoBuilderWeb.LiveFlowsTest do
 
   alias JidoBuilderRuntime.EventBus
 
-  setup do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(JidoBuilderCore.Repo)
-    :ok
-  end
-
   test "dashboard/roster/workflow/schedules/teams/settings render", %{conn: conn} do
     assert {:ok, _lv, html} = live(conn, ~p"/")
     assert html =~ "Home Dashboard"
