@@ -59,6 +59,8 @@ defmodule JidoBuilderWeb.LiveFlowsTest do
   end
 
   test "unknown route renders not found page", %{conn: conn} do
-    assert_error_sent(404, fn -> get(conn, "/missing") end)
+    conn = get(conn, "/missing")
+    assert conn.status == 404
+    assert conn.resp_body =~ "Page not found"
   end
 end
