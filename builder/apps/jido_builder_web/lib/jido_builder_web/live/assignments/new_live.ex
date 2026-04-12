@@ -18,11 +18,14 @@ defmodule JidoBuilderWeb.Assignments.NewLive do
       <.card class="md:col-span-2">
         <:header>Select Agent</:header>
         <div class="grid md:grid-cols-2 gap-2">
-          <button :for={agent <- @agents} phx-click="pick_agent" phx-value-id={agent.name} class={"ui-card-body border rounded text-left " <> if(@selected_agent == agent.name, do: "border-emerald-500", else: "border-zinc-200")}>{agent.name}</button>
+          <button :for={agent <- @agents} phx-click="pick_agent" phx-value-id={agent.name} class={["ui-card-body border rounded text-left", if(@selected_agent == agent.name, do: "border-emerald-500", else: "border-zinc-200")]}>{agent.name}</button>
         </div>
         <form id="dispatch-form" phx-submit="dispatch" class="mt-4 space-y-2">
           <.input_field name="dispatch[signal_type]" label="Signal type" value="ping" />
-          <label class="ui-label">Payload JSON<textarea name="dispatch[payload]" class="ui-input font-mono" rows="6">{"message":"hello"}</textarea></label>
+          <label class="ui-label block text-sm">
+            <span class="block text-xs font-medium text-zinc-600 mb-1">Payload JSON</span>
+            <textarea name="dispatch[payload]" class="ui-input font-mono" rows="6">{"{\"message\":\"hello\"}"}</textarea>
+          </label>
           <.button>Dispatch</.button>
         </form>
       </.card>

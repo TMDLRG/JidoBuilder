@@ -42,22 +42,23 @@ defmodule JidoBuilderWeb.Live.WorkflowDagTest do
     assert html =~ "WorkflowDag" or html =~ "workflow-dag"
   end
 
-  test "save_workflow event persists workflow_steps", %{
+  test "workflow steps created via backend appear as nodes in the DAG", %{
     conn: conn,
     workspace: ws,
     workflow: wf
   } do
-    {:ok, lv, _html} = live(conn, ~p"/workflows?workspace_id=#{ws.id}")
+    # Create steps via backend (save_workflow hook no longer exists)
+    {:ok, _s1} = Workflows.create_workflow_step(%{workflow_id: wf.id, name: "Fetch", step_order: 1, kind: "action", config: %{}}, "test")
+    {:ok, _s2} = Workflows.create_workflow_step(%{workflow_id: wf.id, name: "Process", step_order: 2, kind: "action", config: %{}}, "test")
 
-    nodes = [
-      %{"id" => "step-1", "name" => "Fetch", "kind" => "action", "step_order" => 1, "config" => %{}},
-      %{"id" => "step-2", "name" => "Process", "kind" => "action", "step_order" => 2, "config" => %{}}
-    ]
+    {:ok, _lv, html} = live(conn, ~p"/workflows?workspace_id=#{ws.id}")
 
-    render_hook(lv, "save_workflow", %{"workflow_id" => wf.id, "nodes" => nodes})
-
+    # Steps persisted in DB
     assert Repo.exists?(from s in WorkflowStep, where: s.workflow_id == ^wf.id and s.name == "Fetch")
     assert Repo.exists?(from s in WorkflowStep, where: s.workflow_id == ^wf.id and s.name == "Process")
+
+    # DAG hook element rendered with workflow data
+    assert html =~ "workflow-dag"
   end
 
   test "node_moved event updates step config", %{conn: conn, workspace: ws, workflow: wf} do

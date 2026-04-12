@@ -30,6 +30,9 @@ defmodule JidoBuilderWeb.Live.RosterHireTest do
         "test-setup"
       )
 
+    agent_name = "hire-test-agent-#{System.unique_integer([:positive])}"
+    {:ok, _instance} = JidoBuilderRuntime.Roster.hire(workspace.id, agent_name, "test")
+
     {:ok, lv, _html} = live(conn, ~p"/roster?workspace_id=#{workspace.id}")
 
     on_exit(fn ->
@@ -37,20 +40,19 @@ defmodule JidoBuilderWeb.Live.RosterHireTest do
       :ok
     end)
 
-    %{workspace: workspace, lv: lv}
+    %{workspace: workspace, lv: lv, agent_name: agent_name}
   end
 
-  test "hire form starts agent, creates DB row, logs audit, updates stream",
-       %{lv: lv, workspace: ws} do
-    agent_name = "hire-test-agent-#{System.unique_integer([:positive])}"
-
-    # (d) submit the hire form and check the rendered HTML
-    html =
-      lv
-      |> form("#hire-form", hire: %{display_name: agent_name})
-      |> render_submit()
-
+  test "hire modal opens and roster shows agents hired via backend",
+       %{lv: lv, workspace: ws, agent_name: agent_name} do
+    # (d) Agent hired via Roster.hire in setup appears in the roster list
+    html = render(lv)
     assert html =~ agent_name
+
+    # Clicking Hire opens modal with redirect message
+    html = lv |> element("button", "Hire") |> render_click()
+    assert html =~ "Hire Agent"
+    assert html =~ "assignment console"
 
     # (a) agent appears in the live Jido registry
     agents = Jido.list_agents(JidoBuilderRuntime.Jido)

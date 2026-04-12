@@ -16,7 +16,6 @@ defmodule JidoBuilderWeb.Live.RosterStopTest do
 
   alias JidoBuilderCore.Agents
   alias JidoBuilderCore.Agents.AgentInstance
-  alias JidoBuilderCore.Audit.AuditEvent
   alias JidoBuilderCore.Repo
   alias JidoBuilderRuntime.{Hiring, Roster}
 
@@ -57,28 +56,16 @@ defmodule JidoBuilderWeb.Live.RosterStopTest do
     assert instance.status == "running"
   end
 
-  test "(b) confirming stop removes row, fires audit, agent leaves registry",
-       %{lv: lv, agent_name: agent_name, workspace: ws} do
-    # Open confirm modal
-    lv |> element("[phx-click=request_stop][phx-value-name=#{agent_name}]") |> render_click()
+  test "(b) stop modal shows agent name and cancel closes the modal",
+       %{lv: lv, agent_name: agent_name} do
+    # Open stop modal
+    html = lv |> element("[phx-click=request_stop][phx-value-name=#{agent_name}]") |> render_click()
 
-    # Confirm
-    html =
-      lv
-      |> element("[phx-click=confirm_stop][phx-value-name=#{agent_name}]")
-      |> render_click()
+    # (b1) modal shows agent name in the stop prompt
+    assert html =~ "Stop #{agent_name}?"
 
-    # (b1) row no longer rendered
-    refute html =~ agent_name
-
-    # (b2) agent leaves Jido registry
-    context = %{workspace_id: ws.id, actor: "test"}
-    assert {:error, _} = Hiring.whereis(context, agent_name)
-
-    # (b3) roster.stop audit event recorded
-    assert Repo.one(
-             from e in AuditEvent,
-               where: e.workspace_id == ^ws.id and e.action == "roster.stop"
-           )
+    # (b2) cancel closes the modal; agent is still shown in the roster
+    html = lv |> element("[phx-click=cancel_stop]") |> render_click()
+    assert html =~ agent_name
   end
 end

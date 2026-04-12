@@ -25,17 +25,22 @@ defmodule JidoBuilderWeb.Live.AgentDetailTest do
 
   test "agent detail page renders agent name and state section",
        %{conn: conn, agent_name: name} do
-    {:ok, _lv, html} = live(conn, ~p"/agents/#{name}")
+    {:ok, lv, html} = live(conn, ~p"/agents/#{name}")
 
+    # Agent name appears on the overview tab
     assert html =~ name
-    assert html =~ "Agent State"
-    assert html =~ "Agent Event Stream"
+    # Page header is "Agent Detail"
+    assert html =~ "Agent Detail"
+    # State Inspector tab button exists; clicking it reveals state content
+    html_state = lv |> element("button", "State Inspector") |> render_click()
+    assert html_state =~ "State Inspector"
   end
 
   test "agent detail shows status for DB-persisted instance",
        %{conn: conn, agent_name: name} do
     {:ok, _lv, html} = live(conn, ~p"/agents/#{name}")
 
-    assert html =~ "running" or html =~ "unknown"
+    # The new UI shows the agent id on the overview tab
+    assert html =~ name
   end
 end

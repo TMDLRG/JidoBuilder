@@ -59,8 +59,6 @@ defmodule JidoBuilderCore.Workflows do
   end
 
   defp maybe_audit(error, _actor, _action), do: error
-end
-
 
   def list_workflow_edges(workflow_id) do
     WorkflowEdge
@@ -76,3 +74,4 @@ end
     |> Repo.delete()
     |> maybe_audit(actor, "workflows.edges.delete")
   end
+end

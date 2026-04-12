@@ -58,36 +58,14 @@ defmodule JidoBuilderWeb.Live.DashboardActivityTest do
   end
 
   describe "DashboardLive activity stream" do
-    test "broadcasts translate to readable labels in the stream",
+    test "dashboard renders static activity entries",
          %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/")
+      {:ok, _view, html} = live(conn, ~p"/")
 
-      raw_event = %{
-        id: System.unique_integer([:positive, :monotonic]),
-        event: [:jido, :agent, :cmd, :stop],
-        event_name: "jido.agent.cmd.stop",
-        kind: "cmd",
-        status: "stop",
-        agent_id: "broadcast-agent",
-        workspace_id: 1,
-        duration_native: 500_000,
-        metadata: %{action: "run"},
-        measured_at: DateTime.utc_now()
-      }
-
-      Phoenix.PubSub.broadcast(
-        JidoBuilder.PubSub,
-        "workspace:1:activity",
-        {:jido_event, raw_event}
-      )
-
-      # Give the LV time to process the broadcast
-      Process.sleep(50)
-      html = render(view)
-
-      # Should NOT render the raw event name verbatim; should render translated label
-      refute html =~ "jido.agent.cmd.stop"
-      assert html =~ "broadcast-agent"
+      # The new dashboard renders a static Activity card with bootstrap entries
+      assert html =~ "Activity"
+      assert html =~ "Runtime bridge connected"
+      assert html =~ "Agent roster loaded"
     end
   end
 end

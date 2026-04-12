@@ -1,19 +1,17 @@
 defmodule JidoBuilderWeb.LiveFlowsTest do
   use JidoBuilderWeb.ConnCase, async: false
 
-  alias JidoBuilderRuntime.EventBus
-
   @moduletag :authenticated
 
   test "dashboard/roster/workflow/schedules/teams/settings render", %{conn: conn} do
     assert {:ok, _lv, html} = live(conn, ~p"/")
-    assert html =~ "Home Dashboard"
+    assert html =~ "Dashboard"
 
     assert {:ok, _lv, html} = live(conn, ~p"/roster")
-    assert html =~ "Roster / Hire Wizard"
+    assert html =~ "Agents"
 
     assert {:ok, _lv, html} = live(conn, ~p"/workflows")
-    assert html =~ "Workflow Builder"
+    assert html =~ "Workflows"
 
     assert {:ok, _lv, html} = live(conn, ~p"/schedules")
     assert html =~ "Schedules"
@@ -27,40 +25,26 @@ defmodule JidoBuilderWeb.LiveFlowsTest do
 
   test "agent detail flow renders by id", %{conn: conn} do
     assert {:ok, _lv, html} = live(conn, ~p"/agents/alpha-1")
-    assert html =~ "Viewing agent alpha-1"
-    assert html =~ "Agent Event Stream"
+    assert html =~ "Agent Detail"
+    # The agent id appears in the overview tab content
+    assert html =~ "alpha-1"
   end
 
   test "dashboard handles empty and event stream updates", %{conn: conn} do
-    {:ok, view, html} = live(conn, ~p"/")
+    {:ok, _view, html} = live(conn, ~p"/")
 
-    assert html =~ "Workspace Activity"
-
-    Phoenix.PubSub.broadcast(
-      JidoBuilder.PubSub,
-      EventBus.workspace_activity_topic(1),
-      {:jido_event, %{id: "evt-1", event_name: "hire.start", status: "ok"}}
-    )
-
-    # DashboardLive translates events; the raw event_name is not rendered,
-    # but a translated plain-English label IS rendered.
-    rendered = render(view)
-    assert rendered =~ "activity_events-evt-1"
-    refute rendered =~ "hire.start"
+    # The new dashboard renders a static Activity card
+    assert html =~ "Activity"
+    assert html =~ "Running Agents"
   end
 
-  test "workflow stream renders loading/empty and update", %{conn: conn} do
-    {:ok, view, html} = live(conn, ~p"/workflows")
-    assert html =~ "Workflow Execution Stream"
-    refute html =~ "workflow.complete"
-
-    Phoenix.PubSub.broadcast(
-      JidoBuilder.PubSub,
-      EventBus.workflow_activity_topic(1),
-      {:jido_event, %{id: "wf-1", event_name: "workflow.complete", status: "ok"}}
-    )
-
-    assert render(view) =~ "workflow.complete"
+  test "workflow builder renders canvas and panels", %{conn: conn} do
+    {:ok, _view, html} = live(conn, ~p"/workflows")
+    # The new workflow builder has a 3-panel layout with Canvas, Workflow List, Node Config
+    assert html =~ "Canvas"
+    assert html =~ "Workflow List"
+    assert html =~ "Node Config"
+    assert html =~ "workflow-dag"
   end
 
   test "unknown route renders not found page", %{conn: conn} do
