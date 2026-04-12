@@ -79,7 +79,13 @@ defmodule JidoBuilderCore.SecurityTest do
     assert ui_secret.value == "[REDACTED]"
 
     {:ok, ui_integration} = Security.get_integration_for_ui(integration.id)
-    assert ui_integration.config == %{api_key: "[REDACTED]", options: [%{token: "[REDACTED]"}]}
+    # Keys are strings because Cloak.Ecto.Map round-trips through Jason,
+    # which decodes JSON objects to string-keyed maps (intentionally —
+    # using keys: :atoms would enable attacker-controlled atom DoS).
+    assert ui_integration.config == %{
+      "api_key" => "[REDACTED]",
+      "options" => [%{"token" => "[REDACTED]"}]
+    }
 
     inspected_secret = inspect(secret)
     refute String.contains?(inspected_secret, "super-secret")
