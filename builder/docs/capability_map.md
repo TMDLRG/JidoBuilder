@@ -33,12 +33,12 @@ Status legend: `done` = implemented in this branch, `deferred` = explicitly post
 | List running agents | Roster index | A | `Jido.list_agents/2` | deferred | 3 | GAP-MVP-001 |
 | Count agents | Home dashboard | A | `Jido.agent_count/2` | deferred | 3 | GAP-MVP-001 |
 | Whereis by ID | Agent detail | A | `Jido.whereis/3` | deferred | 3 | GAP-MVP-001 |
-| Hibernate agent | Vault | A | `Jido.hibernate/2` | deferred | 3 | GAP-MVP-004 |
-| Thaw agent | Vault | A | `Jido.thaw/3` | deferred | 3 | GAP-MVP-004 |
-| Toggle debug | Debug panel | A | `Jido.debug/0,1,2` | deferred | 3 | GAP-MVP-007 |
-| Recent debug events | Debug panel | A | `Jido.recent/1,2` | deferred | 3 | GAP-MVP-007 |
-| Debug status | Debug panel | A | `Jido.debug_status/0` | deferred | 3 | GAP-MVP-007 |
-| Parent binding | Hierarchy view | A | `Jido.parent_binding/2,3` | deferred | 3 | GAP-MVP-009 |
+| Hibernate agent | Vault | A | `Jido.hibernate/2` | done | 4 | — |
+| Thaw agent | Vault | A | `Jido.thaw/3` | done | 4 | — |
+| Toggle debug | Debug panel | A | `Jido.debug/0,1,2` | done | 4 | — |
+| Recent debug events | Debug panel | A | `Jido.recent/1,2` | done | 4 | — |
+| Debug status | Debug panel | A | `Jido.debug_status/0` | done | 4 | — |
+| Parent binding | Hierarchy view | A | `Jido.parent_binding/2,3` | done | 4 | — |
 | Sync signal send | Assignment composer | A | `Jido.AgentServer.call/2,3` | deferred | 3 | GAP-MVP-002 |
 | Async signal send | Assignment composer | A | `Jido.AgentServer.cast/2` | deferred | 3 | GAP-MVP-002 |
 | Read agent state | Agent detail | A | `Jido.AgentServer.state/1` | deferred | 3 | GAP-MVP-002 |
@@ -63,13 +63,13 @@ Status legend: `done` = implemented in this branch, `deferred` = explicitly post
 | Directive Schedule | Schedules | A | `Jido.Agent.Directive.Schedule` / `Directive.schedule/2` | deferred | 4 | GAP-MVP-006 |
 | Directive RunInstruction | Directive builder | A | `Jido.Agent.Directive.RunInstruction` / `Directive.run_instruction/2` | deferred | 4 | GAP-MVP-010 |
 | Directive Stop | Roster | A | `Jido.Agent.Directive.Stop` / `Directive.stop/0,1` | deferred | 4 | GAP-MVP-001 |
-| Directive Cron | Schedules | A | `Jido.Agent.Directive.Cron` / `Directive.cron/2,3` | deferred | 4 | GAP-MVP-006 |
-| Directive CronCancel | Schedules | A | `Jido.Agent.Directive.CronCancel` / `Directive.cron_cancel/1` | deferred | 4 | GAP-MVP-006 |
-| StateOp SetState | State ops editor | A | `Jido.Agent.StateOp.SetState` | deferred | 4 | GAP-MVP-005 |
-| StateOp ReplaceState | State ops editor | A | `Jido.Agent.StateOp.ReplaceState` | deferred | 4 | GAP-MVP-005 |
-| StateOp DeleteKeys | State ops editor | A | `Jido.Agent.StateOp.DeleteKeys` | deferred | 4 | GAP-MVP-005 |
-| StateOp SetPath | State ops editor | A | `Jido.Agent.StateOp.SetPath` | deferred | 4 | GAP-MVP-005 |
-| StateOp DeletePath | State ops editor | A | `Jido.Agent.StateOp.DeletePath` | deferred | 4 | GAP-MVP-005 |
+| Directive Cron | Schedules | A | `Jido.Agent.Directive.Cron` / `Directive.cron/2,3` | done | 4 | — |
+| Directive CronCancel | Schedules | A | `Jido.Agent.Directive.CronCancel` / `Directive.cron_cancel/1` | done | 4 | — |
+| StateOp SetState | State ops editor | A | `Jido.Agent.StateOp.SetState` | done | 5 | — |
+| StateOp ReplaceState | State ops editor | A | `Jido.Agent.StateOp.ReplaceState` | done | 5 | — |
+| StateOp DeleteKeys | State ops editor | A | `Jido.Agent.StateOp.DeleteKeys` | done | 5 | — |
+| StateOp SetPath | State ops editor | A | `Jido.Agent.StateOp.SetPath` | done | 5 | — |
+| StateOp DeletePath | State ops editor | A | `Jido.Agent.StateOp.DeletePath` | done | 5 | — |
 | Control Broadcast | Assignments | A | `Jido.Actions.Control.Broadcast` | deferred | 3 | GAP-MVP-002 |
 | Control Cancel | Roster | A | `Jido.Actions.Control.Cancel` | deferred | 3 | GAP-MVP-009 |
 | Control Forward | Playbook step | A | `Jido.Actions.Control.Forward` | deferred | 3 | GAP-MVP-009 |
@@ -89,19 +89,19 @@ Status legend: `done` = implemented in this branch, `deferred` = explicitly post
 | Status MarkIdle | Runtime status | A | `Jido.Actions.Status.MarkIdle` | deferred | 3 | GAP-MVP-011 |
 | Status MarkWorking | Runtime status | A | `Jido.Actions.Status.MarkWorking` | deferred | 3 | GAP-MVP-011 |
 | Status SetStatus | Advanced status | A | `Jido.Actions.Status.SetStatus` | deferred | 3 | GAP-MVP-011 |
-| Strategy Direct | Work styles | A | `Jido.Agent.Strategy.Direct` | deferred | 3 | GAP-MVP-010 |
-| Strategy FSM | Work styles | hybrid | `Jido.Agent.Strategy.FSM` | deferred | 3 | GAP-MVP-010 |
-| Pod behavior support | Teams | A | `Jido.Pod` | deferred | 3 | GAP-MVP-012 |
-| Pod topology support | Teams topology | A | `Jido.Pod.Topology` | deferred | 3 | GAP-MVP-012 |
+| Strategy Direct | Work styles / Strategy editor | A | `Jido.Agent.Strategy.Direct` | done | 4 | — |
+| Strategy FSM | Work styles / FSM Designer | hybrid | `Jido.Agent.Strategy.FSM` | done | 4 | — |
+| Pod behavior support | Teams | A | `Jido.Pod` | done | 4 | — |
+| Pod topology support | Teams topology | A | `Jido.Pod.Topology` | done | 4 | — |
 | Pod get | Teams detail | A | `Jido.Pod.get/2,3` | deferred | 3 | GAP-MVP-012 |
 | Pod ensure node | Teams detail | A | `Jido.Pod.ensure_node/3` | deferred | 3 | GAP-MVP-012 |
 | Pod mutate | Teams editor | A | `Jido.Pod.mutate/3` | deferred | 3 | GAP-MVP-012 |
 | Pod action mutate | Teams actions | A | `Jido.Pod.Actions.Mutate` | deferred | 3 | GAP-MVP-012 |
 | Pod action evolve | Teams actions | A | `Jido.Pod.Actions.Evolve` | deferred | 3 | GAP-MVP-012 |
-| Instance lifecycle registry | Runtime infra | A | `Jido.Agent.InstanceManager` | deferred | 3 | GAP-MVP-004 |
-| Plugin behavior | Capability packs | hybrid | `Jido.Plugin` | deferred | 3 | GAP-MVP-008 |
+| Instance lifecycle registry | Runtime infra | A | `Jido.Agent.InstanceManager` | done | 3 | — |
+| Plugin behavior | Capability packs | hybrid | `Jido.Plugin` | done | 4 | — |
 | Plugin spec/config/manifest/requirements/routes/schedules/instance | Capability packs advanced | hybrid | `Jido.Plugin.Spec`, `Config`, `Manifest`, `Requirements`, `Routes`, `Schedules`, `Instance` | deferred | 2 | GAP-MVP-008 |
-| Sensor behavior | Watchers | hybrid | `Jido.Sensor` | deferred | 3 | GAP-MVP-008 |
+| Sensor behavior | Watchers | hybrid | `Jido.Sensor` | done | 4 | — |
 | Sensor runtime | Watchers runtime | A | `Jido.Sensor.Runtime` | deferred | 3 | GAP-MVP-008 |
 | Sensor spec | Watchers editor | A | `Jido.Sensor.Spec` | deferred | 3 | GAP-MVP-008 |
 | Heartbeat sensor | Watchers | A | `Jido.Sensors.Heartbeat` | deferred | 3 | GAP-MVP-008 |
@@ -110,18 +110,18 @@ Status legend: `done` = implemented in this branch, `deferred` = explicitly post
 | Storage File | Settings storage | A | `Jido.Storage.File` | deferred | 3 | GAP-MVP-004 |
 | Storage Redis | Settings storage | A | `Jido.Storage.Redis` | deferred | 2 | GAP-MVP-004 |
 | Persist API | Vault and snapshots | A | `Jido.Persist` | deferred | 3 | GAP-MVP-004 |
-| Thread core | Threads | A | `Jido.Thread` | deferred | 2 | GAP-MVP-013 |
+| Thread core | Threads explorer | A | `Jido.Thread` | done | 3 | — |
 | Thread agent | Threads | A | `Jido.Thread.Agent` | deferred | 2 | GAP-MVP-013 |
 | Thread entry | Threads | A | `Jido.Thread.Entry` | deferred | 2 | GAP-MVP-013 |
 | Thread plugin | Template plugins | A | `Jido.Thread.Plugin` | deferred | 2 | GAP-MVP-013 |
 | Thread store | Threads | A | `Jido.Thread.Store` | deferred | 2 | GAP-MVP-013 |
 | Thread adapter in-memory | Threads settings | A | `Jido.Thread.Store.Adapters.InMemory` | deferred | 2 | GAP-MVP-013 |
 | Thread adapter journal-backed | Threads settings | A | `Jido.Thread.Store.Adapters.JournalBacked` | deferred | 2 | GAP-MVP-013 |
-| Memory core | Memory | A | `Jido.Memory` | deferred | 2 | GAP-MVP-013 |
+| Memory core | Memory spaces | A | `Jido.Memory` | done | 3 | — |
 | Memory agent | Memory | A | `Jido.Memory.Agent` | deferred | 2 | GAP-MVP-013 |
 | Memory plugin | Template plugins | A | `Jido.Memory.Plugin` | deferred | 2 | GAP-MVP-013 |
 | Memory space | Memory spaces | A | `Jido.Memory.Space` | deferred | 2 | GAP-MVP-013 |
-| Identity core | Identity | A | `Jido.Identity` | deferred | 2 | GAP-MVP-013 |
+| Identity core | Identity profiles | A | `Jido.Identity` | done | 3 | — |
 | Identity agent | Identity | A | `Jido.Identity.Agent` | deferred | 2 | GAP-MVP-013 |
 | Identity plugin | Template plugins | A | `Jido.Identity.Plugin` | deferred | 2 | GAP-MVP-013 |
 | Identity profile | Identity profiles | A | `Jido.Identity.Profile` | deferred | 2 | GAP-MVP-013 |
@@ -130,8 +130,10 @@ Status legend: `done` = implemented in this branch, `deferred` = explicitly post
 | Event contract | Event schema validation | A | `Jido.Observe.EventContract` | deferred | 3 | GAP-MVP-007 |
 | Tracing context | Traces screen | A | `Jido.Tracing.Context` | deferred | 3 | GAP-MVP-007 |
 | Trace model | Traces screen | A | `Jido.Tracing.Trace` | deferred | 3 | GAP-MVP-007 |
-| Scheduler | Schedules | A | `Jido.Scheduler` | deferred | 3 | GAP-MVP-006 |
-| Scheduler job | Schedules | A | `Jido.Scheduler.Job` | deferred | 3 | GAP-MVP-006 |
+| Workflow Builder (D3 DAG) | `/workflows` + `workflow_dag.js` | hybrid | `Workflows.create_workflow_step/2` + `pushEvent("init_graph")` | done | 4 | — |
+| Scheduler | Schedules | A | `Jido.Scheduler` | done | 4 | — |
+| Scheduler job | Schedules | A | `Jido.Scheduler.Job` | done | 4 | — |
+| SQLite WAL-aware backup | `infra/backup.sh` | hybrid | `sqlite3 <db> ".backup <dest>"` — WAL-safe online backup | done | 5 | — |
 | Await completion | Assignments | A | `Jido.Await.completion/2,3` | deferred | 3 | GAP-MVP-009 |
 | Await child | Hierarchy | A | `Jido.Await.child/3,4` | deferred | 3 | GAP-MVP-009 |
 | Await all | Playbooks | A | `Jido.Await.all/2,3` | deferred | 3 | GAP-MVP-009 |

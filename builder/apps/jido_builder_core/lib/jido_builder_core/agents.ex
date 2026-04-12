@@ -1,7 +1,27 @@
 defmodule JidoBuilderCore.Agents do
+  import Ecto.Query
+
   alias JidoBuilderCore.Audit
   alias JidoBuilderCore.Agents.{AgentInstance, GeneratedModule, Partition, Snapshot, Workspace}
   alias JidoBuilderCore.Repo
+
+  def list_workspaces do
+    Workspace |> order_by([w], w.inserted_at) |> Repo.all()
+  end
+
+  def list_snapshots(workspace_id) do
+    Snapshot
+    |> where([s], s.workspace_id == ^workspace_id)
+    |> order_by([s], [desc: s.captured_at])
+    |> Repo.all()
+    |> Repo.preload(:agent_instance)
+  end
+
+  def list_partitions(workspace_id) do
+    Partition
+    |> where([p], p.workspace_id == ^workspace_id)
+    |> Repo.all()
+  end
 
   def create_workspace(attrs, actor),
     do: insert_with_audit(Workspace, attrs, actor, "agents.workspaces.create")

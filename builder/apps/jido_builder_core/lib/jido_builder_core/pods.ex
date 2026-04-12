@@ -1,7 +1,22 @@
 defmodule JidoBuilderCore.Pods do
+  import Ecto.Query
+
   alias JidoBuilderCore.Audit
   alias JidoBuilderCore.Pods.{PodNode, PodTopology}
   alias JidoBuilderCore.Repo
+
+  def list_topologies(workspace_id) do
+    PodTopology
+    |> where([t], t.workspace_id == ^workspace_id)
+    |> Repo.all()
+  end
+
+  def list_topologies_with_nodes(workspace_id) do
+    PodTopology
+    |> where([t], t.workspace_id == ^workspace_id)
+    |> Repo.all()
+    |> Repo.preload(nodes: :agent_instance)
+  end
 
   def create_topology(attrs, actor),
     do: insert_with_audit(PodTopology, attrs, actor, "pods.topologies.create")

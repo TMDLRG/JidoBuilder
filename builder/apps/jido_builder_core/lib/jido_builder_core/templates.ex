@@ -17,6 +17,51 @@ defmodule JidoBuilderCore.Templates do
     Template |> where([t], t.workspace_id == ^workspace_id) |> Repo.all()
   end
 
+  def list_template_plugins(workspace_id) do
+    from(tp in TemplatePlugin,
+      join: t in assoc(tp, :template),
+      where: t.workspace_id == ^workspace_id
+    )
+    |> Repo.all()
+  end
+
+  def update_plugin(plugin, attrs, actor) do
+    plugin
+    |> TemplatePlugin.changeset(attrs)
+    |> Repo.update()
+    |> maybe_audit(actor, "templates.plugins.update")
+  end
+
+  def list_template_sensors(workspace_id) do
+    from(ts in TemplateSensor,
+      join: t in assoc(ts, :template),
+      where: t.workspace_id == ^workspace_id
+    )
+    |> Repo.all()
+  end
+
+  def update_sensor(sensor, attrs, actor) do
+    sensor
+    |> TemplateSensor.changeset(attrs)
+    |> Repo.update()
+    |> maybe_audit(actor, "templates.sensors.update")
+  end
+
+  def list_template_schedules(workspace_id) do
+    from(ts in TemplateSchedule,
+      join: t in assoc(ts, :template),
+      where: t.workspace_id == ^workspace_id
+    )
+    |> Repo.all()
+  end
+
+  def update_schedule(schedule, attrs, actor) do
+    schedule
+    |> TemplateSchedule.changeset(attrs)
+    |> Repo.update()
+    |> maybe_audit(actor, "templates.schedules.update")
+  end
+
   def get_template!(id), do: Repo.get!(Template, id)
 
   def create_template(attrs, actor) do

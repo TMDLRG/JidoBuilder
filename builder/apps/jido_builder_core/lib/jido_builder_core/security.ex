@@ -7,6 +7,12 @@ defmodule JidoBuilderCore.Security do
 
   @redacted "[REDACTED]"
 
+  def list_integrations(workspace_id) do
+    Integration
+    |> where([i], i.workspace_id == ^workspace_id)
+    |> Repo.all()
+  end
+
   def create_integration(attrs, actor),
     do: insert_with_audit(Integration, attrs, actor, "security.integrations.create")
 
