@@ -108,6 +108,53 @@ defmodule JidoBuilderWeb.WorkflowBuilderLive do
   end
 
   @impl true
+  def handle_event("create_workflow", %{"workflow" => %{"name" => name}}, socket) do
+    user = socket.assigns.current_user
+    ws_id = socket.assigns.workspace_id
+
+    case Workflows.create_workflow(%{workspace_id: ws_id, name: String.trim(name), status: "active"}, user.email) do
+      {:ok, workflow} ->
+        workflows = Workflows.list_workflows(ws_id)
+        {:noreply, assign(socket, workflows: workflows, current_workflow: workflow, nodes: [])}
+
+      {:error, _reason} ->
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("select_workflow", %{"id" => wf_id}, socket) do
+    workflow_id = parse_id(wf_id)
+    wf = Enum.find(socket.assigns.workflows, &(&1.id == workflow_id))
+    steps = if wf, do: Workflows.list_workflow_steps(wf.id), else: []
+    nodes = Enum.map(steps, &step_to_node/1)
+    {:noreply, assign(socket, current_workflow: wf, nodes: nodes)}
+  end
+
+  def handle_event("add_step", %{"step" => %{"name" => name, "kind" => kind}}, socket) do
+    user = socket.assigns.current_user
+    wf = socket.assigns.current_workflow
+
+    if wf do
+      order = length(socket.assigns.nodes) + 1
+
+      case Workflows.create_workflow_step(
+             %{workflow_id: wf.id, name: String.trim(name), kind: kind, step_order: order, config: %{}},
+             user.email
+           ) do
+        {:ok, _step} ->
+          steps = Workflows.list_workflow_steps(wf.id)
+          nodes = Enum.map(steps, &step_to_node/1)
+          {:noreply, assign(socket, nodes: nodes)}
+
+        {:error, _} ->
+          {:noreply, socket}
+      end
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
   def handle_event("edge_upserted", %{"from" => _from, "to" => _to}, socket) do
     {:noreply, socket}
   end
@@ -127,14 +174,49 @@ defmodule JidoBuilderWeb.WorkflowBuilderLive do
     ~H"""
     <.page_header><%= @page_title %></.page_header>
 
+    <section class="mt-4 flex gap-6 items-start">
+      <div class="flex-1">
+        <h2 class="text-sm font-semibold mb-2">Workflows</h2>
+        <ul class="text-sm space-y-1 mb-3">
+          <li :for={wf <- @workflows} class={"py-1 border-b cursor-pointer #{if @current_workflow && @current_workflow.id == wf.id, do: "font-bold text-zinc-900", else: "text-zinc-500"}"}>
+            <button type="button" phx-click="select_workflow" phx-value-id={wf.id} class="w-full text-left"><%= wf.name %></button>
+          </li>
+        </ul>
+        <form id="create-workflow-form" phx-submit="create_workflow" class="flex gap-2">
+          <input type="text" name="workflow[name]" placeholder="New workflow name" required class="border rounded px-2 py-1 text-sm flex-1" />
+          <button type="submit" class="rounded bg-zinc-900 px-3 py-1 text-white text-xs">Create</button>
+        </form>
+      </div>
+
+      <div :if={@current_workflow} class="flex-1">
+        <h2 class="text-sm font-semibold mb-2">Add Step to "<%= @current_workflow.name %>"</h2>
+        <form id="add-step-form" phx-submit="add_step" class="flex gap-2 items-end">
+          <div>
+            <label class="block text-xs text-zinc-500">Name</label>
+            <input type="text" name="step[name]" placeholder="Step name" required class="border rounded px-2 py-1 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs text-zinc-500">Kind</label>
+            <select name="step[kind]" class="border rounded px-2 py-1 text-sm">
+              <option value="action">action</option>
+              <option value="emit">emit</option>
+              <option value="condition">condition</option>
+              <option value="transform">transform</option>
+            </select>
+          </div>
+          <button type="submit" class="rounded bg-zinc-900 px-3 py-1 text-white text-xs">Add Step</button>
+        </form>
+      </div>
+    </section>
+
     <div
       id="workflow-dag"
       phx-hook="WorkflowDag"
-      class="mt-4 border rounded bg-zinc-50 h-64 flex items-center justify-center text-zinc-400 text-sm"
+      class="mt-4 border rounded bg-zinc-50 min-h-[10rem] p-4 text-sm"
       data-nodes={Jason.encode!(@nodes)}
       data-edges={Jason.encode!(@edges)}
     >
-      <span>WorkflowDag canvas — D3 renders here when JS is loaded</span>
+      <span :if={@nodes == []} class="text-zinc-400">Empty workflow — add steps above</span>
     </div>
 
     <section class="mt-4">
