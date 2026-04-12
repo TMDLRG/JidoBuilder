@@ -8345,12 +8345,13 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
   var NS = "http://www.w3.org/2000/svg";
   var WorkflowDag = {
     mounted() {
-      this.state = { nodes: [], edges: [], viewBox: [0, 0, 1200, 800], selected: null, drag: null, linkFrom: null };
+      this._scale = 1;
+      this.state = { nodes: [], edges: [], viewBox: [0, 0, 1200, 800], selected: null, drag: null, linkFrom: null, linkLine: null };
       this.svg = document.createElementNS(NS, "svg");
       this.svg.setAttribute("class", "w-full h-[560px] bg-white rounded border");
       this.svg.addEventListener("mousedown", (e) => this.onDown(e));
       this.svg.addEventListener("mousemove", (e) => this.onMove(e));
-      this.svg.addEventListener("mouseup", () => this.onUp());
+      this.svg.addEventListener("mouseup", (e) => this.onUp(e));
       this.svg.addEventListener("wheel", (e) => this.onWheel(e));
       this.el.innerHTML = "";
       this.el.appendChild(this.svg);
@@ -8398,26 +8399,48 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
       this.render();
     },
     onMove(e) {
-      if (!this.state.drag) return;
       const p = this.point(e);
-      const node = this.state.nodes.find((n) => (n.id || n.name) === this.state.drag.id);
-      if (!node) return;
-      node.x = p.x - this.state.drag.dx;
-      node.y = p.y - this.state.drag.dy;
-      this.render();
+      if (this.state.drag) {
+        const node = this.state.nodes.find((n) => (n.id || n.name) === this.state.drag.id);
+        if (node) {
+          node.x = p.x - this.state.drag.dx;
+          node.y = p.y - this.state.drag.dy;
+          this.render();
+        }
+      } else if (this.state.linkFrom) {
+        this.state.linkLine = { x: p.x, y: p.y };
+        this.render();
+      }
     },
-    onUp() {
+    onUp(e) {
       if (this.state.drag) {
         const node = this.state.nodes.find((n) => (n.id || n.name) === this.state.drag.id);
         if (node) this.pushEvent("node_moved", { name: node.name, x: node.x, y: node.y, workflow_id: this.el.dataset.workflowId });
+      } else if (this.state.linkFrom) {
+        const p = this.point(e);
+        const target = this.nodeAt(p);
+        const linkFromId = this.state.linkFrom;
+        if (target && (target.id || target.name) !== linkFromId) {
+          this.pushEvent("edge_created", {
+            source: linkFromId,
+            target: target.id || target.name,
+            workflow_id: this.el.dataset.workflowId
+          });
+        }
       }
       this.state.drag = null;
       this.state.linkFrom = null;
+      this.state.linkLine = null;
+      this.render();
     },
     onWheel(e) {
       e.preventDefault();
-      this.state.viewBox[2] += e.deltaY;
-      this.state.viewBox[3] += e.deltaY;
+      const factor = e.deltaY > 0 ? 1.1 : 0.9;
+      this._scale = Math.max(0.25, Math.min(4, this._scale * factor));
+      const baseW = 1200, baseH = 800;
+      const w = baseW / this._scale;
+      const h = baseH / this._scale;
+      this.state.viewBox = [this.state.viewBox[0], this.state.viewBox[1], w, h];
       this.render();
     },
     path(from, to) {
@@ -8439,6 +8462,21 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
         path.setAttribute("stroke-width", "2");
         this.svg.appendChild(path);
       });
+      if (this.state.linkFrom && this.state.linkLine) {
+        const fromNode = this.state.nodes.find((n) => (n.id || n.name) === this.state.linkFrom);
+        if (fromNode) {
+          const dashLine = document.createElementNS(NS, "line");
+          dashLine.setAttribute("x1", fromNode.x + 170);
+          dashLine.setAttribute("y1", fromNode.y + 28);
+          dashLine.setAttribute("x2", this.state.linkLine.x);
+          dashLine.setAttribute("y2", this.state.linkLine.y);
+          dashLine.setAttribute("stroke", "#94a3b8");
+          dashLine.setAttribute("stroke-dasharray", "6 4");
+          dashLine.setAttribute("stroke-width", "2");
+          dashLine.setAttribute("fill", "none");
+          this.svg.appendChild(dashLine);
+        }
+      }
       this.state.nodes.forEach((node) => {
         const g = document.createElementNS(NS, "g");
         const selected = this.state.selected === (node.id || node.name);
@@ -8481,42 +8519,154 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
       } catch (_) {
         parsed = { error: "invalid json" };
       }
-      this.el.innerHTML = `<pre class="text-xs bg-zinc-950 text-zinc-100 p-3 rounded overflow-auto">${this.format(parsed)}</pre>`;
+      const controls = document.createElement("div");
+      controls.className = "flex gap-2 mb-2";
+      controls.innerHTML = `
+      <button class="text-xs px-2 py-1 rounded bg-zinc-200 hover:bg-zinc-300" data-action="expand-all">Expand All</button>
+      <button class="text-xs px-2 py-1 rounded bg-zinc-200 hover:bg-zinc-300" data-action="collapse-all">Collapse All</button>
+    `;
+      const tree = document.createElement("div");
+      tree.className = "text-xs font-mono bg-zinc-950 text-zinc-100 p-3 rounded overflow-auto";
+      tree.innerHTML = this.buildTree(parsed, 0);
+      this.el.innerHTML = "";
+      this.el.appendChild(controls);
+      this.el.appendChild(tree);
+      controls.querySelector("[data-action=expand-all]").addEventListener("click", () => {
+        tree.querySelectorAll("details").forEach((d) => d.open = true);
+      });
+      controls.querySelector("[data-action=collapse-all]").addEventListener("click", () => {
+        tree.querySelectorAll("details").forEach((d) => d.open = false);
+      });
     },
-    format(value, depth = 0) {
-      if (value === null) return `<span class='text-zinc-400'>null</span>`;
-      if (typeof value === "string") return `<span class='text-emerald-400'>"${value}"</span>`;
-      if (typeof value === "number") return `<span class='text-blue-400'>${value}</span>`;
-      if (typeof value === "boolean") return `<span class='text-purple-400'>${value}</span>`;
-      if (Array.isArray(value)) return `[${value.map((v) => this.format(v, depth + 1)).join(", ")}]`;
-      if (typeof value === "object") {
-        return `{${Object.entries(value).map(([k, v]) => `<div style='padding-left:${(depth + 1) * 12}px'><span class='text-zinc-300'>${k}</span>: ${this.format(v, depth + 1)}</div>`).join("")}}`;
+    buildTree(value, depth) {
+      if (value === null) return `<span style="color:#a1a1aa">null</span>`;
+      if (typeof value === "string") return `<span style="color:#16a34a">"${this.escape(value)}"</span>`;
+      if (typeof value === "number") return `<span style="color:#2563eb">${value}</span>`;
+      if (typeof value === "boolean") return `<span style="color:#7c3aed">${value}</span>`;
+      if (Array.isArray(value)) {
+        if (value.length === 0) return `<span style="color:#a1a1aa">[]</span>`;
+        const items = value.map(
+          (v, i) => `<div style="padding-left:${(depth + 1) * 14}px">${i}: ${this.buildTree(v, depth + 1)}</div>`
+        ).join("");
+        return `<details open><summary style="cursor:pointer;color:#e4e4e7">Array [${value.length}]</summary>${items}</details>`;
       }
-      return String(value);
+      if (typeof value === "object") {
+        const keys = Object.keys(value);
+        if (keys.length === 0) return `<span style="color:#a1a1aa">{}</span>`;
+        const items = keys.map(
+          (k) => `<div style="padding-left:${(depth + 1) * 14}px"><span style="color:#d4d4d8">${this.escape(k)}</span>: ${this.buildTree(value[k], depth + 1)}</div>`
+        ).join("");
+        return `<details open><summary style="cursor:pointer;color:#e4e4e7">Object {${keys.length}}</summary>${items}</details>`;
+      }
+      return this.escape(String(value));
+    },
+    escape(s) {
+      return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
   };
   var json_tree_default = JsonTree;
 
   // js/hooks/execution_timeline.js
+  var EVENT_COLORS = {
+    cmd: "#10b981",
+    signal: "#3b82f6",
+    directive: "#f59e0b",
+    error: "#ef4444"
+  };
+  var RADIUS = 8;
+  var SVG_HEIGHT = 120;
+  var AXIS_Y = 90;
+  var EVENT_Y = 56;
   var ExecutionTimeline = {
     mounted() {
+      this._events = [];
+      this._selected = null;
+      this._tooltip = null;
+      this.handleEvent("append_event", (event) => {
+        this._events.push(event);
+        this.render();
+      });
       this.render();
     },
     updated() {
+      try {
+        this._events = JSON.parse(this.el.dataset.events || "[]");
+      } catch (_) {
+      }
       this.render();
     },
     render() {
-      let events = [];
       try {
-        events = JSON.parse(this.el.dataset.events || "[]");
+        if (!this._events.length) {
+          const eventsAttr = JSON.parse(this.el.dataset.events || "[]");
+          if (eventsAttr.length) this._events = eventsAttr;
+        }
       } catch (_) {
       }
-      this.el.innerHTML = `<div class='flex gap-2 overflow-x-auto'>${events.map((e, i) => `<button data-id='${i}' class='px-2 py-1 rounded text-xs ${this.color(e)}'>${e.kind || "event"}</button>`).join("")}</div>`;
-    },
-    color(e) {
-      if (e.status === "exception") return "bg-red-100 text-red-700";
-      if (e.kind === "signal") return "bg-blue-100 text-blue-700";
-      return "bg-emerald-100 text-emerald-700";
+      const events = this._events;
+      const width = this.el.clientWidth || 800;
+      const spacing = Math.max(60, Math.min(120, (width - 60) / Math.max(events.length, 1)));
+      const svgW = Math.max(width, events.length * spacing + 60);
+      const ns = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(ns, "svg");
+      svg.setAttribute("width", svgW);
+      svg.setAttribute("height", SVG_HEIGHT);
+      svg.style.display = "block";
+      const line = document.createElementNS(ns, "line");
+      line.setAttribute("x1", "20");
+      line.setAttribute("y1", AXIS_Y);
+      line.setAttribute("x2", svgW - 20);
+      line.setAttribute("y2", AXIS_Y);
+      line.setAttribute("stroke", "#d4d4d8");
+      line.setAttribute("stroke-width", "2");
+      svg.appendChild(line);
+      events.forEach((event, i) => {
+        const cx = 30 + i * spacing;
+        const kind = event.kind || "cmd";
+        const color = EVENT_COLORS[kind] || EVENT_COLORS.cmd;
+        const tick = document.createElementNS(ns, "line");
+        tick.setAttribute("x1", cx);
+        tick.setAttribute("y1", AXIS_Y - 6);
+        tick.setAttribute("x2", cx);
+        tick.setAttribute("y2", AXIS_Y + 6);
+        tick.setAttribute("stroke", "#a1a1aa");
+        tick.setAttribute("stroke-width", "1");
+        svg.appendChild(tick);
+        const circle = document.createElementNS(ns, "circle");
+        circle.setAttribute("cx", cx);
+        circle.setAttribute("cy", EVENT_Y);
+        circle.setAttribute("r", RADIUS);
+        circle.setAttribute("fill", color);
+        circle.setAttribute("stroke", this._selected === i ? "#111827" : "none");
+        circle.setAttribute("stroke-width", "2");
+        circle.style.cursor = "pointer";
+        const tooltip = document.createElementNS(ns, "title");
+        tooltip.textContent = `${kind}: ${event.id || event.signal_type || JSON.stringify(event)}`;
+        circle.appendChild(tooltip);
+        circle.addEventListener("click", () => {
+          this._selected = i;
+          this.pushEvent("select_event", { id: event.id || String(i) });
+          this.render();
+        });
+        svg.appendChild(circle);
+        const label = document.createElementNS(ns, "text");
+        label.setAttribute("x", cx);
+        label.setAttribute("y", AXIS_Y + 20);
+        label.setAttribute("text-anchor", "middle");
+        label.setAttribute("font-size", "9");
+        label.setAttribute("fill", "#a1a1aa");
+        label.textContent = kind;
+        svg.appendChild(label);
+      });
+      const container = this.el;
+      container.style.overflowX = "auto";
+      container.innerHTML = "";
+      if (events.length === 0) {
+        container.innerHTML = `<p class="text-xs text-zinc-400 pt-4">No events yet</p>`;
+        return;
+      }
+      container.appendChild(svg);
+      container.scrollLeft = container.scrollWidth;
     }
   };
   var execution_timeline_default = ExecutionTimeline;

@@ -2,12 +2,13 @@ const NS = "http://www.w3.org/2000/svg"
 
 const WorkflowDag = {
   mounted() {
-    this.state = { nodes: [], edges: [], viewBox: [0, 0, 1200, 800], selected: null, drag: null, linkFrom: null }
+    this._scale = 1
+    this.state = { nodes: [], edges: [], viewBox: [0, 0, 1200, 800], selected: null, drag: null, linkFrom: null, linkLine: null }
     this.svg = document.createElementNS(NS, "svg")
     this.svg.setAttribute("class", "w-full h-[560px] bg-white rounded border")
     this.svg.addEventListener("mousedown", (e) => this.onDown(e))
     this.svg.addEventListener("mousemove", (e) => this.onMove(e))
-    this.svg.addEventListener("mouseup", () => this.onUp())
+    this.svg.addEventListener("mouseup", (e) => this.onUp(e))
     this.svg.addEventListener("wheel", (e) => this.onWheel(e))
     this.el.innerHTML = ""
     this.el.appendChild(this.svg)
@@ -54,26 +55,49 @@ const WorkflowDag = {
     this.render()
   },
   onMove(e) {
-    if (!this.state.drag) return
     const p = this.point(e)
-    const node = this.state.nodes.find((n) => (n.id || n.name) === this.state.drag.id)
-    if (!node) return
-    node.x = p.x - this.state.drag.dx
-    node.y = p.y - this.state.drag.dy
-    this.render()
+    if (this.state.drag) {
+      const node = this.state.nodes.find((n) => (n.id || n.name) === this.state.drag.id)
+      if (node) {
+        node.x = p.x - this.state.drag.dx
+        node.y = p.y - this.state.drag.dy
+        this.render()
+      }
+    } else if (this.state.linkFrom) {
+      // Update dashed link preview line
+      this.state.linkLine = { x: p.x, y: p.y }
+      this.render()
+    }
   },
-  onUp() {
+  onUp(e) {
     if (this.state.drag) {
       const node = this.state.nodes.find((n) => (n.id || n.name) === this.state.drag.id)
       if (node) this.pushEvent("node_moved", { name: node.name, x: node.x, y: node.y, workflow_id: this.el.dataset.workflowId })
+    } else if (this.state.linkFrom) {
+      const p = this.point(e)
+      const target = this.nodeAt(p)
+      const linkFromId = this.state.linkFrom
+      if (target && (target.id || target.name) !== linkFromId) {
+        this.pushEvent("edge_created", {
+          source: linkFromId,
+          target: target.id || target.name,
+          workflow_id: this.el.dataset.workflowId
+        })
+      }
     }
     this.state.drag = null
     this.state.linkFrom = null
+    this.state.linkLine = null
+    this.render()
   },
   onWheel(e) {
     e.preventDefault()
-    this.state.viewBox[2] += e.deltaY
-    this.state.viewBox[3] += e.deltaY
+    const factor = e.deltaY > 0 ? 1.1 : 0.9
+    this._scale = Math.max(0.25, Math.min(4, this._scale * factor))
+    const baseW = 1200, baseH = 800
+    const w = baseW / this._scale
+    const h = baseH / this._scale
+    this.state.viewBox = [this.state.viewBox[0], this.state.viewBox[1], w, h]
     this.render()
   },
   path(from, to) {
@@ -96,6 +120,23 @@ const WorkflowDag = {
       path.setAttribute("stroke-width", "2")
       this.svg.appendChild(path)
     })
+
+    // Dashed preview line during link drag
+    if (this.state.linkFrom && this.state.linkLine) {
+      const fromNode = this.state.nodes.find((n) => (n.id || n.name) === this.state.linkFrom)
+      if (fromNode) {
+        const dashLine = document.createElementNS(NS, "line")
+        dashLine.setAttribute("x1", fromNode.x + 170)
+        dashLine.setAttribute("y1", fromNode.y + 28)
+        dashLine.setAttribute("x2", this.state.linkLine.x)
+        dashLine.setAttribute("y2", this.state.linkLine.y)
+        dashLine.setAttribute("stroke", "#94a3b8")
+        dashLine.setAttribute("stroke-dasharray", "6 4")
+        dashLine.setAttribute("stroke-width", "2")
+        dashLine.setAttribute("fill", "none")
+        this.svg.appendChild(dashLine)
+      }
+    }
 
     this.state.nodes.forEach((node) => {
       const g = document.createElementNS(NS, "g")
