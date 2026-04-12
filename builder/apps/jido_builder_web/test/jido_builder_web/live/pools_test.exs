@@ -1,16 +1,23 @@
 defmodule JidoBuilderWeb.Live.PoolsTest do
-  @moduledoc "Phase 4 — Pools: worker pool configuration view."
   use JidoBuilderWeb.ConnCase, async: false
   @moduletag :authenticated
   import Phoenix.LiveViewTest
 
-  test "renders Pools heading", %{conn: conn} do
+  test "renders pool config", %{conn: conn} do
     {:ok, _lv, html} = live(conn, ~p"/pools")
     assert html =~ "Pools"
+    assert html =~ "default_pool"
   end
 
-  test "shows configuration options", %{conn: conn} do
-    {:ok, _lv, html} = live(conn, ~p"/pools")
-    assert html =~ "size" or html =~ "pool" or html =~ "Pools"
+  test "update pool size", %{conn: conn} do
+    {:ok, lv, _html} = live(conn, ~p"/pools")
+
+    html =
+      lv
+      |> form("#pool-config-form", pool: %{name: "default_pool", size: "9", max_overflow: "3"})
+      |> render_submit()
+
+    assert html =~ "Pool config updated"
+    assert html =~ "9"
   end
 end

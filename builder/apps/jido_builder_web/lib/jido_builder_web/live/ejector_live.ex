@@ -27,6 +27,15 @@ defmodule JidoBuilderWeb.EjectorLive do
     end
   end
 
+
+  @impl true
+  def handle_event("download", _params, %{assigns: %{preview: preview}} = socket) when is_binary(preview) do
+    filename = "jido_export_#{System.system_time(:millisecond)}.ex"
+    {:noreply, push_event(socket, "download", %{filename: filename, content: preview})}
+  end
+
+  def handle_event("download", _params, socket), do: {:noreply, socket}
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -63,6 +72,8 @@ defmodule JidoBuilderWeb.EjectorLive do
       <h2 class="text-xs font-semibold mb-2 text-zinc-700">Exported Source</h2>
       <pre class="font-mono text-xs whitespace-pre-wrap"><%= @preview %></pre>
     </div>
+
+    <button :if={@preview} id="ejector-download" type="button" phx-click="download" class="mt-3 rounded border px-3 py-1 text-xs">Download source</button>
 
     <div :if={@error} id="ejector-error" class="mt-4 text-red-600 text-sm"><%= @error %></div>
     """

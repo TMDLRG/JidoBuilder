@@ -1,7 +1,7 @@
 defmodule JidoBuilderWeb.Live.TracesTest do
-  @moduledoc "Phase 4 — Traces viewer: shows telemetry/observability trace log."
   use JidoBuilderWeb.ConnCase, async: false
   @moduletag :authenticated
+
   import Phoenix.LiveViewTest
   alias JidoBuilderCore.{Agents, Observability}
 
@@ -11,16 +11,25 @@ defmodule JidoBuilderWeb.Live.TracesTest do
         %{name: "trace-ws-#{System.unique_integer()}", slug: "trace-#{System.unique_integer()}"},
         "test"
       )
+
+    {:ok, _} =
+      Observability.log_signal(
+        %{workspace_id: ws.id, direction: "outbound", signal_type: "ping", payload: %{}},
+        "test"
+      )
+
     %{workspace: ws}
   end
 
-  test "renders Traces heading", %{conn: conn} do
-    {:ok, _lv, html} = live(conn, ~p"/traces")
-    assert html =~ "Traces"
+  test "filter by signal type", %{conn: conn, workspace: ws} do
+    {:ok, lv, _html} = live(conn, ~p"/traces?workspace_id=#{ws.id}")
+    html = lv |> form("#trace-filter-form", filter: %{signal_type: "ping"}) |> render_change()
+    assert html =~ "ping"
   end
 
-  test "shows empty state when no signal logs", %{conn: conn, workspace: ws} do
-    {:ok, _lv, html} = live(conn, ~p"/traces?workspace_id=#{ws.id}")
-    assert html =~ "Traces" or html =~ "No trace"
+  test "shows trace detail", %{conn: conn, workspace: ws} do
+    {:ok, lv, _html} = live(conn, ~p"/traces?workspace_id=#{ws.id}")
+    html = lv |> element("#trace-signals-list button") |> render_click()
+    assert html =~ "trace-detail"
   end
 end

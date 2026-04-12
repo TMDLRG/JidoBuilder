@@ -11,3 +11,15 @@ const liveSocket = new LiveSocket("/live", Socket, {
 
 liveSocket.connect()
 window.liveSocket = liveSocket
+
+liveSocket.handleEvent("download", ({ filename, content }) => {
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" })
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement("a")
+  anchor.href = url
+  anchor.download = filename || "export.ex"
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+  URL.revokeObjectURL(url)
+})
