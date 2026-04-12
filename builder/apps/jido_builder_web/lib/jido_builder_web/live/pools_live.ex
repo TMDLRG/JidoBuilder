@@ -25,6 +25,7 @@ defmodule JidoBuilderWeb.PoolsLive do
     {:noreply, assign(socket, pools: pools, saved?: true)}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <.page_header><%= @page_title %></.page_header>

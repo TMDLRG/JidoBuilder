@@ -4,8 +4,6 @@ defmodule JidoBuilderWeb.ErrorPolicyLive do
 
   alias JidoBuilderCore.Templates
 
-  @policies ["stop_on_error", "retry_once", "ignore", "escalate"]
-
   @impl true
   def mount(params, _session, socket) do
     workspace_id = wid(params)
@@ -19,6 +17,7 @@ defmodule JidoBuilderWeb.ErrorPolicyLive do
        templates: templates,
        selected_template_id: selected && selected.id,
        selected_policy: policy_from(selected),
+       policies: ~w(stop_on_error retry_once ignore escalate),
        saved?: false
      )}
   end

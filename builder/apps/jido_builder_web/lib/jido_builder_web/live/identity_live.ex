@@ -33,6 +33,7 @@ defmodule JidoBuilderWeb.IdentityLive do
     {:noreply, assign(socket, profiles: config_list(updated, "identity_profiles"))}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <.page_header><%= @page_title %></.page_header>

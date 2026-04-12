@@ -26,6 +26,7 @@ defmodule JidoBuilderWeb.MemoryLive do
     {:noreply, assign(socket, spaces: config_list(updated, "memory_spaces"))}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <.page_header><%= @page_title %></.page_header>

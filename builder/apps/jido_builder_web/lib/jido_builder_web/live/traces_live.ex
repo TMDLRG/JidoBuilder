@@ -32,6 +32,7 @@ defmodule JidoBuilderWeb.TracesLive do
     {:noreply, assign(socket, signals: signals, filter: %{"signal_type" => signal_type}, selected: nil)}
   end
 
+  @impl true
   def handle_event("select", %{"id" => id}, socket) do
     selected = Enum.find(socket.assigns.signals, &(to_string(&1.id) == id))
     {:noreply, assign(socket, selected: selected)}
@@ -50,7 +51,7 @@ defmodule JidoBuilderWeb.TracesLive do
       <li :for={s <- @signals} class="font-mono text-xs border-b pb-1">
         <button type="button" phx-click="select" phx-value-id={s.id} class="w-full text-left">
           <span><%= s.signal_type %></span>
-          <span class="ml-2 text-zinc-500"><%= s.status %></span>
+          <span class="ml-2 text-zinc-500"><%= s.direction %></span>
         </button>
       </li>
     </ul>

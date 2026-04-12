@@ -29,6 +29,7 @@ defmodule JidoBuilderWeb.ThreadsLive do
     {:noreply, assign(socket, threads: config_list(updated, "threads"), saved?: true)}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <.page_header><%= @page_title %></.page_header>

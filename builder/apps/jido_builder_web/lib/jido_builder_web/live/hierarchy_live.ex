@@ -7,7 +7,7 @@ defmodule JidoBuilderWeb.HierarchyLive do
   """
   use JidoBuilderWeb, :live_view
 
-  alias JidoBuilderCore.{Agents, Pods}
+  alias JidoBuilderCore.Pods
 
   @impl true
   def mount(params, _session, socket) do
