@@ -8,7 +8,9 @@ defmodule JidoBuilderCodegen.Templates.Action do
       #{description}
       \"\"\"
 
-      @behaviour Jido.Action
+      use Jido.Action,
+        name: #{inspect(name)},
+        description: #{inspect(description)}
 
       @impl true
       def run(params, _context) do

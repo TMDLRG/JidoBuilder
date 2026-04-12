@@ -5,5 +5,5 @@ defmodule JidoBuilderRuntime.Jido do
   All runtime agent lifecycle calls route through this supervised instance.
   """
 
-  use Jido, otp_app: :jido_builder
+  use Jido, otp_app: :jido_builder_runtime
 end
