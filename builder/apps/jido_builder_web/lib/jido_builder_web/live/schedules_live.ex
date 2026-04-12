@@ -81,35 +81,26 @@ defmodule JidoBuilderWeb.SchedulesLive do
           <label class="block text-xs font-medium mb-1">Timezone</label>
           <input type="text" name="schedule[timezone]" value="UTC" class="border rounded px-2 py-1 w-full text-sm" />
         </div>
-        <button type="submit" class="rounded bg-zinc-900 px-4 py-2 text-white text-xs">
-          Create Schedule
-        </button>
+        <.button>Create Schedule</.button>
       </form>
       <p :if={@form_error} class="mt-2 text-red-600 text-xs"><%= @form_error %></p>
     </.card>
 
     <.card class="mt-8"><:header>Scheduled Jobs</:header>
-      <h2 class="text-sm font-semibold mb-2">Scheduled Jobs</h2>
       <ul id="schedule-list" class="space-y-2 text-sm">
         <li :for={sched <- @schedules} id={"sched-#{sched.id}"} class="flex items-center gap-4 border-b pb-2">
           <span class="font-semibold"><%= sched.name %></span>
           <span class="font-mono text-xs text-zinc-500"><%= sched.cron %></span>
-          <span class={if sched.enabled, do: "text-green-600 text-xs", else: "text-zinc-400 text-xs line-through"}>
-            <%= if sched.enabled, do: "active", else: "cancelled" %>
-          </span>
+          <.badge variant={if sched.enabled, do: "success", else: "default"}><%= if sched.enabled, do: "active", else: "cancelled" %></.badge>
           <button
             :if={sched.enabled}
             phx-click="cancel_schedule"
             phx-value-id={sched.id}
             class="text-xs text-red-600 hover:underline"
-          >
-            Cancel
-          </button>
+          >Cancel</button>
         </li>
       </ul>
-      <p :if={@schedules == []} class="text-sm text-zinc-500">
-        No schedules configured for this workspace.
-      </p>
+      <.empty_state :if={@schedules == []} title="No schedules" description="No schedules configured for this workspace." icon="clock" />
     </.card>
     """
   end

@@ -31,34 +31,39 @@ defmodule JidoBuilderWeb.DebugLive do
     ~H"""
     <.page_header><%= @page_title %></.page_header>
 
-    <button id="debug-toggle" phx-click="toggle_debug" class="rounded border px-3 py-1 text-xs mt-2">
-      Toggle debug (<%= if @debug_enabled, do: "on", else: "off" %>)
-    </button>
+    <div class="mb-4">
+      <.button phx-click="toggle_debug" id="debug-toggle">
+        Toggle debug ({if @debug_enabled, do: "on", else: "off"})
+      </.button>
+    </div>
 
-    <section class="mt-4">
-      <h2 class="text-sm font-semibold mb-2">Agent Debug Status</h2>
-      <ul id="debug-agent-list" class="space-y-1 text-xs">
-        <li :for={a <- @agents} class="border-b pb-1">
-          <%= a.name %> — <%= if @debug_enabled, do: "debug:on", else: "debug:off" %>
-        </li>
-      </ul>
-    </section>
+    <div class="grid md:grid-cols-3 gap-4">
+      <.card>
+        <:header>Agent Debug Status</:header>
+        <ul id="debug-agent-list" class="space-y-1 text-xs">
+          <li :for={a <- @agents} class="border-b pb-1">
+            {a.name} — <.badge variant={if @debug_enabled, do: "success", else: "default"}>{if @debug_enabled, do: "debug:on", else: "debug:off"}</.badge>
+          </li>
+        </ul>
+        <.empty_state :if={@agents == []} title="No agents" description="No running agents." icon="users" />
+      </.card>
 
-    <section class="mt-4">
-      <h2 class="text-sm font-semibold mb-2">Recent Errors</h2>
-      <ul class="space-y-1 text-xs font-mono">
-        <li :for={e <- @errors} class="border-b pb-1 text-red-700"><%= e.directive_type %>: <%= e.status %></li>
-      </ul>
-      <p :if={@errors == []} class="text-sm text-zinc-500">No recent errors.</p>
-    </section>
+      <.card>
+        <:header>Recent Errors</:header>
+        <ul class="space-y-1 text-xs font-mono">
+          <li :for={e <- @errors} class="border-b pb-1"><.badge variant="danger">{e.directive_type}</.badge> {e.status}</li>
+        </ul>
+        <.empty_state :if={@errors == []} title="No errors" description="No recent errors." icon="check_circle" />
+      </.card>
 
-    <section class="mt-6">
-      <h2 class="text-sm font-semibold mb-2">Recent Traces</h2>
-      <ul class="space-y-1 text-xs font-mono">
-        <li :for={t <- @traces} class="border-b pb-1"><%= t.directive_type %>: <%= t.status %></li>
-      </ul>
-      <p :if={@traces == []} class="text-sm text-zinc-500">No recent traces.</p>
-    </section>
+      <.card>
+        <:header>Recent Traces</:header>
+        <ul class="space-y-1 text-xs font-mono">
+          <li :for={t <- @traces} class="border-b pb-1">{t.directive_type}: {t.status}</li>
+        </ul>
+        <.empty_state :if={@traces == []} title="No traces" description="No recent traces." icon="eye" />
+      </.card>
+    </div>
     """
   end
 

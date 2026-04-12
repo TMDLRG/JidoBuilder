@@ -38,20 +38,26 @@ defmodule JidoBuilderWeb.IdentityLive do
     ~H"""
     <.page_header><%= @page_title %></.page_header>
 
-    <form id="identity-form" phx-submit="create" class="max-w-xl grid gap-2">
-      <input type="text" name="profile[name]" placeholder="Name" class="border rounded px-2 py-1 text-sm" />
-      <input type="text" name="profile[persona]" placeholder="Persona" class="border rounded px-2 py-1 text-sm" />
-      <input type="text" name="profile[capabilities]" placeholder="Capabilities" class="border rounded px-2 py-1 text-sm" />
-      <button type="submit" class="justify-self-start rounded bg-zinc-900 px-3 py-1 text-white text-xs">Create profile</button>
-    </form>
+    <.card class="max-w-md mb-4">
+      <:header>New Identity Profile</:header>
+      <form id="identity-form" phx-submit="create" class="space-y-2">
+        <input type="text" name="profile[name]" placeholder="Name" class="border rounded px-2 py-1 w-full text-sm" />
+        <input type="text" name="profile[persona]" placeholder="Persona" class="border rounded px-2 py-1 w-full text-sm" />
+        <input type="text" name="profile[capabilities]" placeholder="Capabilities" class="border rounded px-2 py-1 w-full text-sm" />
+        <.button>Create profile</.button>
+      </form>
+    </.card>
 
-    <ul id="identity-profiles-list" class="mt-4 space-y-2 text-sm">
-      <li :for={profile <- @profiles} class="rounded border p-2">
-        <p class="font-semibold"><%= profile["name"] %></p>
-        <p class="text-xs text-zinc-600"><%= profile["persona"] %></p>
-      </li>
-    </ul>
-    <p :if={@profiles == []} class="text-sm text-zinc-500">No identity profiles configured yet.</p>
+    <.card>
+      <:header>Identity Profiles</:header>
+      <ul id="identity-profiles-list" class="space-y-2 text-sm">
+        <li :for={profile <- @profiles} class="rounded border p-2">
+          <p class="font-semibold">{profile["name"]}</p>
+          <p class="text-xs text-zinc-600">{profile["persona"]}</p>
+        </li>
+      </ul>
+      <.empty_state :if={@profiles == []} title="No profiles" description="No identity profiles configured yet." icon="user" />
+    </.card>
     """
   end
 

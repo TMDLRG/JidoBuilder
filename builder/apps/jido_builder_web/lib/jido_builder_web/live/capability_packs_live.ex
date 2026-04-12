@@ -61,49 +61,28 @@ defmodule JidoBuilderWeb.CapabilityPacksLive do
     ~H"""
     <.page_header><%= @page_title %></.page_header>
 
-    <section class="mt-6">
-      <h2 class="text-sm font-semibold text-zinc-700 mb-2">Discovered Plugins</h2>
-      <ul class="space-y-1 text-sm">
-        <li :for={plugin <- @discovered} class="border-b pb-1">
-          <span class="font-mono"><%= inspect(plugin) %></span>
-        </li>
-      </ul>
-      <p :if={@discovered == []} class="text-sm text-zinc-500">
-        No plugins registered in discovery yet.
-      </p>
-    </section>
+    <div class="grid md:grid-cols-2 gap-4 mt-6">
+      <.card>
+        <:header>Discovered Plugins</:header>
+        <ul class="space-y-1 text-sm">
+          <li :for={plugin <- @discovered} class="border-b pb-1"><span class="font-mono text-xs">{inspect(plugin)}</span></li>
+        </ul>
+        <.empty_state :if={@discovered == []} title="No plugins" description="No plugins in discovery." icon="bolt" />
+      </.card>
 
-    <section class="mt-6">
-      <h2 class="text-sm font-semibold text-zinc-700 mb-2">Configured Plugins</h2>
-      <ul id="plugin-list" class="space-y-2 text-sm">
-        <li :for={plugin <- @plugins} id={"plugin-#{plugin.id}"} class="flex items-center gap-4 border-b pb-2">
-          <span class="font-semibold"><%= plugin.name %></span>
-          <span class="font-mono text-xs text-zinc-500"><%= plugin.module %></span>
-          <span class={if plugin.enabled, do: "text-green-600", else: "text-zinc-400 line-through"}>
-            <%= if plugin.enabled, do: "enabled", else: "disabled" %>
-          </span>
-          <button
-            :if={plugin.enabled}
-            phx-click="disable_plugin"
-            phx-value-id={plugin.id}
-            class="text-xs text-red-600 hover:underline"
-          >
-            Disable
-          </button>
-          <button
-            :if={not plugin.enabled}
-            phx-click="enable_plugin"
-            phx-value-id={plugin.id}
-            class="text-xs text-green-600 hover:underline"
-          >
-            Enable
-          </button>
-        </li>
-      </ul>
-      <p :if={@plugins == []} class="text-sm text-zinc-500">
-        No plugins configured for this workspace.
-      </p>
-    </section>
+      <.card>
+        <:header>Configured Plugins</:header>
+        <ul id="plugin-list" class="space-y-2 text-sm">
+          <li :for={plugin <- @plugins} id={"plugin-#{plugin.id}"} class="flex items-center gap-2 border-b pb-2">
+            <span class="font-semibold flex-1">{plugin.name}</span>
+            <.badge variant={if plugin.enabled, do: "success", else: "default"}>{if plugin.enabled, do: "enabled", else: "disabled"}</.badge>
+            <button :if={plugin.enabled} phx-click="disable_plugin" phx-value-id={plugin.id} class="text-xs text-red-600 hover:underline">Disable</button>
+            <button :if={not plugin.enabled} phx-click="enable_plugin" phx-value-id={plugin.id} class="text-xs text-green-600 hover:underline">Enable</button>
+          </li>
+        </ul>
+        <.empty_state :if={@plugins == []} title="No plugins configured" description="No plugins for this workspace." icon="bolt" />
+      </.card>
+    </div>
     """
   end
 

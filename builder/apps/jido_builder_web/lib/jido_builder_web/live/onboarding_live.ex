@@ -27,17 +27,16 @@ defmodule JidoBuilderWeb.OnboardingLive do
     ~H"""
     <.page_header>Welcome to JidoBuilder</.page_header>
 
-    <div class="mt-4 max-w-lg space-y-2">
-      <h2 class="font-semibold text-sm"><%= @current.title %></h2>
-      <p class="text-sm text-zinc-600"><%= @current.body %></p>
+    <.card class="mt-4 max-w-lg">
+      <:header>{@current.title}</:header>
+      <p class="text-sm text-zinc-600 mb-4">{@current.body}</p>
       <.link id={"step-#{@step}-do-it"} navigate={@current.path} class="inline-flex rounded border px-3 py-1 text-xs">Do it</.link>
-
       <div class="mt-4 flex gap-2 items-center">
-        <button :if={@step > 1} phx-click="prev" class="border rounded px-3 py-1 text-xs">Back</button>
-        <button :if={@step < 4} phx-click="next" class="rounded bg-zinc-900 px-3 py-1 text-white text-xs">Next</button>
-        <span class="text-xs text-zinc-400 ml-2">Step <%= @step %> of 4</span>
+        <.button :if={@step > 1} phx-click="prev" variant="secondary">Back</.button>
+        <.button :if={@step < 4} phx-click="next">Next</.button>
+        <span class="text-xs text-zinc-400 ml-2">Step {@step} of 4</span>
       </div>
-    </div>
+    </.card>
     """
   end
 end

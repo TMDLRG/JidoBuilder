@@ -57,46 +57,47 @@ defmodule JidoBuilderWeb.StateOpsLive do
       Compose and preview state operations against a sample agent state.
     </p>
 
-    <form id="state-ops-form" phx-submit="apply_op" class="space-y-4 max-w-xl">
-      <div>
-        <label class="block text-xs font-medium mb-1">Operation</label>
-        <select name="state_op[op]" class="border rounded px-2 py-1 w-full text-sm font-mono">
-          <option :for={op <- @ops} value={op}><%= op %></option>
-        </select>
-      </div>
+    <.card class="max-w-xl">
+      <:header>Apply State Op</:header>
+      <form id="state-ops-form" phx-submit="apply_op" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium mb-1">Operation</label>
+          <select name="state_op[op]" class="border rounded px-2 py-1 w-full text-sm font-mono">
+            <option :for={op <- @ops} value={op}>{op}</option>
+          </select>
+        </div>
 
-      <div>
-        <label class="block text-xs font-medium mb-1">Current State (JSON)</label>
-        <textarea
-          name="state_op[state_json]"
-          rows="4"
-          placeholder="{&quot;key&quot;: &quot;value&quot;}"
-          class="border rounded px-2 py-1 w-full text-sm font-mono"
-        ></textarea>
-      </div>
+        <div>
+          <label class="block text-xs font-medium mb-1">Current State (JSON)</label>
+          <textarea
+            name="state_op[state_json]"
+            rows="4"
+            placeholder="{&quot;key&quot;: &quot;value&quot;}"
+            class="border rounded px-2 py-1 w-full text-sm font-mono"
+          ></textarea>
+        </div>
 
-      <div>
-        <label class="block text-xs font-medium mb-1">Payload (JSON)</label>
-        <textarea
-          name="state_op[payload_json]"
-          rows="4"
-          placeholder="{&quot;new_key&quot;: &quot;new_value&quot;}"
-          class="border rounded px-2 py-1 w-full text-sm font-mono"
-        ></textarea>
-      </div>
+        <div>
+          <label class="block text-xs font-medium mb-1">Payload (JSON)</label>
+          <textarea
+            name="state_op[payload_json]"
+            rows="4"
+            placeholder="{&quot;new_key&quot;: &quot;new_value&quot;}"
+            class="border rounded px-2 py-1 w-full text-sm font-mono"
+          ></textarea>
+        </div>
 
-      <button type="submit" class="rounded bg-zinc-900 px-4 py-2 text-white text-sm">
-        Apply Op
-      </button>
-    </form>
+        <.button>Apply Op</.button>
+      </form>
+    </.card>
 
     <div :if={@result} id="state-ops-result" class="mt-6 rounded bg-green-50 border border-green-200 p-4">
       <p class="text-xs font-semibold mb-1 text-green-800">result</p>
-      <pre class="font-mono text-xs whitespace-pre-wrap"><%= Jason.encode!(@result, pretty: true) %></pre>
+      <pre class="font-mono text-xs whitespace-pre-wrap">{Jason.encode!(@result, pretty: true)}</pre>
     </div>
 
     <div :if={@error} id="state-ops-error" class="mt-6 rounded bg-red-50 border border-red-200 p-4 text-sm text-red-700">
-      <%= @error %>
+      {@error}
     </div>
     """
   end

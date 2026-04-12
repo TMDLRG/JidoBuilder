@@ -81,18 +81,14 @@ defmodule JidoBuilderWeb.HierarchyLive do
             <input type="number" name="node[position]" value="1" min="1" class="border rounded px-2 py-1 w-full text-sm" />
           </div>
         </div>
-        <button type="submit" class="rounded bg-zinc-900 px-4 py-2 text-white text-xs">
-          Add Node
-        </button>
+        <.button>Add Node</.button>
       </form>
       <p :if={@form_error} class="mt-2 text-red-600 text-xs"><%= @form_error %></p>
     </section>
 
     <section class="mt-8">
       <h2 class="text-sm font-semibold mb-3">Pod Topology Tree</h2>
-      <div :if={@topologies == []} class="text-sm text-zinc-500">
-        No pod topologies in this workspace.
-      </div>
+      <.empty_state :if={@topologies == []} title="No topologies" description="No pod topologies in this workspace." icon="users" />
       <div :for={topo <- @topologies} id={"topo-#{topo.id}"} class="mb-6 border rounded p-3">
         <h3 class="font-semibold text-sm mb-2">
           <span><%= topo.name %></span>

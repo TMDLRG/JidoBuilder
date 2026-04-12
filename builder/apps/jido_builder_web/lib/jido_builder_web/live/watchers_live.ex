@@ -56,49 +56,29 @@ defmodule JidoBuilderWeb.WatchersLive do
     ~H"""
     <.page_header><%= @page_title %></.page_header>
 
-    <section class="mt-6">
-      <h2 class="text-sm font-semibold text-zinc-700 mb-2">Discovered Sensors</h2>
-      <ul class="space-y-1 text-sm">
-        <li :for={sensor <- @discovered} class="border-b pb-1">
-          <span class="font-mono"><%= inspect(sensor) %></span>
-        </li>
-      </ul>
-      <p :if={@discovered == []} class="text-sm text-zinc-500">
-        No sensors registered in discovery yet.
-      </p>
-    </section>
+    <div class="grid md:grid-cols-2 gap-4 mt-6">
+      <.card>
+        <:header>Discovered Sensors</:header>
+        <ul class="space-y-1 text-sm">
+          <li :for={sensor <- @discovered} class="border-b pb-1"><span class="font-mono text-xs">{inspect(sensor)}</span></li>
+        </ul>
+        <.empty_state :if={@discovered == []} title="No sensors" description="No sensors in discovery." icon="bolt" />
+      </.card>
 
-    <section class="mt-6">
-      <h2 class="text-sm font-semibold text-zinc-700 mb-2">Configured Watchers</h2>
-      <ul id="sensor-list" class="space-y-2 text-sm">
-        <li :for={sensor <- @sensors} id={"sensor-#{sensor.id}"} class="flex items-center gap-4 border-b pb-2">
-          <span class="font-semibold"><%= sensor.name %></span>
-          <span class="font-mono text-xs text-zinc-500"><%= sensor.module %></span>
-          <span class={if sensor.enabled, do: "text-green-600", else: "text-zinc-400 line-through"}>
-            <%= if sensor.enabled, do: "enabled", else: "disabled" %>
-          </span>
-          <button
-            :if={sensor.enabled}
-            phx-click="disable_sensor"
-            phx-value-id={sensor.id}
-            class="text-xs text-red-600 hover:underline"
-          >
-            Disable
-          </button>
-          <button
-            :if={not sensor.enabled}
-            phx-click="enable_sensor"
-            phx-value-id={sensor.id}
-            class="text-xs text-green-600 hover:underline"
-          >
-            Enable
-          </button>
-        </li>
-      </ul>
-      <p :if={@sensors == []} class="text-sm text-zinc-500">
-        No watchers configured for this workspace.
-      </p>
-    </section>
+      <.card>
+        <:header>Configured Watchers</:header>
+        <ul id="sensor-list" class="space-y-2 text-sm">
+          <li :for={sensor <- @sensors} id={"sensor-#{sensor.id}"} class="flex items-center gap-2 border-b pb-2">
+            <span class="font-semibold flex-1">{sensor.name}</span>
+            <span class="font-mono text-xs text-zinc-500">{sensor.module}</span>
+            <.badge variant={if sensor.enabled, do: "success", else: "default"}>{if sensor.enabled, do: "enabled", else: "disabled"}</.badge>
+            <button :if={sensor.enabled} phx-click="disable_sensor" phx-value-id={sensor.id} class="text-xs text-red-600 hover:underline">Disable</button>
+            <button :if={not sensor.enabled} phx-click="enable_sensor" phx-value-id={sensor.id} class="text-xs text-green-600 hover:underline">Enable</button>
+          </li>
+        </ul>
+        <.empty_state :if={@sensors == []} title="No watchers configured" description="No watchers for this workspace." icon="bolt" />
+      </.card>
+    </div>
     """
   end
 

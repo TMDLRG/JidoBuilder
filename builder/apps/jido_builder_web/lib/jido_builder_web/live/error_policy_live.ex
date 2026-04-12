@@ -36,28 +36,30 @@ defmodule JidoBuilderWeb.ErrorPolicyLive do
     ~H"""
     <.page_header><%= @page_title %></.page_header>
 
-    <form id="error-policy-form" phx-submit="save" class="space-y-4 max-w-lg">
-      <div>
-        <label class="block text-xs font-medium mb-1">Template</label>
-        <select name="template_id" class="border rounded px-2 py-1 w-full text-sm">
-          <option :for={t <- @templates} value={t.id} selected={to_string(@selected_template_id) == to_string(t.id)}>
-            <%= t.name %> (<%= t.slug %>)
-          </option>
-        </select>
-      </div>
+    <.card class="mt-4 max-w-lg">
+      <:header>Error Policy</:header>
+      <form id="error-policy-form" phx-submit="save" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium mb-1">Template</label>
+          <select name="template_id" class="border rounded px-2 py-1 w-full text-sm">
+            <option :for={t <- @templates} value={t.id} selected={to_string(@selected_template_id) == to_string(t.id)}>
+              {t.name} ({t.slug})
+            </option>
+          </select>
+        </div>
 
-      <fieldset>
-        <legend class="text-xs font-medium mb-2">Policy</legend>
-        <label :for={policy <- @policies} class="flex items-center gap-2 text-sm py-1">
-          <input type="radio" name="policy" value={policy} checked={@selected_policy == policy} />
-          <%= policy %>
-        </label>
-      </fieldset>
+        <fieldset>
+          <legend class="text-xs font-medium mb-2">Policy</legend>
+          <label :for={policy <- @policies} class="flex items-center gap-2 text-sm py-1">
+            <input type="radio" name="policy" value={policy} checked={@selected_policy == policy} />
+            {policy}
+          </label>
+        </fieldset>
 
-      <button type="submit" class="rounded bg-zinc-900 px-4 py-2 text-white text-xs">Save policy</button>
-    </form>
-
-    <p :if={@saved?} id="error-policy-saved" class="mt-4 text-xs text-emerald-700">Error policy saved.</p>
+        <.button>Save policy</.button>
+      </form>
+      <p :if={@saved?} id="error-policy-saved" class="mt-4 text-xs text-emerald-700">Error policy saved.</p>
+    </.card>
     """
   end
 

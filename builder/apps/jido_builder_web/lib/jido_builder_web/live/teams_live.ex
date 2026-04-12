@@ -70,24 +70,19 @@ defmodule JidoBuilderWeb.TeamsLive do
             <option value="random">Random</option>
           </select>
         </div>
-        <button type="submit" class="rounded bg-zinc-900 px-4 py-2 text-white text-xs">
-          Create Pod
-        </button>
+        <.button>Create Pod</.button>
       </form>
       <p :if={@form_error} class="mt-2 text-red-600 text-xs"><%= @form_error %></p>
     </.card>
 
-    <.card class="mt-8"><:header>Scheduled Jobs</:header>
-      <h2 class="text-sm font-semibold mb-2">Existing Pods</h2>
+    <.card class="mt-8"><:header>Existing Pods</:header>
       <ul id="topology-list" class="space-y-2 text-sm">
         <li :for={topo <- @topologies} id={"topo-#{topo.id}"} class="border-b pb-2">
           <span class="font-semibold"><%= topo.name %></span>
-          <span class="ml-2 text-xs text-zinc-500">strategy: <%= topo.strategy %></span>
+          <.badge variant="default"><%= topo.strategy %></.badge>
         </li>
       </ul>
-      <p :if={@topologies == []} class="text-sm text-zinc-500">
-        No pods configured for this workspace.
-      </p>
+      <.empty_state :if={@topologies == []} title="No pods" description="No pods configured for this workspace." icon="users" />
     </.card>
     """
   end

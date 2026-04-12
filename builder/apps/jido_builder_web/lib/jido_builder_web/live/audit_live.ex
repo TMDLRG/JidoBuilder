@@ -16,14 +16,13 @@ defmodule JidoBuilderWeb.AuditLive do
   def render(assigns) do
     ~H"""
     <.page_header><%= @page_title %></.page_header>
-    <ul id="audit-events" class="space-y-2 text-sm mt-4">
-      <li :for={ev <- @events} id={"audit-#{ev.id}"} class="border-b pb-2">
-        <span class="font-mono text-xs"><%= ev.action %></span>
-        <span class="ml-2 text-zinc-500">by <%= ev.actor %></span>
-        <span class="ml-2 text-zinc-400 text-xs"><%= ev.occurred_at %></span>
-      </li>
-    </ul>
-    <p :if={@events == []} class="text-sm text-zinc-500 mt-4">No audit events.</p>
+    <.card class="mt-4">
+      <:header>Audit Events</:header>
+      <.table id="audit-events" rows={@events}>
+        <:col :let={ev}><span class="font-mono text-xs">{ev.action}</span> <span class="text-zinc-500">by {ev.actor}</span> <span class="text-zinc-400 text-xs">{ev.occurred_at}</span></:col>
+      </.table>
+      <.empty_state :if={@events == []} title="No audit events" description="No activity recorded yet." icon="eye" />
+    </.card>
     """
   end
 

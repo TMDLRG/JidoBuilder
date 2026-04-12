@@ -44,20 +44,23 @@ defmodule JidoBuilderWeb.TracesLive do
     <.page_header><%= @page_title %></.page_header>
 
     <form id="trace-filter-form" phx-change="filter" class="my-3 max-w-md">
-      <input type="text" name="filter[signal_type]" value={@filter["signal_type"]} placeholder="Filter by signal type" class="border rounded px-2 py-1 w-full text-sm" />
+      <.input_field name="filter[signal_type]" label="Filter by signal type" value={@filter["signal_type"]} />
     </form>
 
-    <ul id="trace-signals-list" class="space-y-1 text-sm">
-      <li :for={s <- @signals} class="font-mono text-xs border-b pb-1">
-        <button type="button" phx-click="select" phx-value-id={s.id} class="w-full text-left">
-          <span><%= s.signal_type %></span>
-          <span class="ml-2 text-zinc-500"><%= s.direction %></span>
-        </button>
-      </li>
-    </ul>
-    <p :if={@signals == []} class="text-sm text-zinc-500">No trace signals yet.</p>
+    <.card>
+      <:header>Signal Traces</:header>
+      <ul id="trace-signals-list" class="space-y-1 text-sm">
+        <li :for={s <- @signals} class="font-mono text-xs border-b pb-1">
+          <button type="button" phx-click="select" phx-value-id={s.id} class="w-full text-left">
+            <span>{s.signal_type}</span>
+            <.badge variant="default">{s.direction}</.badge>
+          </button>
+        </li>
+      </ul>
+      <.empty_state :if={@signals == []} title="No traces" description="No trace signals yet." icon="eye" />
+    </.card>
 
-    <pre :if={@selected} id="trace-detail" class="mt-6 rounded border bg-zinc-50 p-3 text-xs font-mono whitespace-pre-wrap"><%= inspect(@selected, pretty: true) %></pre>
+    <pre :if={@selected} id="trace-detail" class="mt-6 rounded border bg-zinc-50 p-3 text-xs font-mono whitespace-pre-wrap">{inspect(@selected, pretty: true)}</pre>
     """
   end
 

@@ -51,34 +51,24 @@ defmodule JidoBuilderWeb.SettingsLive do
           <span class="ml-2 text-xs text-zinc-400"><%= integ.status %></span>
         </li>
       </ul>
-      <p :if={@integrations == []} class="text-sm text-zinc-500">No integrations.</p>
+      <.empty_state :if={@integrations == []} title="No integrations" description="No integrations configured." icon="bolt" />
     </.card>
 
     <.card class="mt-6"><:header>Secrets</:header>
-      <h2 class="text-sm font-semibold mb-2">Secrets</h2>
       <ul class="space-y-1 text-sm">
         <li :for={secret <- @secrets} class="border-b pb-1">
           <span class="font-semibold"><%= secret.name %></span>
-          <span class="ml-2 text-zinc-400 text-xs"><%= secret.value %></span>
+          <span class="ml-2 text-zinc-400 text-xs font-mono">{secret.value}</span>
         </li>
       </ul>
-      <p :if={@secrets == []} class="text-sm text-zinc-500">No secrets.</p>
+      <.empty_state :if={@secrets == []} title="No secrets" description="No secrets stored." icon="cog" />
     </.card>
 
     <.card class="mt-6 max-w-md"><:header>Add Secret</:header>
-      <h2 class="text-sm font-semibold mb-2">Add Secret</h2>
       <form id="secret-form" phx-submit="create_secret" class="space-y-3">
-        <div>
-          <label class="block text-xs font-medium mb-1">Name</label>
-          <input type="text" name="secret[name]" placeholder="API_KEY" class="border rounded px-2 py-1 w-full text-sm" />
-        </div>
-        <div>
-          <label class="block text-xs font-medium mb-1">Value</label>
-          <input type="password" name="secret[value]" class="border rounded px-2 py-1 w-full text-sm" />
-        </div>
-        <button type="submit" class="rounded bg-zinc-900 px-4 py-2 text-white text-xs">
-          Save Secret
-        </button>
+        <.input_field name="secret[name]" label="Name" placeholder="API_KEY" />
+        <.input_field name="secret[value]" label="Value" type="password" />
+        <.button>Save Secret</.button>
       </form>
       <p :if={@form_error} class="mt-2 text-red-600 text-xs"><%= @form_error %></p>
     </.card>

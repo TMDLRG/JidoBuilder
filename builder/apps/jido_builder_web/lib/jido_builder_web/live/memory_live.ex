@@ -30,15 +30,22 @@ defmodule JidoBuilderWeb.MemoryLive do
   def render(assigns) do
     ~H"""
     <.page_header><%= @page_title %></.page_header>
-    <form id="memory-form" phx-submit="create" class="max-w-md flex gap-2">
-      <input type="text" name="space[name]" placeholder="knowledge-base" class="border rounded px-2 py-1 text-sm flex-1" />
-      <button type="submit" class="rounded bg-zinc-900 px-3 py-1 text-white text-xs">Add space</button>
-    </form>
 
-    <ul id="memory-spaces-list" class="mt-4 space-y-1 text-sm">
-      <li :for={space <- @spaces} class="border-b pb-1"><%= space["name"] %></li>
-    </ul>
-    <p :if={@spaces == []} class="text-sm text-zinc-500">No memory spaces configured yet.</p>
+    <.card class="max-w-md mb-4">
+      <:header>Add Memory Space</:header>
+      <form id="memory-form" phx-submit="create" class="flex gap-2">
+        <input type="text" name="space[name]" placeholder="knowledge-base" class="border rounded px-2 py-1 text-sm flex-1" />
+        <.button>Add space</.button>
+      </form>
+    </.card>
+
+    <.card>
+      <:header>Memory Spaces</:header>
+      <ul id="memory-spaces-list" class="space-y-1 text-sm">
+        <li :for={space <- @spaces} class="border-b pb-1">{space["name"]}</li>
+      </ul>
+      <.empty_state :if={@spaces == []} title="No memory spaces" description="No memory spaces configured yet." icon="circle-stack" />
+    </.card>
     """
   end
 

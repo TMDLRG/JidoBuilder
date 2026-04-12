@@ -22,24 +22,24 @@ defmodule JidoBuilderWeb.Templates.IndexLive do
     ~H"""
     <.page_header><%= @page_title %></.page_header>
 
-    <div id="templates-list" phx-update="stream">
-      <div
-        :for={{dom_id, tmpl} <- @streams.templates}
-        id={dom_id}
-        class="flex items-center justify-between border-b py-2 text-sm"
-      >
-        <div>
-          <span class="font-semibold"><%= tmpl.name %></span>
-          <span class="ml-2 text-zinc-500 font-mono"><%= tmpl.slug %></span>
-          <span class="ml-2 text-xs text-zinc-400"><%= tmpl.status %></span>
+    <.card class="mt-4">
+      <:header>Templates</:header>
+      <div id="templates-list" phx-update="stream">
+        <div
+          :for={{dom_id, tmpl} <- @streams.templates}
+          id={dom_id}
+          class="flex items-center justify-between border-b py-2 text-sm"
+        >
+          <div>
+            <span class="font-semibold">{tmpl.name}</span>
+            <span class="ml-2 text-zinc-500 font-mono text-xs">{tmpl.slug}</span>
+            <.badge variant={if tmpl.status == "active", do: "success", else: "default"}>{tmpl.status}</.badge>
+          </div>
+          <.link navigate={~p"/templates/#{tmpl.id}/edit"} class="text-xs text-blue-600 hover:underline">Edit</.link>
         </div>
-        <.link navigate={~p"/templates/#{tmpl.id}/edit"} class="text-xs text-blue-600 hover:underline">
-          Edit
-        </.link>
       </div>
-    </div>
-
-    <p :if={@empty} class="text-sm text-zinc-500 mt-4">No templates yet.</p>
+      <.empty_state :if={@empty} title="No templates" description="No templates created yet." icon="folder" />
+    </.card>
     """
   end
 

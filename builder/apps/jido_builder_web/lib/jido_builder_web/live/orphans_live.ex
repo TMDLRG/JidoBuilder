@@ -48,19 +48,21 @@ defmodule JidoBuilderWeb.OrphansLive do
     <.page_header><%= @page_title %></.page_header>
     <p class="text-sm text-zinc-500 mb-4">Agents not attached to any pod topology.</p>
 
-    <div :for={agent <- @orphans} class="rounded border p-3 mb-2 text-sm">
-      <p class="font-semibold"><%= agent.name %></p>
-      <form id={"adopt-form-#{agent.id}"} phx-submit="adopt" class="mt-2 flex gap-2 items-center">
-        <input type="hidden" name="agent_id" value={agent.id} />
-        <select name="pod_topology_id" class="border rounded px-2 py-1 text-xs">
-          <option :for={t <- @topologies} value={t.id}><%= t.name %></option>
-        </select>
-        <button type="submit" class="rounded bg-zinc-900 px-3 py-1 text-white text-xs">Adopt</button>
-      </form>
-    </div>
-
-    <p :if={@orphans == []} class="text-sm text-zinc-500 mt-4">No orphan agents found.</p>
-    <p :if={@adopted?} id="orphans-adopted" class="text-xs text-emerald-700 mt-2">Agent adopted into topology.</p>
+    <.card class="mt-4">
+      <:header>Orphan Agents</:header>
+      <div :for={agent <- @orphans} class="rounded border p-3 mb-2 text-sm">
+        <p class="font-semibold">{agent.name}</p>
+        <form id={"adopt-form-#{agent.id}"} phx-submit="adopt" class="mt-2 flex gap-2 items-center">
+          <input type="hidden" name="agent_id" value={agent.id} />
+          <select name="pod_topology_id" class="border rounded px-2 py-1 text-xs">
+            <option :for={t <- @topologies} value={t.id}>{t.name}</option>
+          </select>
+          <.button>Adopt</.button>
+        </form>
+      </div>
+      <.empty_state :if={@orphans == []} title="No orphan agents" description="All agents are attached to a pod." icon="users" />
+      <p :if={@adopted?} id="orphans-adopted" class="text-xs text-emerald-700 mt-2">Agent adopted into topology.</p>
+    </.card>
     """
   end
 

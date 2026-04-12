@@ -35,16 +35,22 @@ defmodule JidoBuilderWeb.ThreadsLive do
     <.page_header><%= @page_title %></.page_header>
     <p class="text-sm text-zinc-500 mb-4">Browse and create thread entries for template context.</p>
 
-    <form id="thread-form" phx-submit="create" class="max-w-md flex gap-2">
-      <input type="text" name="thread[name]" placeholder="incident-room" class="border rounded px-2 py-1 text-sm flex-1" />
-      <button type="submit" class="rounded bg-zinc-900 px-3 py-1 text-white text-xs">Create thread</button>
-    </form>
+    <.card class="max-w-md mb-4">
+      <:header>New Thread</:header>
+      <form id="thread-form" phx-submit="create" class="flex gap-2">
+        <input type="text" name="thread[name]" placeholder="incident-room" class="border rounded px-2 py-1 text-sm flex-1" />
+        <.button>Create thread</.button>
+      </form>
+      <p :if={@saved?} class="text-xs text-emerald-700 mt-2">Thread created.</p>
+    </.card>
 
-    <ul id="threads-list" class="mt-4 space-y-1 text-sm">
-      <li :for={thread <- @threads} class="border-b pb-1"><%= thread["name"] %></li>
-    </ul>
-    <p :if={@threads == []} class="text-sm text-zinc-500">No threads yet.</p>
-    <p :if={@saved?} class="text-xs text-emerald-700 mt-2">Thread created.</p>
+    <.card>
+      <:header>Threads</:header>
+      <ul id="threads-list" class="space-y-1 text-sm">
+        <li :for={thread <- @threads} class="border-b pb-1">{thread["name"]}</li>
+      </ul>
+      <.empty_state :if={@threads == []} title="No threads" description="No threads yet." icon="chat-bubble-left-right" />
+    </.card>
     """
   end
 
