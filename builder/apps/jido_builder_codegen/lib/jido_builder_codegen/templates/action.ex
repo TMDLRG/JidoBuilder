@@ -4,9 +4,7 @@ defmodule JidoBuilderCodegen.Templates.Action do
   def render(%{module: mod, name: name, description: description}) do
     """
     defmodule #{mod} do
-      @moduledoc \"\"\"
-      #{description}
-      \"\"\"
+      @moduledoc #{inspect(description)}
 
       use Jido.Action,
         name: #{inspect(name)},

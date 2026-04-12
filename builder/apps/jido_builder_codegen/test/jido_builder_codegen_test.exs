@@ -25,6 +25,31 @@ defmodule JidoBuilderCodegenTest do
     assert source =~ "use Jido.Action"
   end
 
+  test "template render escapes triple-quote injection in description" do
+    block = %{
+      type: :action,
+      module: "Generated.ActionInjection",
+      name: "injected",
+      description: ~s(evil """ injection)
+    }
+
+    assert {:ok, source} = Templates.render(block)
+
+    refute String.contains?(source, ~s(@moduledoc """))
+
+    tmp_path =
+      Path.join(System.tmp_dir!(), "gen_#{System.unique_integer([:positive])}.ex")
+
+    File.write!(tmp_path, source)
+
+    assert {:ok, %{modules: modules}} =
+             JidoBuilderCodegen.Compiler.compile([tmp_path])
+
+    assert Generated.ActionInjection in modules
+
+    File.rm!(tmp_path)
+  end
+
   test "compiles curated action block", %{queue: queue} do
     request = %{
       workspace_id: 1,

@@ -7,7 +7,20 @@ defmodule Builder.MixProject do
       version: "0.1.0",
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      releases: [
+        jido_builder: [
+          version: "0.1.0",
+          applications: [
+            jido_builder_core: :permanent,
+            jido_builder_runtime: :permanent,
+            jido_builder_codegen: :permanent,
+            jido_builder_generated: :permanent,
+            jido_builder_web: :permanent
+          ],
+          include_executables_for: [:unix]
+        ]
+      ]
     ]
   end
 
