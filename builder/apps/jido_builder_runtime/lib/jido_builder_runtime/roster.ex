@@ -82,6 +82,27 @@ defmodule JidoBuilderRuntime.Roster do
     )
   end
 
+  @doc """
+  Updates persisted state snapshot for a running agent instance.
+  """
+  @spec update_agent_state(pos_integer(), String.t(), map()) ::
+          {:ok, AgentInstance.t()} | {:error, Error.t()}
+  def update_agent_state(workspace_id, agent_name, state)
+      when is_integer(workspace_id) and is_binary(agent_name) and is_map(state) do
+    case Repo.one(
+           from a in AgentInstance,
+             where: a.workspace_id == ^workspace_id and a.name == ^agent_name
+         ) do
+      nil ->
+        {:error, Error.new(:not_found, "agent instance not found", %{name: agent_name})}
+
+      instance ->
+        instance
+        |> AgentInstance.changeset(%{state: state, last_seen_at: DateTime.utc_now()})
+        |> Repo.update()
+    end
+  end
+
   defp mark_stopped(workspace_id, agent_name) do
     case Repo.one(
            from a in AgentInstance,

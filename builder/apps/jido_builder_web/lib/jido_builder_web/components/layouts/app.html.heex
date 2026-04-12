@@ -1,33 +1,24 @@
-<div class="mx-auto max-w-6xl p-6">
-  <nav class="mb-6 flex flex-wrap gap-3 text-sm border-b pb-3">
-    <.link navigate={~p"/"} class="hover:underline">Dashboard</.link>
-    <.link navigate={~p"/roster"} class="hover:underline">Roster</.link>
-    <.link navigate={~p"/assignments/new"} class="hover:underline">Assignments</.link>
-    <.link navigate={~p"/workflows"} class="hover:underline">Workflow Builder</.link>
-    <.link navigate={~p"/schedules"} class="hover:underline">Schedules</.link>
-    <.link navigate={~p"/teams"} class="hover:underline">Teams</.link>
-    <.link navigate={~p"/settings"} class="hover:underline">Settings</.link>
-  </nav>
-
-  <%!-- Cmd+K command palette container (toggled via JS in app.js) --%>
-  <div id="command-palette" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center"
-       phx-click-away="close_palette">
-    <div class="bg-white rounded shadow-lg max-w-md w-full mx-auto mt-24 p-4">
-      <input type="text" placeholder="Search commands…"
-             class="w-full border rounded px-3 py-2 text-sm" />
-      <ul class="mt-2 text-sm space-y-1">
-        <li><a href="/" class="block px-2 py-1 hover:bg-zinc-100 rounded">Dashboard</a></li>
-        <li><a href="/roster" class="block px-2 py-1 hover:bg-zinc-100 rounded">Roster</a></li>
-        <li><a href="/assignments/new" class="block px-2 py-1 hover:bg-zinc-100 rounded">New Assignment</a></li>
-        <li><a href="/workflows" class="block px-2 py-1 hover:bg-zinc-100 rounded">Workflow Builder</a></li>
-        <li><a href="/schedules" class="block px-2 py-1 hover:bg-zinc-100 rounded">Schedules</a></li>
-        <li><a href="/teams" class="block px-2 py-1 hover:bg-zinc-100 rounded">Teams</a></li>
-        <li><a href="/settings" class="block px-2 py-1 hover:bg-zinc-100 rounded">Settings</a></li>
-      </ul>
+<div id="app-shell" class="min-h-screen bg-zinc-100 flex" phx-hook="Sidebar">
+  <aside id="app-sidebar" class="w-64 bg-zinc-900 text-zinc-200 flex flex-col">
+    <div class="h-14 border-b border-zinc-800 px-4 flex items-center justify-between">
+      <span class="font-semibold">Jido Builder</span>
+      <button id="sidebar-toggle" data-role="sidebar-toggle" class="text-xs text-zinc-400">⇔</button>
     </div>
+    <nav class="flex-1 overflow-y-auto p-3 text-sm space-y-4">
+      <section><p class="text-zinc-500 text-xs mb-1">OPERATE</p><.link navigate={~p"/"}>Dashboard</.link><br/><.link navigate={~p"/roster"}>Agents</.link><br/><.link navigate={~p"/workflows"}>Workflows</.link><br/><.link navigate={~p"/schedules"}>Schedules</.link></section>
+      <section><p class="text-zinc-500 text-xs mb-1">CONFIGURE</p><.link navigate={~p"/templates"}>Templates</.link><br/><.link navigate={~p"/skills"}>Skills</.link><br/><.link navigate={~p"/directives"}>Directives</.link><br/><.link navigate={~p"/teams"}>Teams</.link></section>
+      <section><p class="text-zinc-500 text-xs mb-1">OBSERVE</p><.link navigate={~p"/execution"}>Execution</.link><br/><.link navigate={~p"/traces"}>Traces</.link><br/><.link navigate={~p"/audit"}>Audit</.link><br/><.link navigate={~p"/debug"}>Debug</.link></section>
+      <section><p class="text-zinc-500 text-xs mb-1">ADMIN</p><.link navigate={~p"/settings"}>Settings</.link><br/><.link navigate={~p"/workspaces"}>Workspaces</.link></section>
+    </nav>
+  </aside>
+  <div class="flex-1 min-w-0 flex flex-col">
+    <header class="h-14 bg-white border-b border-zinc-200 px-4 flex items-center justify-between">
+      <button data-role="sidebar-toggle" class="text-sm text-zinc-600">Toggle</button>
+      <div class="text-xs text-zinc-500">⌘K Search</div>
+      <div class="text-xs"><%= @current_user.email %></div>
+    </header>
+    <main class="flex-1 overflow-y-auto p-6">
+      {@inner_content}
+    </main>
   </div>
-
-  <main>
-    {@inner_content}
-  </main>
 </div>

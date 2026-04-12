@@ -6,7 +6,7 @@ defmodule JidoBuilderRuntime.TelemetryBridge do
   use GenServer
 
   alias JidoBuilderCore.Observability
-  alias JidoBuilderRuntime.EventBus
+  alias JidoBuilderRuntime.{EventBus, Roster}
 
   @handler_id "jido-builder-runtime-telemetry-bridge"
   @actor "runtime.telemetry"
@@ -60,6 +60,7 @@ defmodule JidoBuilderRuntime.TelemetryBridge do
 
     persist(event)
     persist_error(event)
+    publish_state_change(event)
   end
 
   defp normalize(event_name, measurements, metadata) do
@@ -200,4 +201,28 @@ defmodule JidoBuilderRuntime.TelemetryBridge do
     |> Enum.reject(fn {_k, v} -> is_pid(v) or is_reference(v) or is_function(v) end)
     |> Map.new()
   end
+
+  defp publish_state_change(%{event: [:jido, :agent, :cmd, :stop]} = event) do
+    agent_id = event.agent_id
+
+    if agent_id do
+      state = Map.get(event.metadata, :state, %{})
+      _ = Roster.update_agent_state(event.workspace_id, to_string(agent_id), state)
+
+      publish(
+        %{
+          agent_id: agent_id,
+          workspace_id: event.workspace_id,
+          timestamp: DateTime.utc_now(),
+          state: state
+        },
+        EventBus.agent_state_topic(event.workspace_id, agent_id)
+      )
+    end
+
+    :ok
+  end
+
+  defp publish_state_change(_event), do: :ok
+
 end

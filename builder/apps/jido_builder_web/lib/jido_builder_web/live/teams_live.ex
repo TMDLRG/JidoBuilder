@@ -20,7 +20,7 @@ defmodule JidoBuilderWeb.TeamsLive do
        page_title: "Teams (Pods)",
        workspace_id: workspace_id,
        topologies: topologies,
-       form_error: nil
+       form_error: nil, toast: nil
      )}
   end
 
@@ -36,7 +36,7 @@ defmodule JidoBuilderWeb.TeamsLive do
     case Pods.create_topology(merged, user.email) do
       {:ok, _topo} ->
         topologies = Pods.list_topologies(workspace_id)
-        {:noreply, assign(socket, topologies: topologies, form_error: nil)}
+        {:noreply, assign(socket, topologies: topologies, form_error: nil, toast: nil)}
 
       {:error, changeset} ->
         {:noreply, assign(socket, form_error: inspect(changeset.errors))}
@@ -47,9 +47,10 @@ defmodule JidoBuilderWeb.TeamsLive do
   def render(assigns) do
     ~H"""
     <.page_header><%= @page_title %></.page_header>
+    <.toast :if={@toast} title={@toast.title} message={@toast.message} variant="info" />
     <p class="text-sm text-zinc-500 mb-4">Coordinate pods of specialized agents.</p>
 
-    <section class="mt-4 max-w-md">
+    <.card class="mt-4 max-w-md"><:header>New Team / Pod</:header>
       <h2 class="text-sm font-semibold mb-2">New Team / Pod</h2>
       <form id="topology-form" phx-submit="create_topology" class="space-y-3">
         <div>
@@ -74,9 +75,9 @@ defmodule JidoBuilderWeb.TeamsLive do
         </button>
       </form>
       <p :if={@form_error} class="mt-2 text-red-600 text-xs"><%= @form_error %></p>
-    </section>
+    </.card>
 
-    <section class="mt-8">
+    <.card class="mt-8"><:header>Scheduled Jobs</:header>
       <h2 class="text-sm font-semibold mb-2">Existing Pods</h2>
       <ul id="topology-list" class="space-y-2 text-sm">
         <li :for={topo <- @topologies} id={"topo-#{topo.id}"} class="border-b pb-2">
@@ -87,7 +88,7 @@ defmodule JidoBuilderWeb.TeamsLive do
       <p :if={@topologies == []} class="text-sm text-zinc-500">
         No pods configured for this workspace.
       </p>
-    </section>
+    </.card>
     """
   end
 
