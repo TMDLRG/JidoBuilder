@@ -154,7 +154,7 @@ Status legend: `done` = implemented in this branch, `deferred` = explicitly post
 | Stop-on-error policy | Template error policy | A | Policy config | deferred | 2 | GAP-MVP-011 |
 | Testing template cmd purity | Template “Test this” | A | Run `cmd/2` against sample signal | deferred | 2 | GAP-MVP-016 |
 | Fixture signal playback | Activity replay | A | Replay through runtime dispatch | deferred | 2 | GAP-MVP-016 |
-| Instance config settings | Settings | A | `config :jido_builder, JidoBuilder.Jido` | deferred | 2 | GAP-MVP-017 |
+| Instance config settings | Settings | A | `config :jido_builder_runtime, JidoBuilderRuntime.Jido` | deferred | 2 | GAP-MVP-017 |
 | Debug config settings | Settings debug | A | `Jido.Debug` | deferred | 2 | GAP-MVP-017 |
 | Observability config | Settings observability | A | `config :jido, :observability` | deferred | 2 | GAP-MVP-017 |
 | Redaction settings | Settings privacy | A | `redact_sensitive` | deferred | 2 | GAP-MVP-017 |

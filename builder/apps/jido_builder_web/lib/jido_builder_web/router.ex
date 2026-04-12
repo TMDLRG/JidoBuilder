@@ -15,6 +15,13 @@ defmodule JidoBuilderWeb.Router do
   end
 
   scope "/", JidoBuilderWeb do
+    pipe_through(:api)
+
+    get("/healthz", HealthController, :healthz)
+    get("/readyz", HealthController, :readyz)
+  end
+
+  scope "/", JidoBuilderWeb do
     pipe_through(:browser)
 
     live_session :default do

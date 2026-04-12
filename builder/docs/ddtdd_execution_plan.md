@@ -26,6 +26,44 @@ Every work item below MUST follow this seven-step ritual. **No code is committed
 
 ---
 
+## 0.5 Phase 0 Closure Marker
+
+**Phase 0 closed on 2026-04-12.**
+
+Baseline after closure: 24 tests across five umbrella apps, 0
+failures. After 0.9 through 0.15 land, the baseline will be 27
+tests, 0 failures (new injection test + two health controller
+tests). The full Phase 0 work-item trail:
+
+| Item | Fix | PR |
+|---|---|---|
+| 0.1 | ConnCase loading via `elixirc_paths(:test)` + `~p` sigil via `verified_routes/0` | #20, #21 |
+| 0.2 | Sandbox ownership collision (runtime + web tests) | #22 |
+| 0.2.1 | Test `secret_key_base` lengthened to 64 bytes | #23 |
+| 0.2.1a | `:lazy_html` added as web test dep | #24 |
+| 0.2.1b | 404 test aligned with rendered-response behavior | #25 |
+| 0.2.2 | Seed workspace fixture for IntegrationRuntimeTest | #26 |
+| 0.3 | Redaction test expects string keys after Cloak JSON round-trip | #27 |
+| 0.4 | `Audit.log/4` uses subject's own id when subject is a Workspace | #28 |
+| 0.5 | Codegen action template emits `use Jido.Action` | #28 |
+| 0.6 | `FileWriter.resolve_path/1` normalizes root via `Path.expand/1` (Windows fix) | #28 |
+| 0.7 | Rename `:jido_builder` OTP config to `:jido_builder_runtime` | #28 |
+| 0.8 | CompileQueue rollback on compiler failure | #29 |
+| 0.9 | Action template `@moduledoc` hardened via `inspect/1` | this batch |
+| 0.10 | Scrubbed remaining `:jido_builder` doc references | this batch |
+| 0.11 | `config/runtime.exs` for 12-factor prod secrets | this batch |
+| 0.12 | `:releases` config added to umbrella `mix.exs` | this batch |
+| 0.13 | `/healthz` and `/readyz` endpoints | this batch |
+| 0.14 | Multi-stage Dockerfile (Alpine, Podman-compatible) | this batch |
+| 0.15 | This closure marker | this batch |
+
+**Handoff:** work items after 0.15 pass to Claude Code in a new
+chat. Phases 1-6 (feature surfaces) and the remaining Phase 7
+items (7.3 Cloak rotation, 7.5 codegen sandbox threat-model,
+7.6 EEx property fuzzing, 7.10-7.14 operations) remain.
+
+---
+
 ## 1. Read-First Inventory (the contracts you must obey)
 
 Before writing any code, you MUST be able to answer "where does this live in upstream Jido?" for every primitive in the work item. The plan in `BUILDER_PLAN.md` §0.3 is your map. The actual sources are:
