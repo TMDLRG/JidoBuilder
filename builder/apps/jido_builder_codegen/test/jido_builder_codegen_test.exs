@@ -73,7 +73,16 @@ defmodule JidoBuilderCodegenTest do
     original = "defmodule Broken do\n  def ok, do: :ok\nend\n"
     File.write!(file, original)
 
-    request = %{blocks: [%{type: :action, module: "Broken", name: "a1", description: "\"\"\""}]}
+    # First block writes broken.ex (overwriting original); second block fails
+    # the FileWriter path-sandbox check, causing write_blocks to return
+    # {:error, %{errors: [...], writes: [first_write]}}.  The run_compile else
+    # branch then calls rollback/1 on those writes, restoring broken.ex.
+    request = %{
+      blocks: [
+        %{type: :action, module: "Broken", name: "a1", description: "valid"},
+        %{type: :action, module: "../escape", name: "bad", description: "escape"}
+      ]
+    }
 
     assert {:error, %{errors: [_ | _]}} = CompileQueue.enqueue(queue, request)
     assert File.read!(file) == original
