@@ -39,7 +39,8 @@ defmodule JidoBuilderWeb.MixProject do
       {:jido_builder_core, in_umbrella: true},
       {:jido_builder_runtime, in_umbrella: true},
       {:jido_builder_codegen, in_umbrella: true},
-      {:jido, path: "../../..", override: true}
+      {:jido, path: "../../..", override: true},
+      {:lazy_html, ">= 0.1.0", only: :test}
     ]
   end
 
