@@ -39,7 +39,10 @@ defmodule JidoBuilderWeb.TeamsLive do
         {:noreply, assign(socket, topologies: topologies, form_error: nil, toast: nil)}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, form_error: inspect(changeset.errors))}
+        errors = Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
+          Enum.reduce(opts, msg, fn {key, value}, acc -> String.replace(acc, "%{#{key}}", to_string(value)) end)
+        end) |> Enum.map_join(", ", fn {field, errs} -> "#{field}: #{Enum.join(errs, ", ")}" end)
+        {:noreply, assign(socket, form_error: errors)}
     end
   end
 
@@ -53,23 +56,12 @@ defmodule JidoBuilderWeb.TeamsLive do
     <.card class="mt-4 max-w-md"><:header>New Team / Pod</:header>
       <h2 class="text-sm font-semibold mb-2">New Team / Pod</h2>
       <form id="topology-form" phx-submit="create_topology" class="space-y-3">
-        <div>
-          <label class="block text-xs font-medium mb-1">Name</label>
-          <input
-            type="text"
-            name="topology[name]"
-            placeholder="AlphaTeam"
-            class="border rounded px-2 py-1 w-full text-sm"
-          />
-        </div>
-        <div>
-          <label class="block text-xs font-medium mb-1">Strategy</label>
-          <select name="topology[strategy]" class="border rounded px-2 py-1 w-full text-sm">
-            <option value="round_robin">Round Robin</option>
-            <option value="broadcast">Broadcast</option>
-            <option value="random">Random</option>
-          </select>
-        </div>
+        <.input_field name="topology[name]" label="Name" placeholder="AlphaTeam" />
+        <.select_field name="topology[strategy]" label="Strategy">
+          <option value="round_robin">Round Robin</option>
+          <option value="broadcast">Broadcast</option>
+          <option value="random">Random</option>
+        </.select_field>
         <.button>Create Pod</.button>
       </form>
       <p :if={@form_error} class="mt-2 text-red-600 text-xs"><%= @form_error %></p>

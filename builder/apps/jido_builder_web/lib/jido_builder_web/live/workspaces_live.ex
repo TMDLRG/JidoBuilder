@@ -27,7 +27,7 @@ defmodule JidoBuilderWeb.WorkspacesLive do
         {:noreply, assign(socket, workspaces: workspaces, form_error: nil)}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, form_error: inspect(changeset.errors))}
+        {:noreply, assign(socket, form_error: format_errors(changeset))}
     end
   end
 
@@ -41,7 +41,7 @@ defmodule JidoBuilderWeb.WorkspacesLive do
         {:noreply, assign(socket, partitions: partitions, form_error: nil)}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, form_error: inspect(changeset.errors))}
+        {:noreply, assign(socket, form_error: format_errors(changeset))}
     end
   end
 
@@ -75,12 +75,9 @@ defmodule JidoBuilderWeb.WorkspacesLive do
     <.card class="mt-4 max-w-md">
       <:header>New Partition</:header>
       <form id="partition-form" phx-submit="create_partition" class="space-y-3">
-        <div>
-          <label class="block text-xs font-medium mb-1">Workspace</label>
-          <select name="partition[workspace_id]" class="border rounded px-2 py-1 w-full text-sm">
-            <option :for={ws <- @workspaces} value={ws.id}>{ws.name}</option>
-          </select>
-        </div>
+        <.select_field name="partition[workspace_id]" label="Workspace">
+          <option :for={ws <- @workspaces} value={ws.id}>{ws.name}</option>
+        </.select_field>
         <.input_field name="partition[name]" label="Name" />
         <.input_field name="partition[key]" label="Key" />
         <.button>Create Partition</.button>
@@ -98,5 +95,14 @@ defmodule JidoBuilderWeb.WorkspacesLive do
       </ul>
     </.card>
     """
+  end
+
+  defp format_errors(changeset) do
+    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
+      Enum.reduce(opts, msg, fn {key, value}, acc ->
+        String.replace(acc, "%{#{key}}", to_string(value))
+      end)
+    end)
+    |> Enum.map_join(", ", fn {field, errors} -> "#{field}: #{Enum.join(errors, ", ")}" end)
   end
 end

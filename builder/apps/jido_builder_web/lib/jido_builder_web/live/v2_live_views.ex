@@ -527,18 +527,45 @@ defmodule JidoBuilderWeb.NotebookLive do
 
   def handle_event("run_cell", _params, socket), do: {:noreply, socket}
 
+  def handle_event("reset", _params, socket) do
+    {:noreply, assign(socket, eval: Evaluator.new(), cells: [])}
+  end
+
+  def handle_event("export", _params, socket) do
+    eval = socket.assigns.eval
+    code = Evaluator.export(eval, "NotebookExport")
+
+    {:noreply,
+     socket
+     |> push_event("download", %{filename: "notebook_export.ex", content: code})}
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header>Notebook</.page_header>
+    <.page_header>
+      Notebook
+      <:actions>
+        <div class="flex gap-2">
+          <button phx-click="reset" class="ui-btn secondary text-xs" data-confirm="Reset notebook? All cells will be lost.">Reset</button>
+          <button :if={@cells != []} phx-click="export" class="ui-btn secondary text-xs">Export Module</button>
+        </div>
+      </:actions>
+    </.page_header>
     <div class="mt-4 space-y-3">
       <div id="code-editor" phx-hook="CodeEditor" class="p-4 border rounded bg-zinc-50">
-        <textarea class="w-full border rounded p-2 text-sm font-mono h-24" placeholder="# Write Elixir code here..."></textarea>
-        <button data-action="run" class="mt-2 bg-green-600 text-white text-xs px-3 py-1 rounded">Run Cell</button>
+        <textarea class="w-full border rounded p-2 text-sm font-mono h-24" placeholder="# Write Elixir code here... Try: Enum.map(1..5, &(&1 * &1))"></textarea>
+        <div class="flex items-center gap-3 mt-2">
+          <button data-action="run" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded transition-colors">Run Cell</button>
+          <span class="text-xs text-zinc-400">{length(@cells)} cells executed</span>
+        </div>
       </div>
       <div :for={cell <- @cells} class={"p-3 border rounded text-sm font-mono #{if cell.status == :ok, do: "bg-green-50", else: "bg-red-50"}"}>
-        <div class="text-zinc-500 text-xs">Cell {cell.cell}</div>
-        <div class="text-xs text-zinc-400 mb-1 font-mono">{cell.code}</div>
+        <div class="flex justify-between">
+          <span class="text-zinc-500 text-xs">Cell {cell.cell}</span>
+          <span class={"text-xs px-1.5 py-0.5 rounded #{if cell.status == :ok, do: "bg-green-200 text-green-800", else: "bg-red-200 text-red-800"}"}>{cell.status}</span>
+        </div>
+        <div class="text-xs text-zinc-400 mb-1 font-mono mt-1">{cell.code}</div>
         <div class={"font-medium #{if cell.status == :ok, do: "text-green-800", else: "text-red-700"}"}>
           {if cell.status == :ok, do: inspect(cell.result), else: cell.error}
         </div>
