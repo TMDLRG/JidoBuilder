@@ -10,4 +10,24 @@ updates:
       - "elixir"
     commit-message:
       prefix: "deps"
-      include: "scope" 
+      include: "scope"
+
+  - package-ecosystem: "mix"
+    directory: "/builder"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "builder"
+    commit-message:
+      prefix: "deps(builder)"
+      include: "scope"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "ci"
