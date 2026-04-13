@@ -187,9 +187,9 @@ defmodule JidoBuilderWeb.GuideLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="flex gap-6 -m-6">
-      <%!-- Table of Contents sidebar --%>
-      <nav class="w-56 shrink-0 bg-white border-r border-zinc-200 p-4 overflow-y-auto sticky top-0 h-screen text-sm">
+    <div class="flex -m-6" style="height: calc(100vh - 64px);">
+      <%!-- Table of Contents sidebar — fixed, scrolls independently --%>
+      <nav class="w-56 shrink-0 bg-white border-r border-zinc-200 p-4 overflow-y-auto text-sm">
         <h2 class="font-semibold text-zinc-900 mb-4 text-base">User Guide</h2>
         <ul class="space-y-3">
           <li :for={section <- @sections}>
@@ -208,8 +208,8 @@ defmodule JidoBuilderWeb.GuideLive do
         </ul>
       </nav>
 
-      <%!-- Guide content --%>
-      <article class="flex-1 max-w-3xl py-6 pr-6 space-y-12">
+      <%!-- Guide content — scrolls independently --%>
+      <article class="flex-1 max-w-3xl py-6 pr-6 space-y-12 overflow-y-auto">
 
         <%!-- ═══════════════════════════════════════════ --%>
         <%!-- WELCOME --%>
@@ -1024,7 +1024,7 @@ defmodule JidoBuilderWeb.GuideLive do
 
           <div id="about-build" class="guide-section space-y-3">
             <h3 class="text-lg font-semibold text-zinc-800">How This Was Built</h3>
-            <p class="text-sm text-zinc-600 leading-relaxed">JidoBuilder v2 was built in <strong>under 3 calendar days</strong>. The builder folder was created on April 11, 2026 at 4:46 PM CDT. By April 13, 2026 at 1:12 AM CDT &mdash; approximately 33 hours later &mdash; the platform had 388 passing tests, 15 interactive LiveView pages, 13 MCP tools, 61 registered actions, a full Active Inference perception-action loop with real-time SVG visualization, an LLM strategy with tool bridging across 3 providers, a composable Agent Factory with team deployment, and an interactive Elixir notebook with persistent bindings. Built entirely using AI-assisted development with the ORCHESTRATE Method.</p>
+            <p class="text-sm text-zinc-600 leading-relaxed">JidoBuilder v2 was built in <strong>under 3 calendar days</strong>. The <code>builder/</code> folder was created on April 11, 2026 at 4:46 PM CDT. By April 13, 2026 at 3:10 PM CDT &mdash; approximately 46 hours later &mdash; the platform had 320 passing tests across 4 OTP apps, 41 browser-verified interactive LiveView pages, 13 MCP tools, 75 registered actions (including LLM and memory actions), a full Active Inference perception-action loop with real-time SVG visualization, an agentic LLM chat system with recursive tool-use loops across 3 providers, a composable Agent Factory with team deployment, conversation persistence, a 4-step LLM Agent Wizard, a 70+ tool whitelist system, and an interactive Elixir notebook with persistent bindings. Every page was OCD-sweep tested with every button clicked and every form submitted. Built entirely using AI-assisted development with the ORCHESTRATE Method.</p>
             <div class="p-4 bg-emerald-50 border border-emerald-200 rounded text-sm text-emerald-800">
               <p class="font-semibold">Founding Partner seats are open.</p>
               <p class="mt-1">Interested in partnering on AI agent delivery? Email <a href="mailto:mpolzin@zimzap.com" class="underline font-semibold">mpolzin@zimzap.com</a> to learn more.</p>
