@@ -8347,6 +8347,11 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
     mounted() {
       this._scale = 1;
       this.state = { nodes: [], edges: [], viewBox: [0, 0, 1200, 800], selected: null, drag: null, linkFrom: null, linkLine: null };
+      try {
+        this.state.nodes = JSON.parse(this.el.dataset.nodes || "[]");
+        this.state.edges = JSON.parse(this.el.dataset.edges || "[]");
+      } catch (_) {
+      }
       this.svg = document.createElementNS(NS, "svg");
       this.svg.setAttribute("class", "w-full h-[560px] bg-white rounded border");
       this.svg.addEventListener("mousedown", (e) => this.onDown(e));
@@ -8371,6 +8376,10 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
         this.state.nodes = JSON.parse(this.el.dataset.nodes || "[]");
         this.state.edges = JSON.parse(this.el.dataset.edges || "[]");
       } catch (_) {
+      }
+      if (!this.el.contains(this.svg)) {
+        this.el.innerHTML = "";
+        this.el.appendChild(this.svg);
       }
       this.render();
     },
@@ -8671,14 +8680,255 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
   };
   var execution_timeline_default = ExecutionTimeline;
 
+  // js/hooks/time_series_chart.js
+  var TimeSeriesChart = {
+    mounted() {
+      this.render();
+    },
+    updated() {
+      this.render();
+    },
+    render() {
+      const raw = this.el.getAttribute("data-chart");
+      const label = this.el.getAttribute("data-label") || "Value";
+      const color = this.el.getAttribute("data-color") || "#10b981";
+      let data = [];
+      try {
+        data = JSON.parse(raw);
+      } catch (_) {
+      }
+      if (!data || data.length === 0) {
+        this.el.innerHTML = '<div class="flex flex-col items-center justify-center py-8 text-zinc-400 text-sm"><svg class="h-8 w-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>No data for this period</div>';
+        return;
+      }
+      const maxCount = Math.max(...data.map((d) => d.count), 1);
+      const svgWidth = 600;
+      const svgHeight = 200;
+      const padding = { top: 20, right: 10, bottom: 40, left: 40 };
+      const chartW = svgWidth - padding.left - padding.right;
+      const chartH = svgHeight - padding.top - padding.bottom;
+      const barGap = 2;
+      const barWidth = Math.max(2, chartW / data.length - barGap);
+      const yTicks = 4;
+      let yLines = "";
+      for (let i = 0; i <= yTicks; i++) {
+        const y = padding.top + chartH - chartH / yTicks * i;
+        const val = Math.round(maxCount / yTicks * i);
+        yLines += `<line x1="${padding.left}" y1="${y}" x2="${svgWidth - padding.right}" y2="${y}" stroke="#e4e4e7" stroke-width="1"/>`;
+        yLines += `<text x="${padding.left - 6}" y="${y + 4}" text-anchor="end" fill="#a1a1aa" font-size="10">${val}</text>`;
+      }
+      let bars = "";
+      data.forEach((d, i) => {
+        const x = padding.left + i * (barWidth + barGap);
+        const h = d.count / maxCount * chartH;
+        const y = padding.top + chartH - h;
+        bars += `<rect x="${x}" y="${y}" width="${barWidth}" height="${h}" fill="${color}" rx="1" opacity="0.85">`;
+        bars += `<title>${d.hour}: ${d.count} ${label.toLowerCase()}</title>`;
+        bars += `</rect>`;
+      });
+      const labelCount = Math.min(6, data.length);
+      const step = Math.max(1, Math.floor(data.length / labelCount));
+      let xLabels = "";
+      for (let i = 0; i < data.length; i += step) {
+        const x = padding.left + i * (barWidth + barGap) + barWidth / 2;
+        const y = svgHeight - 6;
+        const hourStr = data[i].hour.slice(11, 16) || data[i].hour.slice(-5);
+        xLabels += `<text x="${x}" y="${y}" text-anchor="middle" fill="#a1a1aa" font-size="10">${hourStr}</text>`;
+      }
+      this.el.innerHTML = `<svg viewBox="0 0 ${svgWidth} ${svgHeight}" class="w-full" preserveAspectRatio="xMidYMid meet">` + yLines + bars + xLabels + `</svg>`;
+    }
+  };
+  var time_series_chart_default = TimeSeriesChart;
+
+  // js/hooks/code_editor.js
+  var CodeEditor = {
+    mounted() {
+      const textarea = this.el.querySelector("textarea");
+      if (textarea) {
+        textarea.classList.add("font-mono", "text-sm");
+        textarea.setAttribute("spellcheck", "false");
+      }
+      const runBtn = this.el.querySelector("[data-action='run']");
+      if (runBtn) {
+        runBtn.addEventListener("click", () => {
+          const code = textarea ? textarea.value : "";
+          this.pushEvent("run_cell", { code });
+        });
+      }
+      this.handleEvent("cell_result", ({ result, status, cell }) => {
+        let output = this.el.querySelector("[data-role='output']");
+        if (!output) {
+          output = document.createElement("div");
+          output.setAttribute("data-role", "output");
+          output.className = "mt-2 p-2 rounded text-xs font-mono border";
+          this.el.appendChild(output);
+        }
+        output.className = status === "ok" ? "mt-2 p-2 rounded text-xs font-mono border bg-green-50 text-green-800" : "mt-2 p-2 rounded text-xs font-mono border bg-red-50 text-red-800";
+        output.textContent = `[${cell}] ${result}`;
+      });
+    }
+  };
+  var code_editor_default = CodeEditor;
+
+  // js/hooks/belief_visualizer.js
+  var BeliefVisualizer = {
+    mounted() {
+      this.render();
+      this.handleEvent("update_beliefs", (data) => {
+        this.el.dataset.beliefs = JSON.stringify(data.beliefs || []);
+        this.render();
+      });
+    },
+    updated() {
+      this.render();
+    },
+    render() {
+      const raw = this.el.dataset.beliefs;
+      if (!raw) return;
+      let beliefs;
+      try {
+        beliefs = JSON.parse(raw);
+      } catch {
+        return;
+      }
+      if (!Array.isArray(beliefs) || beliefs.length === 0) return;
+      const w = this.el.clientWidth || 300;
+      const barH = 28;
+      const h = beliefs.length * barH + 10;
+      const maxBar = w - 80;
+      const bars = beliefs.map((val, i) => {
+        const bw = Math.max(1, val * maxBar);
+        const y = i * barH + 5;
+        return `
+        <rect x="60" y="${y}" width="${bw}" height="20" rx="3" fill="#10b981" opacity="0.8"/>
+        <text x="2" y="${y + 15}" font-size="11" fill="#555">S${i}</text>
+        <text x="${62 + bw}" y="${y + 15}" font-size="10" fill="#333">${val.toFixed(3)}</text>
+      `;
+      }).join("");
+      this.el.innerHTML = `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${bars}</svg>`;
+    }
+  };
+  var belief_visualizer_default = BeliefVisualizer;
+
+  // js/hooks/policy_tree.js
+  var PolicyTree = {
+    mounted() {
+      this.render();
+      this.handleEvent("update_policies", (data) => {
+        this.el.dataset.policies = JSON.stringify(data.policies || []);
+        this.render();
+      });
+    },
+    updated() {
+      this.render();
+    },
+    render() {
+      const raw = this.el.dataset.policies;
+      if (!raw) return;
+      let policies;
+      try {
+        policies = JSON.parse(raw);
+      } catch {
+        return;
+      }
+      if (!Array.isArray(policies) || policies.length === 0) return;
+      const w = this.el.clientWidth || 300;
+      const barH = 32;
+      const h = policies.length * barH + 10;
+      const efes = policies.map((p) => p.efe || 0);
+      const minEfe = Math.min(...efes);
+      const maxEfe = Math.max(...efes);
+      const range2 = maxEfe - minEfe || 1;
+      const maxBar = w - 140;
+      const bars = policies.map((p, i) => {
+        const norm = 1 - (p.efe - minEfe) / range2;
+        const bw = Math.max(2, norm * maxBar);
+        const y = i * barH + 5;
+        const isBest = i === 0 || p.efe === minEfe;
+        const color = isBest ? "#10b981" : "#6b7280";
+        const label = (p.actions || []).join(",");
+        return `
+        <rect x="80" y="${y}" width="${bw}" height="22" rx="3" fill="${color}" opacity="0.7"/>
+        <text x="2" y="${y + 16}" font-size="10" fill="#555">[${label}]</text>
+        <text x="${82 + bw}" y="${y + 16}" font-size="10" fill="#333">${p.efe.toFixed(2)}</text>
+      `;
+      }).join("");
+      this.el.innerHTML = `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${bars}</svg>`;
+    }
+  };
+  var policy_tree_default = PolicyTree;
+
+  // js/hooks/chat_stream.js
+  var ChatStream = {
+    mounted() {
+      this.currentMessage = null;
+      this.handleEvent("new_chunk", ({ content }) => {
+        if (!this.currentMessage) {
+          this.currentMessage = document.createElement("div");
+          this.currentMessage.className = "p-2 rounded text-sm bg-zinc-50 mr-8 mb-2";
+          const label = document.createElement("span");
+          label.className = "text-xs font-semibold";
+          label.textContent = "assistant";
+          this.currentMessage.appendChild(label);
+          const text = document.createElement("p");
+          text.className = "streaming-text";
+          this.currentMessage.appendChild(text);
+          this.el.appendChild(this.currentMessage);
+        }
+        const textEl = this.currentMessage.querySelector(".streaming-text");
+        if (textEl) {
+          textEl.textContent += content;
+        }
+        this.el.scrollTop = this.el.scrollHeight;
+      });
+      this.handleEvent("stream_end", () => {
+        this.currentMessage = null;
+      });
+      this.handleEvent("add_message", ({ role, content }) => {
+        const msg = document.createElement("div");
+        const isUser = role === "user";
+        msg.className = `p-2 rounded text-sm mb-2 ${isUser ? "bg-blue-50 ml-8" : "bg-zinc-50 mr-8"}`;
+        msg.innerHTML = `<span class="text-xs font-semibold">${role}</span><p>${this.escapeHtml(content)}</p>`;
+        this.el.appendChild(msg);
+        this.el.scrollTop = this.el.scrollHeight;
+      });
+    },
+    escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  };
+  var chat_stream_default = ChatStream;
+
   // js/app.js
   var Sidebar = {
     mounted() {
+      const sidebar = this.el.querySelector("#app-sidebar");
+      const overlay = this.el.querySelector("#mobile-sidebar-overlay");
       const apply = (collapsed2) => {
-        const sidebar = this.el.querySelector("#app-sidebar");
         if (!sidebar) return;
         sidebar.style.width = collapsed2 ? "4rem" : "16rem";
+        if (collapsed2) {
+          sidebar.classList.add("sidebar-collapsed");
+        } else {
+          sidebar.classList.remove("sidebar-collapsed");
+        }
         localStorage.setItem("builder.sidebar.collapsed", collapsed2 ? "1" : "0");
+      };
+      const closeMobile = () => {
+        if (!sidebar || !overlay) return;
+        sidebar.classList.remove("flex");
+        sidebar.classList.add("hidden", "md:flex");
+        overlay.classList.add("hidden");
+      };
+      const openMobile = () => {
+        if (!sidebar || !overlay) return;
+        sidebar.classList.remove("hidden");
+        sidebar.classList.add("flex");
+        sidebar.style.width = "16rem";
+        sidebar.classList.remove("sidebar-collapsed");
+        overlay.classList.remove("hidden");
       };
       let collapsed = localStorage.getItem("builder.sidebar.collapsed") === "1";
       apply(collapsed);
@@ -8688,6 +8938,19 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
           apply(collapsed);
         });
       });
+      this.el.querySelectorAll('[data-role="mobile-menu-toggle"]').forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const isHidden = sidebar.classList.contains("hidden");
+          if (isHidden) {
+            openMobile();
+          } else {
+            closeMobile();
+          }
+        });
+      });
+      if (overlay) {
+        overlay.addEventListener("click", closeMobile);
+      }
     }
   };
   var Download = {
@@ -8708,7 +8971,7 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
   var csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content");
   var liveSocket = new LiveSocket2("/live", Socket, {
     params: { _csrf_token: csrfToken },
-    hooks: { WorkflowDag: workflow_dag_default, Sidebar, JsonTree: json_tree_default, ExecutionTimeline: execution_timeline_default, Download }
+    hooks: { WorkflowDag: workflow_dag_default, Sidebar, JsonTree: json_tree_default, ExecutionTimeline: execution_timeline_default, Download, TimeSeriesChart: time_series_chart_default, CodeEditor: code_editor_default, BeliefVisualizer: belief_visualizer_default, PolicyTree: policy_tree_default, ChatStream: chat_stream_default }
   });
   liveSocket.connect();
   window.liveSocket = liveSocket;
