@@ -54,7 +54,7 @@ defmodule JidoBuilderWeb.WatchersLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
 
     <div class="grid md:grid-cols-2 gap-4 mt-6">
       <.card>

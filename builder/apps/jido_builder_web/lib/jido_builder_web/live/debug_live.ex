@@ -90,7 +90,7 @@ defmodule JidoBuilderWeb.DebugLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
 
     <div class="mb-4">
       <.button phx-click="toggle_debug" id="debug-toggle">

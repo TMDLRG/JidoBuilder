@@ -58,6 +58,10 @@ defmodule JidoBuilderRuntime.TelemetryBridge do
       publish(event, EventBus.workflow_topic(workspace_id, event.workflow_id))
     end
 
+    if event.correlation_id do
+      publish(event, EventBus.correlation_topic(workspace_id, event.correlation_id))
+    end
+
     persist(event)
     persist_error(event)
     publish_state_change(event)

@@ -15,13 +15,13 @@ defmodule JidoBuilderWeb.VaultLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
     <p class="text-sm text-zinc-500 mb-4">Hibernate and thaw agent snapshots.</p>
     <ul id="snapshot-list" class="space-y-2 text-sm">
       <li :for={snap <- @snapshots} id={"snap-#{snap.id}"} class="border-b pb-2">
-        <span class="font-semibold"><%= snap.metadata["label"] || "snapshot-#{snap.id}" %></span>
-        <span :if={snap.agent_instance} class="ml-2 text-zinc-500">agent: <%= snap.agent_instance.name %></span>
-        <span class="ml-2 text-zinc-400 text-xs"><%= snap.captured_at %></span>
+        <span class="font-semibold">{snap.metadata["label"] || "snapshot-#{snap.id}"}</span>
+        <span :if={snap.agent_instance} class="ml-2 text-zinc-500">agent: {snap.agent_instance.name}</span>
+        <span class="ml-2 text-zinc-400 text-xs">{snap.captured_at}</span>
       </li>
     </ul>
     <p :if={@snapshots == []} class="text-sm text-zinc-500 mt-4">No snapshots.</p>

@@ -51,49 +51,27 @@ defmodule JidoBuilderWeb.Directives.BuilderLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
     <p class="text-sm mb-4">Compose directives that agents execute in response to signals.</p>
 
     <form id="directive-composer" phx-submit="preview" phx-change="change_kind" class="space-y-3 max-w-xl">
-      <div>
-        <label class="block text-xs font-medium mb-1">Directive type</label>
-        <select name="directive[kind]" class="border rounded px-2 py-1 w-full text-sm">
-          <option :for={{key, label} <- @directive_types} value={key} selected={@form_data["kind"] == key}>
-            <%= label %>
-          </option>
-        </select>
-      </div>
+      <.select_field name="directive[kind]" label="Directive type">
+        <option :for={{key, label} <- @directive_types} value={key} selected={@form_data["kind"] == key}>
+          {label}
+        </option>
+      </.select_field>
 
-      <div>
-        <label class="block text-xs font-medium mb-1">signal_type</label>
-        <input type="text" name="directive[signal_type]" value={@form_data["signal_type"]} class="border rounded px-2 py-1 w-full text-sm" />
-      </div>
-
-      <div>
-        <label class="block text-xs font-medium mb-1">dispatch adapter</label>
-        <input type="text" name="directive[dispatch]" value={@form_data["dispatch"]} class="border rounded px-2 py-1 w-full text-sm" />
-      </div>
-
-      <div>
-        <label class="block text-xs font-medium mb-1">delay_ms</label>
-        <input type="number" name="directive[delay_ms]" value={@form_data["delay_ms"]} class="border rounded px-2 py-1 w-full text-sm" />
-      </div>
-
-      <div>
-        <label class="block text-xs font-medium mb-1">message/tag/reason</label>
-        <input type="text" name="directive[tag]" value={@form_data["tag"]} class="border rounded px-2 py-1 w-full text-sm" />
-      </div>
-
-      <div>
-        <label class="block text-xs font-medium mb-1">agent_module</label>
-        <input type="text" name="directive[agent_module]" value={@form_data["agent_module"]} class="border rounded px-2 py-1 w-full text-sm font-mono" />
-      </div>
+      <.input_field name="directive[signal_type]" label="signal_type" value={@form_data["signal_type"]} />
+      <.input_field name="directive[dispatch]" label="dispatch adapter" value={@form_data["dispatch"]} />
+      <.input_field name="directive[delay_ms]" label="delay_ms" type="number" value={@form_data["delay_ms"]} />
+      <.input_field name="directive[tag]" label="message/tag/reason" value={@form_data["tag"]} />
+      <.input_field name="directive[agent_module]" label="agent_module" value={@form_data["agent_module"]} />
 
       <button type="submit" class="rounded bg-zinc-900 px-4 py-2 text-white text-xs">Preview directive</button>
     </form>
 
-    <div :if={@preview} id="directive-preview" class="mt-6 rounded bg-zinc-50 border p-4 font-mono text-xs whitespace-pre-wrap"><%= @preview %></div>
-    <div :if={@error} id="directive-error" class="mt-4 text-sm text-red-600"><%= @error %></div>
+    <div :if={@preview} id="directive-preview" class="mt-6 rounded bg-zinc-50 border p-4 font-mono text-xs whitespace-pre-wrap">{@preview}</div>
+    <div :if={@error} id="directive-error" class="mt-4 text-sm text-red-600">{@error}</div>
     """
   end
 

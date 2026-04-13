@@ -30,7 +30,7 @@ defmodule JidoBuilderWeb.AgentLive do
        workspace_id: workspace_id,
        agent_id: id,
        instance: instance,
-       active_tab: "overview",
+       active_tab: Map.get(params, "tab", "overview"),
        agent_state: %{},
        health: health,
        signal_count: signal_count,
@@ -44,8 +44,11 @@ defmodule JidoBuilderWeb.AgentLive do
   def handle_event("tab", %{"name" => tab}, socket), do: {:noreply, assign(socket, active_tab: tab)}
 
   def handle_event("stop_agent", _params, socket) do
-    Roster.stop(socket.assigns.workspace_id, socket.assigns.agent_id)
-    {:noreply, push_navigate(socket, to: ~p"/roster")}
+    case Roster.stop(socket.assigns.workspace_id, socket.assigns.agent_id) do
+      {:ok, _} -> {:noreply, push_navigate(socket, to: ~p"/roster")}
+      {:error, _} -> {:noreply, push_navigate(socket, to: ~p"/roster")}
+      _ -> {:noreply, push_navigate(socket, to: ~p"/roster")}
+    end
   end
 
   @impl true

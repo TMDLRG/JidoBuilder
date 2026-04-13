@@ -215,9 +215,7 @@ defmodule JidoBuilderWeb.Assignments.NewLive do
           <label class="ui-label block text-sm">
             <span class="block text-xs font-medium text-zinc-600 mb-1">Signal type</span>
             <select name="dispatch[signal_type]" class="ui-input">
-              <%= for sig <- signal_type_options(@selected_agent_routes) do %>
-                <option value={sig} selected={sig == @signal_type}>{sig}</option>
-              <% end %>
+              <option :for={sig <- signal_type_options(@selected_agent_routes)} value={sig} selected={sig == @signal_type}>{sig}</option>
             </select>
           </label>
           <label class="ui-label block text-sm">

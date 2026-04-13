@@ -84,16 +84,62 @@ defmodule JidoBuilderWeb.UI do
     """
   end
 
+  # -- Select Field --
+  attr :name, :string, default: nil
+  attr :label, :string, default: nil
+  attr :value, :string, default: nil
+  attr :class, :string, default: ""
+  slot :inner_block
+
+  def select_field(assigns) do
+    ~H"""
+    <label class="ui-label block text-sm">
+      <span :if={@label} class="block text-xs font-medium text-zinc-600 mb-1">{@label}</span>
+      <select name={@name} class={["ui-input", @class]}>
+        {render_slot(@inner_block)}
+      </select>
+    </label>
+    """
+  end
+
+  # -- Textarea Field --
+  attr :name, :string, default: nil
+  attr :label, :string, default: nil
+  attr :value, :string, default: nil
+  attr :rows, :integer, default: 4
+  attr :placeholder, :string, default: nil
+  attr :class, :string, default: ""
+
+  def textarea_field(assigns) do
+    ~H"""
+    <label class="ui-label block text-sm">
+      <span :if={@label} class="block text-xs font-medium text-zinc-600 mb-1">{@label}</span>
+      <textarea name={@name} rows={@rows} placeholder={@placeholder} class={["ui-input", @class]}>{@value}</textarea>
+    </label>
+    """
+  end
+
   # -- Table --
   attr :id, :string, required: true
   attr :rows, :list, default: []
-  slot :col, required: true
+  slot :col, required: true do
+    attr :label, :string
+  end
 
   def table(assigns) do
+    has_labels = Enum.any?(assigns.col, &(&1[:label]))
+
+    assigns = assign(assigns, :has_labels, has_labels)
+
     ~H"""
     <table id={@id} class="ui-table w-full text-sm">
+      <thead :if={@has_labels}>
+        <tr>
+          <th :for={col <- @col} class="py-2 px-3 text-left">{col[:label]}</th>
+        </tr>
+      </thead>
       <tbody>
-        <tr :for={row <- @rows} class="border-b last:border-0">
+        <tr :for={row <- @rows}>
           <td :for={col <- @col} class="py-2 px-3">{render_slot(col, row)}</td>
         </tr>
       </tbody>

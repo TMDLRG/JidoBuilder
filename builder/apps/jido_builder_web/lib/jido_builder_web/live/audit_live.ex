@@ -15,7 +15,7 @@ defmodule JidoBuilderWeb.AuditLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
     <.card class="mt-4">
       <:header>Audit Events</:header>
       <.table id="audit-events" rows={@events}>

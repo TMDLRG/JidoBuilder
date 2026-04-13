@@ -49,7 +49,7 @@ defmodule JidoBuilderWeb.TeamsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
     <.toast :if={@toast} title={@toast.title} message={@toast.message} variant="info" />
     <p class="text-sm text-zinc-500 mb-4">Coordinate pods of specialized agents.</p>
 
@@ -64,14 +64,14 @@ defmodule JidoBuilderWeb.TeamsLive do
         </.select_field>
         <.button>Create Pod</.button>
       </form>
-      <p :if={@form_error} class="mt-2 text-red-600 text-xs"><%= @form_error %></p>
+      <p :if={@form_error} class="mt-2 text-red-600 text-xs">{@form_error}</p>
     </.card>
 
     <.card class="mt-8"><:header>Existing Pods</:header>
       <ul id="topology-list" class="space-y-2 text-sm">
         <li :for={topo <- @topologies} id={"topo-#{topo.id}"} class="border-b pb-2">
-          <span class="font-semibold"><%= topo.name %></span>
-          <.badge variant="default"><%= topo.strategy %></.badge>
+          <span class="font-semibold">{topo.name}</span>
+          <.badge variant="default">{topo.strategy}</.badge>
         </li>
       </ul>
       <.empty_state :if={@topologies == []} title="No pods" description="No pods configured for this workspace." icon="users" />

@@ -45,7 +45,7 @@ defmodule JidoBuilderWeb.OrphansLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
     <p class="text-sm text-zinc-500 mb-4">Agents not attached to any pod topology.</p>
 
     <.card class="mt-4">

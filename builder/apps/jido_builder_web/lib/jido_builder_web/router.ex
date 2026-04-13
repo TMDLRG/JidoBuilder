@@ -17,12 +17,48 @@ defmodule JidoBuilderWeb.Router do
     plug(:accepts, ["json"])
   end
 
+  pipeline :api_authenticated do
+    plug(:accepts, ["json"])
+    plug(JidoBuilderWeb.Plugs.ApiAuth)
+    plug(JidoBuilderWeb.Plugs.RateLimit)
+  end
+
   scope "/", JidoBuilderWeb do
     pipe_through(:api)
 
     get("/healthz", HealthController, :healthz)
     get("/readyz", HealthController, :readyz)
     get("/metrics", MetricsController, :index)
+  end
+
+  scope "/api/v1", JidoBuilderWeb.Api.V1 do
+    pipe_through(:api)
+
+    get "/openapi.json", OpenApiController, :spec
+  end
+
+  scope "/mcp", JidoBuilderWeb.MCP do
+    pipe_through(:api_authenticated)
+
+    post "/", McpController, :handle
+    get "/sse", SseController, :sse
+    post "/messages", SseController, :messages
+  end
+
+  scope "/api/v1", JidoBuilderWeb.Api.V1 do
+    pipe_through(:api_authenticated)
+
+    resources "/agents", AgentController, only: [:index, :create, :show, :delete], param: "id"
+    post "/agents/:id/dispatch", AgentController, :dispatch
+
+    resources "/templates", TemplateController, only: [:index, :create, :show, :delete]
+    resources "/workflows", WorkflowController, only: [:index, :create, :show]
+
+    get "/workspace/export", WorkspaceController, :export
+
+    get "/signals", ObservabilityController, :signals
+    get "/errors", ObservabilityController, :errors
+    get "/correlation/:id", ObservabilityController, :correlation
   end
 
   scope "/", JidoBuilderWeb do
@@ -37,7 +73,7 @@ defmodule JidoBuilderWeb.Router do
     pipe_through([:browser, :require_authenticated_user])
 
     live_session :authenticated,
-      on_mount: [{JidoBuilderWeb.UserAuth, :ensure_authenticated}] do
+      on_mount: [{JidoBuilderWeb.UserAuth, :ensure_authenticated}, {JidoBuilderWeb.CommandPalette, :default}] do
       live("/", DashboardLive, :index)
       live("/roster", RosterLive, :index)
       live("/agents/:id", AgentLive, :show)
@@ -50,6 +86,7 @@ defmodule JidoBuilderWeb.Router do
       live("/assignments/new", Assignments.NewLive, :new)
       live("/templates", Templates.IndexLive, :index)
       live("/templates/:id/edit", Templates.EditLive, :edit)
+      live("/actions", Actions.BuilderLive, :index)
       live("/skills", Skills.IndexLive, :index)
       live("/work-styles", WorkStyles.IndexLive, :index)
       live("/directives", Directives.BuilderLive, :index)
@@ -73,6 +110,19 @@ defmodule JidoBuilderWeb.Router do
       live("/debug", DebugLive, :index)
       live("/error-policy", ErrorPolicyLive, :index)
       live("/orphans", OrphansLive, :index)
+      live("/guide", GuideLive, :index)
+      live("/metrics-dashboard", MetricsLive, :index)
+      live("/marketplace", Plugins.MarketplaceLive, :index)
+      # -- v2 routes --
+      live("/active-inference", ActiveInferenceLive, :index)
+      live("/llm-config", LlmConfigLive, :index)
+      live("/factory", FactoryLive, :index)
+      live("/solutions", SolutionsLive, :index)
+      live("/template-library", TemplateLibraryLive, :index)
+      live("/notebook", NotebookLive, :index)
+      live("/notebook/:id", NotebookLive, :show)
+      live("/skills-manager", SkillsManagerLive, :index)
+      live("/agents/:id/chat", AgentChatLive, :show)
     end
   end
 end

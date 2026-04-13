@@ -51,7 +51,7 @@ defmodule JidoBuilderWeb.BlockEditorLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
 
     <form id="editor-form" phx-submit="preview" class="space-y-3 max-w-md mt-4">
       <div>
@@ -71,13 +71,12 @@ defmodule JidoBuilderWeb.BlockEditorLive do
 
     <div :if={@preview} id="source-preview" class="mt-6 rounded bg-zinc-50 border p-4">
       <h2 class="text-xs font-semibold mb-2 text-zinc-700">Generated Source</h2>
-      <pre class="font-mono text-xs whitespace-pre-wrap"><%= @preview %></pre>
+      <pre class="font-mono text-xs whitespace-pre-wrap">{@preview}</pre>
     </div>
 
-    <div :if={@error} id="editor-error" class="mt-4 text-red-600 text-sm"><%= @error %></div>
+    <div :if={@error} id="editor-error" class="mt-4 text-red-600 text-sm">{@error}</div>
 
-    <%= if @block_type == "strategy" do %>
-    <section class="mt-8">
+    <section :if={@block_type == "strategy"} class="mt-8">
       <h2 class="text-sm font-semibold mb-2">FSM States + Transitions</h2>
       <p class="text-xs text-zinc-500">Define state machine states and transition rules below.</p>
       <table class="text-xs mt-2 w-full max-w-lg">
@@ -95,7 +94,7 @@ defmodule JidoBuilderWeb.BlockEditorLive do
         </tbody>
       </table>
     </section>
-    <% end %>
+    
     """
   end
 end

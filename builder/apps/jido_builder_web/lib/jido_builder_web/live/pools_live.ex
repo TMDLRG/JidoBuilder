@@ -28,7 +28,7 @@ defmodule JidoBuilderWeb.PoolsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
     <p class="text-sm text-zinc-500 mb-4">Worker pool configuration for agent execution.</p>
 
     <.card class="mt-4">

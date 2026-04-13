@@ -26,7 +26,7 @@ defmodule JidoBuilderWeb.ExecutionLive do
     <.page_header>Execution Monitor</.page_header>
     <div class="grid grid-cols-12 gap-4">
       <.card class="col-span-9"><:header>Timeline</:header><div id="execution-timeline" phx-hook="ExecutionTimeline" data-events={Jason.encode!(@events)} class="h-48"></div></.card>
-      <.card class="col-span-3"><:header>Event Detail</:header><pre class="text-xs"><%= inspect(@selected) %></pre></.card>
+      <.card class="col-span-3"><:header>Event Detail</:header><pre class="text-xs">{inspect(@selected)}</pre></.card>
     </div>
     """
   end

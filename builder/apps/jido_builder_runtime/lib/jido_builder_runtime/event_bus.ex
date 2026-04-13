@@ -25,4 +25,8 @@ defmodule JidoBuilderRuntime.EventBus do
   @spec workflow_activity_topic(pos_integer()) :: String.t()
   def workflow_activity_topic(workspace_id),
     do: "workspace:" <> to_string(workspace_id) <> ":workflow:activity"
+
+  @spec correlation_topic(pos_integer(), String.t()) :: String.t()
+  def correlation_topic(workspace_id, correlation_id),
+    do: "workspace:" <> to_string(workspace_id) <> ":correlation:" <> to_string(correlation_id)
 end

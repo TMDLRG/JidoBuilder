@@ -39,16 +39,16 @@ defmodule JidoBuilderWeb.SettingsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
     <.toast :if={@toast} title={@toast.title} message={@toast.message} variant="info" />
 
     <.card class="mt-6"><:header>Integrations</:header>
       <h2 class="text-sm font-semibold mb-2">Integrations</h2>
       <ul class="space-y-1 text-sm">
         <li :for={integ <- @integrations} class="border-b pb-1">
-          <span class="font-semibold"><%= integ.name %></span>
-          <span class="ml-2 text-zinc-500"><%= integ.provider %></span>
-          <span class="ml-2 text-xs text-zinc-400"><%= integ.status %></span>
+          <span class="font-semibold">{integ.name}</span>
+          <span class="ml-2 text-zinc-500">{integ.provider}</span>
+          <span class="ml-2 text-xs text-zinc-400">{integ.status}</span>
         </li>
       </ul>
       <.empty_state :if={@integrations == []} title="No integrations" description="No integrations configured." icon="bolt" />
@@ -57,7 +57,7 @@ defmodule JidoBuilderWeb.SettingsLive do
     <.card class="mt-6"><:header>Secrets</:header>
       <ul class="space-y-1 text-sm">
         <li :for={secret <- @secrets} class="border-b pb-1">
-          <span class="font-semibold"><%= secret.name %></span>
+          <span class="font-semibold">{secret.name}</span>
           <span class="ml-2 text-zinc-400 text-xs font-mono">{secret.value}</span>
         </li>
       </ul>
@@ -70,7 +70,7 @@ defmodule JidoBuilderWeb.SettingsLive do
         <.input_field name="secret[value]" label="Value" type="password" />
         <.button>Save Secret</.button>
       </form>
-      <p :if={@form_error} class="mt-2 text-red-600 text-xs"><%= @form_error %></p>
+      <p :if={@form_error} class="mt-2 text-red-600 text-xs">{@form_error}</p>
     </.card>
     """
   end

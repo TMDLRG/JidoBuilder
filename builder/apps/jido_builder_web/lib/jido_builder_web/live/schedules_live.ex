@@ -58,7 +58,7 @@ defmodule JidoBuilderWeb.SchedulesLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
     <.toast :if={@toast} title={@toast.title} message={@toast.message} variant="info" />
     <p class="text-sm text-zinc-500 mb-4">Manage recurring runs and temporal triggers.</p>
 
@@ -67,22 +67,22 @@ defmodule JidoBuilderWeb.SchedulesLive do
       <form id="schedule-form" phx-submit="create_schedule" class="space-y-3">
         <.select_field name="schedule[template_id]" label="Template">
           <option value="">-- select --</option>
-          <option :for={tmpl <- @templates} value={tmpl.id}><%= tmpl.name %></option>
+          <option :for={tmpl <- @templates} value={tmpl.id}>{tmpl.name}</option>
         </.select_field>
         <.input_field name="schedule[name]" label="Name" placeholder="Heartbeat" />
         <.input_field name="schedule[cron]" label="Cron Expression" placeholder="* * * * *" />
         <.input_field name="schedule[timezone]" label="Timezone" placeholder="UTC" />
         <.button>Create Schedule</.button>
       </form>
-      <p :if={@form_error} class="mt-2 text-red-600 text-xs"><%= @form_error %></p>
+      <p :if={@form_error} class="mt-2 text-red-600 text-xs">{@form_error}</p>
     </.card>
 
     <.card class="mt-8"><:header>Scheduled Jobs</:header>
       <ul id="schedule-list" class="space-y-2 text-sm">
         <li :for={sched <- @schedules} id={"sched-#{sched.id}"} class="flex items-center gap-4 border-b pb-2">
-          <span class="font-semibold"><%= sched.name %></span>
-          <span class="font-mono text-xs text-zinc-500"><%= sched.cron %></span>
-          <.badge variant={if sched.enabled, do: "success", else: "default"}><%= if sched.enabled, do: "active", else: "cancelled" %></.badge>
+          <span class="font-semibold">{sched.name}</span>
+          <span class="font-mono text-xs text-zinc-500">{sched.cron}</span>
+          <.badge variant={if sched.enabled, do: "success", else: "default"}>{if sched.enabled, do: "active", else: "cancelled"}</.badge>
           <button
             :if={sched.enabled}
             phx-click="cancel_schedule"

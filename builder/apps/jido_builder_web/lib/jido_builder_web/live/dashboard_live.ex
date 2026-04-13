@@ -33,10 +33,10 @@ defmodule JidoBuilderWeb.DashboardLive do
     {:noreply, assign(socket, kpis: kpis, activities: activities)}
   end
 
-  def handle_info({:jido_event, event}, socket) do
-    kind = event[:kind] || event["kind"] || "event"
-    agent = event[:agent_id] || event["agent_id"] || ""
-    label = "#{kind} — #{agent}" |> String.trim_trailing(" — ")
+  def handle_info({:jido_event, event}, socket) when is_map(event) do
+    kind = Map.get(event, :kind) || Map.get(event, "kind", "event")
+    agent = Map.get(event, :agent_id) || Map.get(event, "agent_id", "")
+    label = String.trim_trailing("#{kind} - #{agent}", " - ")
     activities = prepend_activity(socket.assigns.activities, label)
     {:noreply, assign(socket, activities: activities)}
   end
