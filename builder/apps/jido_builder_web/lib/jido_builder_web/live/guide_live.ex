@@ -157,6 +157,17 @@ defmodule JidoBuilderWeb.GuideLive do
         %{id: "browsing-installing-templates", title: "Browsing and Installing Templates"},
         %{id: "creating-shareable-templates", title: "Creating Shareable Templates"}
       ]
+    },
+    %{
+      id: "about",
+      title: "About",
+      icon: "user",
+      children: [
+        %{id: "about-author", title: "About the Author"},
+        %{id: "about-method", title: "The ORCHESTRATE Method"},
+        %{id: "about-projects", title: "Other Projects"},
+        %{id: "about-build", title: "How This Was Built"}
+      ]
     }
   ]
 
@@ -875,9 +886,100 @@ defmodule JidoBuilderWeb.GuideLive do
           </div>
         </section>
 
+        <%!-- ═══════════════════════════════════════════ --%>
+        <%!-- ABOUT --%>
+        <%!-- ═══════════════════════════════════════════ --%>
+        <section id="about" class="guide-section space-y-6">
+          <h2 class="text-2xl font-bold text-zinc-900 border-b pb-3">About</h2>
+
+          <div id="about-author" class="guide-section space-y-3">
+            <h3 class="text-lg font-semibold text-zinc-800">About the Author</h3>
+            <div class="flex gap-6 items-start">
+              <div class="space-y-3">
+                <p class="text-sm text-zinc-600 leading-relaxed"><strong>Michael Polzin</strong> is a C-Suite IT Executive, Solution Architect, and author with 35+ years in IT operations and service management. He helps organizations orchestrate complex technology, people, and processes into coherent, reliable services that actually move the business forward. He is the author of <em>The ORCHESTRATE Method</em>, co-author of <em>Run on Rhythm</em>, and creator of the AI Usage Maturity Model in <em>Level Up</em>.</p>
+                <p class="text-sm text-zinc-600 leading-relaxed">Michael is the Owner of Action Based Consulting and previously served as CEO of Leeward Business Advisors. He holds a degree from Cardinal Stritch University and is based in the Greater Milwaukee area.</p>
+                <div class="flex flex-wrap gap-2 text-xs">
+                  <a href="https://www.linkedin.com/in/mpolzin/" target="_blank" class="bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">LinkedIn</a>
+                  <a href="https://github.com/TMDLRG" target="_blank" class="bg-zinc-100 text-zinc-700 px-2 py-1 rounded hover:bg-zinc-200">GitHub</a>
+                  <a href="https://dev.to/tmdlrg" target="_blank" class="bg-zinc-100 text-zinc-700 px-2 py-1 rounded hover:bg-zinc-200">Blog</a>
+                  <a href="https://www.youtube.com/@NewsWright" target="_blank" class="bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200">YT: @NewsWright</a>
+                  <a href="https://www.youtube.com/@ORCHESTRATEMaster" target="_blank" class="bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200">YT: @ORCHESTRATEMaster</a>
+                  <a href="mailto:mpolzin@zimzap.com" class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded hover:bg-emerald-200">mpolzin@zimzap.com</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="about-method" class="guide-section space-y-3">
+            <h3 class="text-lg font-semibold text-zinc-800">The ORCHESTRATE Method</h3>
+            <p class="text-sm text-zinc-600 leading-relaxed">JidoBuilder was built on <strong>The ORCHESTRATE Method</strong> &mdash; a prompting framework that makes AI work like magic. It provides structure, context, and intentionality to AI interactions, enabling professional-grade outputs.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <a href="https://www.amazon.com/ORCHESTRATE-Prompting-Professional-AI-Outputs-ebook/dp/B0G2B9LG6V" target="_blank" class="p-4 border rounded hover:border-blue-300 hover:bg-blue-50 transition-colors block">
+                <div class="font-semibold text-sm">The ORCHESTRATE Method</div>
+                <div class="text-xs text-zinc-500 mt-1">A Prompting Framework for Professional AI Outputs</div>
+                <div class="text-xs text-blue-600 mt-2">Buy on Amazon &rarr;</div>
+              </a>
+              <a href="https://www.amazon.com/Run-Rhythm-Build-business-doesnt-ebook/dp/B0G1Y8L9D7" target="_blank" class="p-4 border rounded hover:border-blue-300 hover:bg-blue-50 transition-colors block">
+                <div class="font-semibold text-sm">Run on Rhythm</div>
+                <div class="text-xs text-zinc-500 mt-1">Build a business that doesn't run you &mdash; wisdom and AI cognition shaping</div>
+                <div class="text-xs text-blue-600 mt-2">Buy on Amazon &rarr;</div>
+              </a>
+              <a href="https://www.amazon.com/Level-Up-Usage-Maturity-Model-ebook/dp/B0G2FHBJ4W" target="_blank" class="p-4 border rounded hover:border-blue-300 hover:bg-blue-50 transition-colors block">
+                <div class="font-semibold text-sm">Level Up: The AI Usage Maturity Model</div>
+                <div class="text-xs text-zinc-500 mt-1">Infer your path to AI Business Success</div>
+                <div class="text-xs text-blue-600 mt-2">Buy on Amazon &rarr;</div>
+              </a>
+            </div>
+            <div class="mt-3 p-3 bg-zinc-50 border rounded text-sm">
+              <p class="text-zinc-600">Rep the movement: <a href="https://iamhitl.com" target="_blank" class="text-blue-600 hover:underline font-semibold">IAMHITL.com</a> &mdash; merch for humans in the loop.</p>
+            </div>
+          </div>
+
+          <div id="about-projects" class="guide-section space-y-3">
+            <h3 class="text-lg font-semibold text-zinc-800">Other Projects by Michael Polzin</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <a href="https://milwaukeeafterdark.onrender.com/" target="_blank" class="p-3 border rounded hover:border-blue-300 hover:bg-blue-50 transition-colors block">
+                <div class="font-semibold text-sm">Milwaukee After Dark</div>
+                <div class="text-xs text-zinc-500">Interactive map-based nightlife exploration game</div>
+              </a>
+              <a href="https://bayes-museum.vercel.app/" target="_blank" class="p-3 border rounded hover:border-blue-300 hover:bg-blue-50 transition-colors block">
+                <div class="font-semibold text-sm">Bayes Museum</div>
+                <div class="text-xs text-zinc-500">Interactive exhibits about belief updating &mdash; priors, likelihoods, and posteriors</div>
+              </a>
+              <a href="https://orc-active-inference.vercel.app/" target="_blank" class="p-3 border rounded hover:border-blue-300 hover:bg-blue-50 transition-colors block">
+                <div class="font-semibold text-sm">ORC Active Inference</div>
+                <div class="text-xs text-zinc-500">Active Inference visualization and learning platform</div>
+              </a>
+              <a href="https://app-omega-gray.vercel.app/" target="_blank" class="p-3 border rounded hover:border-blue-300 hover:bg-blue-50 transition-colors block">
+                <div class="font-semibold text-sm">App Omega</div>
+                <div class="text-xs text-zinc-500">AI application platform</div>
+              </a>
+              <a href="https://67-game-mu.vercel.app/" target="_blank" class="p-3 border rounded hover:border-blue-300 hover:bg-blue-50 transition-colors block">
+                <div class="font-semibold text-sm">67 Game</div>
+                <div class="text-xs text-zinc-500">Interactive strategy game</div>
+              </a>
+              <a href="https://solutionwrightwebsite.vercel.app/" target="_blank" class="p-3 border rounded hover:border-blue-300 hover:bg-blue-50 transition-colors block">
+                <div class="font-semibold text-sm">SolutionWright</div>
+                <div class="text-xs text-zinc-500">Coming soon &mdash; AI solution delivery platform</div>
+              </a>
+            </div>
+          </div>
+
+          <div id="about-build" class="guide-section space-y-3">
+            <h3 class="text-lg font-semibold text-zinc-800">How This Was Built</h3>
+            <p class="text-sm text-zinc-600 leading-relaxed">JidoBuilder v2 was built in <strong>under 3 calendar days</strong>. The builder folder was created on April 11, 2026 at 4:46 PM CDT. By April 13, 2026 at 1:12 AM CDT &mdash; approximately 33 hours later &mdash; the platform had 388 passing tests, 15 interactive LiveView pages, 13 MCP tools, 61 registered actions, a full Active Inference perception-action loop with real-time SVG visualization, an LLM strategy with tool bridging across 3 providers, a composable Agent Factory with team deployment, and an interactive Elixir notebook with persistent bindings. Built entirely using AI-assisted development with the ORCHESTRATE Method.</p>
+            <div class="p-4 bg-emerald-50 border border-emerald-200 rounded text-sm text-emerald-800">
+              <p class="font-semibold">Founding Partner seats are open.</p>
+              <p class="mt-1">Interested in partnering on AI agent delivery? Email <a href="mailto:mpolzin@zimzap.com" class="underline font-semibold">mpolzin@zimzap.com</a> to learn more.</p>
+            </div>
+          </div>
+        </section>
+
         <%!-- Footer --%>
-        <footer class="border-t pt-6 text-center text-sm text-zinc-400">
+        <footer class="border-t pt-6 text-center text-sm text-zinc-400 space-y-2">
           <p>Jido Builder v0.1.0 &mdash; Built on the <a href="https://hexdocs.pm/jido" class="text-emerald-600 hover:underline">Jido Agent Framework</a></p>
+          <p>Built on <a href="https://www.amazon.com/ORCHESTRATE-Prompting-Professional-AI-Outputs-ebook/dp/B0G2B9LG6V" class="text-emerald-600 hover:underline">The ORCHESTRATE Method</a> | Wisdom from <a href="https://www.amazon.com/Run-Rhythm-Build-business-doesnt-ebook/dp/B0G1Y8L9D7" class="text-emerald-600 hover:underline">Run on Rhythm</a> | <a href="https://iamhitl.com" class="text-emerald-600 hover:underline">IAMHITL.com</a></p>
+          <p>&copy; 2026 <a href="https://www.linkedin.com/in/mpolzin/" class="text-emerald-600 hover:underline">Michael Polzin</a> &mdash; <a href="mailto:mpolzin@zimzap.com" class="text-emerald-600 hover:underline">mpolzin@zimzap.com</a></p>
         </footer>
 
       </article>
