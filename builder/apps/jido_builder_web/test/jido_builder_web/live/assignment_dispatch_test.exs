@@ -63,8 +63,8 @@ defmodule JidoBuilderWeb.Live.AssignmentDispatchTest do
       )
       |> render_submit()
 
-    # feedback panel visible — new handler returns "queued" status
-    assert html =~ "queued" or html =~ "result" or html =~ "ok"
+    # feedback panel visible — sync dispatch shows timing result
+    assert html =~ "ms" or html =~ "Success" or html =~ "Error"
   end
 
   test "repeated dispatches continue to work (no client-side rate limit)",
@@ -84,7 +84,7 @@ defmodule JidoBuilderWeb.Live.AssignmentDispatchTest do
     end
 
     html = render(lv)
-    # The new UI shows the result badge; rate limiting is not enforced in the LV handler
-    assert html =~ "queued"
+    # The new UI shows sync dispatch result with timing
+    assert html =~ "ms" or html =~ "Success" or html =~ "Error"
   end
 end

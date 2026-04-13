@@ -118,6 +118,61 @@ defmodule JidoBuilderCore.Observability do
     |> log_directive(actor)
   end
 
+  @doc """
+  Returns all signal_logs and directive_logs matching a given correlation_id
+  within a workspace. Used to trace the full execution lifecycle of a dispatch.
+  """
+  @spec get_by_correlation_id(pos_integer(), String.t()) :: %{
+          signal_logs: [SignalLog.t()],
+          directive_logs: [DirectiveLog.t()]
+        }
+  def get_by_correlation_id(workspace_id, correlation_id) do
+    signal_logs =
+      from(log in SignalLog,
+        where: log.workspace_id == ^workspace_id and log.correlation_id == ^correlation_id,
+        order_by: [asc: log.inserted_at]
+      )
+      |> Repo.all()
+
+    directive_logs =
+      from(log in DirectiveLog,
+        where: log.workspace_id == ^workspace_id and log.correlation_id == ^correlation_id,
+        order_by: [asc: log.inserted_at]
+      )
+      |> Repo.all()
+
+    %{signal_logs: signal_logs, directive_logs: directive_logs}
+  end
+
+  @doc "Returns signal_logs for a specific agent instance."
+  def list_agent_signals(agent_instance_id, opts \\ []) do
+    limit = Keyword.get(opts, :limit, 100)
+
+    from(log in SignalLog,
+      where: log.agent_instance_id == ^agent_instance_id,
+      order_by: [desc: log.inserted_at],
+      limit: ^limit
+    )
+    |> Repo.all()
+  end
+
+  @doc "Counts signal_logs for a specific agent instance."
+  def count_agent_signals(agent_instance_id) do
+    from(log in SignalLog, where: log.agent_instance_id == ^agent_instance_id)
+    |> Repo.aggregate(:count)
+  end
+
+  @doc "Counts error directive_logs for a specific agent."
+  def count_agent_errors(workspace_id, agent_name) do
+    from(log in DirectiveLog,
+      where:
+        log.workspace_id == ^workspace_id and
+          log.directive_type == "runtime.error" and
+          fragment("json_extract(payload, '$.agent_id') = ?", ^agent_name)
+    )
+    |> Repo.aggregate(:count)
+  end
+
   def list_recent_signals(workspace_id, opts \\ []) do
     workspace_id
     |> signal_query()

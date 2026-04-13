@@ -10,7 +10,7 @@ defmodule JidoBuilderWeb.Live.WorkflowLifecycleTest do
 
     assert html =~ "Workflow List"
     assert html =~ "Canvas"
-    assert html =~ "Node Config"
+    assert html =~ "Execution"
     assert html =~ ~s(phx-hook="WorkflowDag")
   end
 end

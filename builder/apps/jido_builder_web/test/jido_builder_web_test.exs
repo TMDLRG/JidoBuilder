@@ -40,10 +40,10 @@ defmodule JidoBuilderWeb.LiveFlowsTest do
 
   test "workflow builder renders canvas and panels", %{conn: conn} do
     {:ok, _view, html} = live(conn, ~p"/workflows")
-    # The new workflow builder has a 3-panel layout with Canvas, Workflow List, Node Config
+    # The new workflow builder has a 3-panel layout with Canvas, Workflow List, Execution
     assert html =~ "Canvas"
     assert html =~ "Workflow List"
-    assert html =~ "Node Config"
+    assert html =~ "Execution"
     assert html =~ "workflow-dag"
   end
 
