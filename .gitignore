@@ -34,7 +34,13 @@ jido-*.tar
 # expublish
 RELEASE.md
 
-# Local Notes
+# Local Notes & Development Plans
 NOTES.md
 PLAN.md
 plans/
+*_PLAN.md
+*_KICKOFF.md
+CODEX_PROMPT.md
+deep-research-report.md
+usage-rules.md
+OCD_SWEEP_PLAN.md

@@ -1,5 +1,8 @@
 JidoBuilder
-Copyright 2026 JidoBuilder Contributors
+Copyright (c) 2026 Michael Polzin (mpolzin@zimzap.com)
+
+Licensed under the PolyForm Noncommercial License 1.0.0.
+See LICENSE for full terms. For commercial licensing, contact mpolzin@zimzap.com.
 
 This product is built for and integrates with the Jido autonomous agent
 framework. Releases of JidoBuilder may include code from the Jido project.
@@ -25,10 +28,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-The name "Jido" (自動) comes from the Japanese word meaning "automatic" or
+The name "Jido" comes from the Japanese word meaning "automatic" or
 "automated". Jido is a trademark of its respective owners. Use of the Jido
 name in JidoBuilder is for descriptive purposes to indicate compatibility
 and is not intended to imply endorsement.
+
+Any Jido code included in JidoBuilder releases remains under Apache 2.0.
+Only original JidoBuilder code is covered by the PolyForm Noncommercial License.
 
 ================================================================================
 
@@ -37,3 +43,6 @@ Additional third-party notices:
 Phoenix Framework - https://phoenixframework.org/ - MIT License
 Phoenix LiveView - https://github.com/phoenixframework/phoenix_live_view - MIT License
 Ecto - https://github.com/elixir-ecto/ecto - Apache 2.0 License
+
+Additional dependencies are listed in builder/mix.lock and retain their
+original licenses (MIT, Apache-2.0, or as specified by each package).

@@ -84,6 +84,33 @@ defmodule JidoBuilderRuntime.LLM.Providers.OpenAI do
       else: body
   end
 
+  defp format_message(%{tool_use: %ToolUse{} = tu} = msg) do
+    base = %{
+      "role" => "assistant",
+      "content" => msg[:content],
+      "tool_calls" => [
+        %{
+          "id" => tu.id,
+          "type" => "function",
+          "function" => %{
+            "name" => tu.name,
+            "arguments" => Jason.encode!(tu.arguments || %{})
+          }
+        }
+      ]
+    }
+
+    base
+  end
+
+  defp format_message(%{tool_use_id: tool_use_id} = msg) when is_binary(tool_use_id) do
+    %{
+      "role" => "tool",
+      "tool_call_id" => tool_use_id,
+      "content" => msg[:content] || ""
+    }
+  end
+
   defp format_message(msg) do
     %{
       "role" => msg[:role] || msg["role"],

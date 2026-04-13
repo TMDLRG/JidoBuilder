@@ -15,9 +15,11 @@ defmodule JidoBuilderRuntime.DynamicAgent do
       runtime_state: [type: :map, default: %{}]
     ]
 
-  alias JidoBuilderCore.Templates.Template
+  alias JidoBuilderCore.Templates.{Template, TemplateLlmConfig}
   alias JidoBuilderCore.Repo
   alias JidoBuilderRuntime.{Dispatch, DynamicPlugin, DynamicSensor, Error}
+
+  import Ecto.Query, only: [from: 2]
 
   @spec from_template(pos_integer(), map()) :: {:ok, Jido.Agent.t()} | {:error, Error.t()}
   def from_template(template_id, attrs \\ %{}) when is_integer(template_id) and is_map(attrs) do
@@ -28,11 +30,13 @@ defmodule JidoBuilderRuntime.DynamicAgent do
          {:ok, action_slugs} <- action_slug_allow_list(template_id),
          {:ok, plugins} <- DynamicPlugin.mounts_for_template(template_id),
          {:ok, sensors} <- DynamicSensor.mounts_for_template(template_id) do
+      llm_config = Repo.one(from c in TemplateLlmConfig, where: c.template_id == ^template_id, limit: 1)
+
       state =
         attrs
         |> Map.put(:template_id, template_id)
         |> Map.put_new(:enabled_action_slugs, action_slugs)
-        |> Map.put_new(:runtime_state, %{plugins: plugins, sensors: sensors})
+        |> Map.put_new(:runtime_state, %{plugins: plugins, sensors: sensors, llm_config: llm_config})
 
       try do
         agent = __MODULE__.new(state: state)

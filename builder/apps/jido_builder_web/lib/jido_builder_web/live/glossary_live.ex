@@ -25,7 +25,22 @@ defmodule JidoBuilderWeb.GlossaryLive do
     %{term: "Notebook", definition: "A LiveBook-style interactive code editor for building and testing agents with persistent bindings."},
     %{term: "Factory", definition: "A meta-system for creating, composing, versioning, and deploying agent templates."},
     %{term: "Markov Blanket", definition: "A statistical boundary separating an agent's internal states from external environment states."},
-    %{term: "Expected Free Energy", definition: "A score for ranking action policies that decomposes into epistemic value (information gain) and pragmatic value (preference alignment)."}
+    %{term: "Expected Free Energy", definition: "A score for ranking action policies that decomposes into epistemic value (information gain) and pragmatic value (preference alignment)."},
+    # -- LLM & conversation terms --
+    %{term: "LlmChat", definition: "A Jido Action that implements a recursive agentic tool-use loop: calls the LLM, executes tool requests, feeds results back, and repeats until a text response is returned."},
+    %{term: "Tool Whitelist", definition: "A per-template list of action slugs that controls which Jido Actions are exposed to the LLM as callable tools."},
+    %{term: "Tool Bridge", definition: "The module that converts Jido Actions into LLM-compatible tool schemas and routes tool_use responses back to action execution."},
+    %{term: "Conversation", definition: "A managed message history for multi-turn LLM interactions, with system prompt injection, token tracking, and automatic truncation."},
+    %{term: "Conversation Persistence", definition: "Database-backed storage of chat messages grouped by conversation thread ID, enabling history reload across sessions."},
+    %{term: "Memory Space", definition: "A named key-value store that agents can read from, write to, and search — enabling persistent knowledge across conversations."},
+    %{term: "Workflow", definition: "A directed graph of steps (actions, emits, conditions, transforms) that defines a multi-step agent process."},
+    %{term: "Signal Route", definition: "A mapping from a signal type to an action module within a template, determining how an agent handles each signal."},
+    %{term: "Identity Profile", definition: "A persona configuration for an agent, including name, persona description, and capabilities list."},
+    %{term: "Thread", definition: "A named conversation context within a template, used to scope chat history and memory operations."},
+    %{term: "Resource Pool", definition: "A managed set of shared resources (connections, workers) that agents check out and return, with configurable size and overflow limits."},
+    %{term: "Block", definition: "A reusable building block (action, agent, plugin, sensor, or strategy) that can be validated and composed into templates."},
+    %{term: "FSM Strategy", definition: "A state-machine-driven signal processing strategy where transitions are determined by signal type."},
+    %{term: "Direct Strategy", definition: "A signal processing strategy that immediately applies all operations in sequence without state-machine transitions."}
   ]
 
   @impl true
