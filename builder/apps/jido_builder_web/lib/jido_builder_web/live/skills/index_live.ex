@@ -5,8 +5,12 @@ defmodule JidoBuilderWeb.Skills.IndexLive do
   alias JidoBuilderRuntime.Discovery
 
   @impl true
-  def mount(_params, _session, socket) do
-    context = %{workspace_id: 1, actor: "web"}
+  def mount(params, _session, socket) do
+    workspace_id = case params do
+      %{"workspace_id" => id} -> case Integer.parse(id) do {n, ""} -> n; _ -> 1 end
+      _ -> 1
+    end
+    context = %{workspace_id: workspace_id, actor: "web"}
     actions = case Discovery.list_actions(context) do {:ok, list} -> list; _ -> [] end
 
     {:ok,
@@ -42,23 +46,23 @@ defmodule JidoBuilderWeb.Skills.IndexLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
 
     <form phx-change="filter" class="my-3 max-w-md">
-      <input type="text" name="q" value={@query} placeholder="Search actions" class="border rounded px-2 py-1 w-full text-sm" />
+      <.input_field name="q" value={@query} placeholder="Search actions" />
     </form>
 
     <ul id="skills-list" class="space-y-2 text-sm">
       <li :for={{action, idx} <- Enum.with_index(@filtered)} class="border-b pb-2">
         <button type="button" phx-click="select" phx-value-idx={idx} class="text-left w-full">
-          <span class="font-semibold"><%= action_name(action) %></span>
+          <span class="font-semibold">{action_name(action)}</span>
         </button>
       </li>
     </ul>
 
     <p :if={@filtered == []} class="text-sm text-zinc-500 mt-4">No actions match your search.</p>
 
-    <div :if={@selected} id="skill-detail" class="mt-6 rounded border p-3 text-xs font-mono whitespace-pre-wrap"><%= inspect(@selected, pretty: true) %></div>
+    <div :if={@selected} id="skill-detail" class="mt-6 rounded border p-3 text-xs font-mono whitespace-pre-wrap">{inspect(@selected, pretty: true)}</div>
     """
   end
 

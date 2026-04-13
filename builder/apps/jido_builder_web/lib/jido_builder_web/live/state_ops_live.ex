@@ -52,7 +52,7 @@ defmodule JidoBuilderWeb.StateOpsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
     <p class="text-sm text-zinc-500 mb-4">
       Compose and preview state operations against a sample agent state.
     </p>
@@ -60,32 +60,23 @@ defmodule JidoBuilderWeb.StateOpsLive do
     <.card class="max-w-xl">
       <:header>Apply State Op</:header>
       <form id="state-ops-form" phx-submit="apply_op" class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium mb-1">Operation</label>
-          <select name="state_op[op]" class="border rounded px-2 py-1 w-full text-sm font-mono">
-            <option :for={op <- @ops} value={op}>{op}</option>
-          </select>
-        </div>
+        <.select_field name="state_op[op]" label="Operation">
+          <option :for={op <- @ops} value={op}>{op}</option>
+        </.select_field>
 
-        <div>
-          <label class="block text-xs font-medium mb-1">Current State (JSON)</label>
-          <textarea
-            name="state_op[state_json]"
-            rows="4"
-            placeholder="{&quot;key&quot;: &quot;value&quot;}"
-            class="border rounded px-2 py-1 w-full text-sm font-mono"
-          ></textarea>
-        </div>
+        <.textarea_field
+          name="state_op[state_json]"
+          label="Current State (JSON)"
+          rows={4}
+          placeholder="{&quot;key&quot;: &quot;value&quot;}"
+        />
 
-        <div>
-          <label class="block text-xs font-medium mb-1">Payload (JSON)</label>
-          <textarea
-            name="state_op[payload_json]"
-            rows="4"
-            placeholder="{&quot;new_key&quot;: &quot;new_value&quot;}"
-            class="border rounded px-2 py-1 w-full text-sm font-mono"
-          ></textarea>
-        </div>
+        <.textarea_field
+          name="state_op[payload_json]"
+          label="Payload (JSON)"
+          rows={4}
+          placeholder="{&quot;new_key&quot;: &quot;new_value&quot;}"
+        />
 
         <.button>Apply Op</.button>
       </form>

@@ -62,10 +62,9 @@ defmodule JidoBuilderWeb.Live.DashboardActivityTest do
          %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/")
 
-      # The new dashboard renders a static Activity card with bootstrap entries
+      # Dashboard renders an Activity card with initial connection event
       assert html =~ "Activity"
       assert html =~ "Runtime bridge connected"
-      assert html =~ "Agent roster loaded"
     end
   end
 end

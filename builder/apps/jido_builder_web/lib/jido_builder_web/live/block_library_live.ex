@@ -30,7 +30,7 @@ defmodule JidoBuilderWeb.BlockLibraryLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
     <p class="text-sm text-zinc-500 mb-4">Browse and validate codegen block definitions.</p>
 
     <.card class="mb-6">

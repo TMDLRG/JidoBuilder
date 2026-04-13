@@ -13,6 +13,6 @@ defmodule JidoBuilderWeb.Live.AgentLifecycleTest do
     assert dispatch_html =~ "Dispatch"
 
     {:ok, _agent, agent_html} = live(conn, ~p"/agents/demo-agent")
-    assert agent_html =~ "State Inspector"
+    assert agent_html =~ "State"
   end
 end

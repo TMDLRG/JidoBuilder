@@ -83,6 +83,13 @@ defmodule JidoBuilderCore.Templates do
     |> maybe_audit(actor, "templates.delete")
   end
 
+  def list_routes(template_id) when is_integer(template_id) do
+    TemplateRoute
+    |> where([r], r.template_id == ^template_id)
+    |> order_by([r], asc: r.signal)
+    |> Repo.all()
+  end
+
   def create_route(attrs, actor),
     do: insert_with_audit(TemplateRoute, attrs, actor, "templates.routes.create")
 

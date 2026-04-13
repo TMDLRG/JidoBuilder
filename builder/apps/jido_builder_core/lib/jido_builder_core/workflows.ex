@@ -33,6 +33,13 @@ defmodule JidoBuilderCore.Workflows do
     |> Repo.delete_all()
   end
 
+  def delete_workflow_step(step), do: Repo.delete(step)
+
+  def delete_workflow(workflow) do
+    delete_workflow_steps(workflow.id)
+    Repo.delete(workflow)
+  end
+
   def create_workflow(attrs, actor),
     do: insert_with_audit(Workflow, attrs, actor, "workflows.create")
 

@@ -40,7 +40,7 @@ defmodule JidoBuilderWeb.EjectorLive do
   def render(assigns) do
     ~H"""
     <div id="ejector-hook" phx-hook="Download">
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
     <p class="text-sm text-zinc-500 mb-4">Export a block definition as a standalone Elixir module (no compile).</p>
 
     <.card class="max-w-md">

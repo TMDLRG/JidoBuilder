@@ -43,7 +43,7 @@ defmodule JidoBuilderWeb.HierarchyLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
     <p class="text-sm text-zinc-500 mb-4">Agent parent/child relationships via pod topology.</p>
 
     <section class="mt-4 max-w-lg">
@@ -53,14 +53,14 @@ defmodule JidoBuilderWeb.HierarchyLive do
           <label class="block text-xs font-medium mb-1">Pod (Topology)</label>
           <select name="node[pod_topology_id]" class="border rounded px-2 py-1 w-full text-sm">
             <option value="">— select —</option>
-            <option :for={topo <- @topologies} value={topo.id}><%= topo.name %></option>
+            <option :for={topo <- @topologies} value={topo.id}>{topo.name}</option>
           </select>
         </div>
         <div>
           <label class="block text-xs font-medium mb-1">Agent Instance</label>
           <select name="node[agent_instance_id]" class="border rounded px-2 py-1 w-full text-sm">
             <option value="">— select —</option>
-            <option :for={inst <- @instances} value={inst.id}><%= inst.name %></option>
+            <option :for={inst <- @instances} value={inst.id}>{inst.name}</option>
           </select>
         </div>
         <div>
@@ -83,7 +83,7 @@ defmodule JidoBuilderWeb.HierarchyLive do
         </div>
         <.button>Add Node</.button>
       </form>
-      <p :if={@form_error} class="mt-2 text-red-600 text-xs"><%= @form_error %></p>
+      <p :if={@form_error} class="mt-2 text-red-600 text-xs">{@form_error}</p>
     </section>
 
     <section class="mt-8">
@@ -91,15 +91,15 @@ defmodule JidoBuilderWeb.HierarchyLive do
       <.empty_state :if={@topologies == []} title="No topologies" description="No pod topologies in this workspace." icon="users" />
       <div :for={topo <- @topologies} id={"topo-#{topo.id}"} class="mb-6 border rounded p-3">
         <h3 class="font-semibold text-sm mb-2">
-          <span><%= topo.name %></span>
-          <span class="ml-2 text-xs text-zinc-400">strategy: <%= topo.strategy %></span>
+          <span>{topo.name}</span>
+          <span class="ml-2 text-xs text-zinc-400">strategy: {topo.strategy}</span>
         </h3>
         <ul class="pl-4 space-y-1 text-xs">
           <li :for={node <- topo.nodes} id={"node-#{node.id}"} class="flex items-center gap-2">
-            <span class="font-medium"><%= node.name %></span>
-            <span class="text-zinc-400">role: <%= node.role %></span>
+            <span class="font-medium">{node.name}</span>
+            <span class="text-zinc-400">role: {node.role}</span>
             <span :if={node.agent_instance} class="text-zinc-600">
-              → <%= node.agent_instance.name %>
+              → {node.agent_instance.name}
             </span>
           </li>
           <li :if={topo.nodes == []} class="text-zinc-400 italic">No nodes yet.</li>

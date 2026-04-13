@@ -42,6 +42,7 @@ defmodule JidoBuilderRuntime.Context do
     extra
     |> Map.put(:workspace_id, ctx.workspace_id)
     |> maybe_put(:agent_instance_id, Map.get(ctx, :agent_instance_id))
+    |> maybe_put(:correlation_id, Map.get(ctx, :correlation_id))
   end
 
   defp maybe_put(map, _key, nil), do: map

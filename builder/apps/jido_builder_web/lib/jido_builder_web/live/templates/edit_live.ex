@@ -44,7 +44,7 @@ defmodule JidoBuilderWeb.Templates.EditLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header><%= @page_title %></.page_header>
+    <.page_header>{@page_title}</.page_header>
 
     <.card class="mt-4 max-w-lg">
       <:header>Edit {@template.name}</:header>

@@ -31,8 +31,8 @@ defmodule JidoBuilderWeb.Live.AgentDetailTest do
     assert html =~ name
     # Page header is "Agent Detail"
     assert html =~ "Agent Detail"
-    # State Inspector tab button exists; clicking it reveals state content
-    html_state = lv |> element("button", "State Inspector") |> render_click()
+    # State tab button exists; clicking it reveals state content
+    html_state = lv |> element("[phx-click=tab][phx-value-name=state]") |> render_click()
     assert html_state =~ "State Inspector"
   end
 

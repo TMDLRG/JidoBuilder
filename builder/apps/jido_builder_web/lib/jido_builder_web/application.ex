@@ -8,6 +8,7 @@ defmodule JidoBuilderWeb.Application do
     children = [
       {Phoenix.PubSub, name: JidoBuilder.PubSub},
       JidoBuilderWeb.Telemetry,
+      JidoBuilderWeb.MCP.SseSessionStore,
       JidoBuilderWeb.Endpoint
     ]
 

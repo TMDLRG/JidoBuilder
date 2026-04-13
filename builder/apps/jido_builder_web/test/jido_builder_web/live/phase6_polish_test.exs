@@ -35,9 +35,9 @@ defmodule JidoBuilderWeb.Live.Phase6PolishTest do
     assert html =~ "incident-room"
   end
 
-  test "create memory space", %{conn: conn, workspace: ws} do
-    {:ok, lv, _} = live(conn, ~p"/memory?workspace_id=#{ws.id}")
-    html = lv |> form("#memory-form", space: %{name: "knowledge-base"}) |> render_submit()
+  test "create memory space", %{conn: conn} do
+    {:ok, lv, _} = live(conn, ~p"/memory")
+    html = render_click(lv, "create_space", %{"space" => %{"name" => "knowledge-base"}})
     assert html =~ "knowledge-base"
   end
 
@@ -52,16 +52,18 @@ defmodule JidoBuilderWeb.Live.Phase6PolishTest do
     assert html =~ "Helper"
   end
 
-  test "step 1 links to workspaces", %{conn: conn} do
-    {:ok, lv, _} = live(conn, ~p"/onboarding")
-    assert lv |> element("#step-1-do-it") |> render() =~ "/workspaces"
+  test "step 1 shows workspace creation form", %{conn: conn} do
+    {:ok, _lv, html} = live(conn, ~p"/onboarding")
+    assert html =~ "Create a Workspace"
+    assert html =~ "onboarding-form"
   end
 
-  test "step 3 links to roster", %{conn: conn} do
+  test "step 3 shows agent hire form", %{conn: conn} do
     {:ok, lv, _} = live(conn, ~p"/onboarding")
-    _ = lv |> element("button[phx-click=next]") |> render_click()
-    _ = lv |> element("button[phx-click=next]") |> render_click()
-    assert lv |> element("#step-3-do-it") |> render() =~ "/roster"
+    _ = lv |> element("#skip-step") |> render_click()
+    _ = lv |> element("#skip-step") |> render_click()
+    html = render(lv)
+    assert html =~ "Hire an Agent"
   end
 
   test "toggle debug", %{conn: conn, workspace: ws} do
