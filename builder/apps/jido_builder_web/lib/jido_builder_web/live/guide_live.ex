@@ -115,9 +115,12 @@ defmodule JidoBuilderWeb.GuideLive do
       icon: "cpu_chip",
       children: [
         %{id: "configuring-llm-provider", title: "Configuring an LLM Provider"},
-        %{id: "creating-llm-agent", title: "Creating an LLM Agent"},
+        %{id: "tool-whitelist", title: "Tool Whitelist"},
+        %{id: "llm-agent-wizard", title: "LLM Agent Wizard"},
+        %{id: "creating-llm-agent", title: "The LlmChat Action"},
         %{id: "tool-use-conversations", title: "Tool Use and Conversations"},
-        %{id: "memory-augmented-agents", title: "Memory-Augmented Agents"}
+        %{id: "memory-augmented-agents", title: "Memory-Augmented Agents"},
+        %{id: "conversation-persistence", title: "Conversation Persistence"}
       ]
     },
     %{
@@ -594,7 +597,10 @@ defmodule JidoBuilderWeb.GuideLive do
               The Audit page provides a chronological record of all administrative actions:
               agent hires/stops, template changes, workflow modifications, and configuration
               updates. Each entry shows the actor (user email), action type, timestamp,
-              and affected resource.
+              and affected resource. Use the <strong>Refresh</strong> button to reload events
+              and the <strong>action filter dropdown</strong> to narrow the list to a specific
+              action type (e.g., <code>roster.hire</code>, <code>templates.update</code>).
+              The event count updates dynamically as you filter.
             </p>
           </div>
 
@@ -668,8 +674,11 @@ defmodule JidoBuilderWeb.GuideLive do
           <div id="vault" class="guide-section space-y-3">
             <h3 class="text-lg font-semibold text-zinc-800">Vault</h3>
             <p class="text-sm text-zinc-600 leading-relaxed">
-              The Vault provides secure storage for sensitive configuration that agents
-              may need at runtime, separate from the Settings integration secrets.
+              The Vault stores agent snapshots for hibernate/thaw operations. Use the
+              <strong>Refresh</strong> button to reload the snapshot list. Each snapshot
+              shows its label, linked agent, and capture timestamp. Click <strong>Thaw</strong>
+              to restore an agent from a snapshot, or <strong>Delete</strong> to remove it.
+              When no snapshots exist, a clean empty state is shown.
             </p>
           </div>
 
@@ -800,21 +809,69 @@ defmodule JidoBuilderWeb.GuideLive do
         <%!-- ═══════════════════════════════════════════ --%>
         <section id="llm-agents" class="guide-section space-y-6">
           <h2 class="text-2xl font-bold text-zinc-900 border-b pb-3">LLM Agents</h2>
+
           <div id="configuring-llm-provider" class="guide-section space-y-3">
             <h3 class="text-lg font-semibold text-zinc-800">Configuring an LLM Provider</h3>
-            <p class="text-sm text-zinc-600 leading-relaxed">JidoBuilder supports three LLM providers: Anthropic (Claude), OpenAI (GPT-4), and a deterministic Mock provider for testing. Visit the LLM Config page to select a provider and model, adjust temperature and max tokens, write a system prompt, and save the configuration. The model dropdown updates dynamically when you switch providers.</p>
+            <p class="text-sm text-zinc-600 leading-relaxed">JidoBuilder supports three LLM providers: <strong>Anthropic</strong> (Claude Sonnet, Haiku), <strong>OpenAI</strong> (GPT-4, GPT-4o), and a deterministic <strong>Mock</strong> provider for development. Navigate to <strong>LLM Config</strong> in the sidebar to configure:</p>
+            <ul class="text-sm text-zinc-600 list-disc pl-5 space-y-1">
+              <li><strong>Provider &amp; Model</strong> &mdash; the model dropdown updates dynamically when you switch providers.</li>
+              <li><strong>Temperature</strong> (0&ndash;2) &mdash; controls response creativity.</li>
+              <li><strong>Max Tokens</strong> &mdash; upper bound on response length.</li>
+              <li><strong>System Prompt</strong> &mdash; the persona and instructions for your agent.</li>
+            </ul>
+            <p class="text-sm text-zinc-600 leading-relaxed">API keys are resolved from the <strong>Settings &gt; Secrets</strong> page (ANTHROPIC_API_KEY or OPENAI_API_KEY) or from environment variables. If no key is available, the system falls back to the Mock provider.</p>
           </div>
+
+          <div id="tool-whitelist" class="guide-section space-y-3">
+            <h3 class="text-lg font-semibold text-zinc-800">Tool Whitelist</h3>
+            <p class="text-sm text-zinc-600 leading-relaxed">Below the provider settings on the LLM Config page, the <strong>Tool Whitelist</strong> section displays every registered action as a checkbox, organized by category (Code, Data, File, Integration, Memory, Notification, Search, State, Transform, Utility, Web). Check the actions you want the LLM to invoke as tools. Only whitelisted actions are exposed to the LLM &mdash; this gives you precise control over what your agent can do. The counter updates live as you toggle checkboxes. Click <strong>Save Configuration</strong> to persist your selection; it will be retained across page reloads.</p>
+          </div>
+
+          <div id="llm-agent-wizard" class="guide-section space-y-3">
+            <h3 class="text-lg font-semibold text-zinc-800">LLM Agent Wizard</h3>
+            <p class="text-sm text-zinc-600 leading-relaxed">The fastest way to create an LLM-backed agent is the 4-step wizard at <code>/agents/new/llm</code>:</p>
+            <ol class="text-sm text-zinc-600 list-decimal pl-5 space-y-1">
+              <li><strong>Agent Identity</strong> &mdash; enter a name and optional description.</li>
+              <li><strong>LLM Configuration</strong> &mdash; choose provider, model, temperature, max tokens, and write a system prompt.</li>
+              <li><strong>Tool Selection</strong> &mdash; check the actions your agent should be able to call (same categories as the LLM Config page).</li>
+              <li><strong>Review &amp; Create</strong> &mdash; verify all settings and click <strong>Create Agent</strong>.</li>
+            </ol>
+            <p class="text-sm text-zinc-600 leading-relaxed">The wizard creates a Template, TemplateLlmConfig, and a <code>jido.chat.message</code> signal route in a single database transaction. After creation, use the <strong>View Agents</strong> or <strong>Configure LLM</strong> links to continue.</p>
+          </div>
+
           <div id="creating-llm-agent" class="guide-section space-y-3">
-            <h3 class="text-lg font-semibold text-zinc-800">Creating an LLM Agent</h3>
-            <p class="text-sm text-zinc-600 leading-relaxed">An LLM agent uses the LLM Strategy to process messages. It converts available actions into LLM tool schemas, sends the conversation to the provider, and executes any tool_use responses in a loop until the LLM returns a text response or hits the iteration limit.</p>
+            <h3 class="text-lg font-semibold text-zinc-800">The LlmChat Action</h3>
+            <p class="text-sm text-zinc-600 leading-relaxed">At the core of every LLM agent is the <code>LlmChat</code> action &mdash; a standard Jido Action that implements a recursive agentic tool-use loop:</p>
+            <ol class="text-sm text-zinc-600 list-decimal pl-5 space-y-1">
+              <li>Receives a user message and the current conversation history.</li>
+              <li>Converts whitelisted action modules into LLM tool schemas via the Tool Bridge.</li>
+              <li>Calls the LLM provider with the conversation and tool definitions.</li>
+              <li>If the LLM returns a <code>tool_use</code> response, executes the action via <code>Jido.Exec.run</code>, feeds the result back into the conversation, and loops.</li>
+              <li>If the LLM returns a text response, the loop ends and the reply is returned.</li>
+              <li>A configurable iteration ceiling (default 10) prevents runaway loops.</li>
+            </ol>
+            <p class="text-sm text-zinc-600 leading-relaxed">The Agent Chat UI at <code>/agents/:id/chat</code> dispatches messages through this action asynchronously. While the LLM is processing, a <em>thinking&hellip;</em> indicator is shown and the input is disabled. Tool calls are displayed as amber blocks between the user and assistant messages for full transparency.</p>
           </div>
+
           <div id="tool-use-conversations" class="guide-section space-y-3">
             <h3 class="text-lg font-semibold text-zinc-800">Tool Use and Conversations</h3>
-            <p class="text-sm text-zinc-600 leading-relaxed">The Tool Bridge converts Jido Actions into LLM-compatible tool definitions automatically via Action.Tool.to_tool/1. When the LLM requests a tool call, the bridge resolves the action, converts parameters, executes it, and formats the result back into the conversation.</p>
+            <p class="text-sm text-zinc-600 leading-relaxed">The <strong>Tool Bridge</strong> (<code>ToolBridge</code>) converts Jido Actions into LLM-compatible tool definitions automatically via <code>Action.Tool.to_tool/1</code>. When the LLM requests a tool call, the bridge resolves the matching action module, converts parameters using the action&rsquo;s schema, executes via <code>Jido.Exec.run/3</code>, and formats the result back into the conversation as a <code>tool_result</code> message. Both Anthropic and OpenAI message formats are supported &mdash; the provider adapters handle the format differences (Anthropic uses content arrays with <code>tool_use</code>/<code>tool_result</code> blocks; OpenAI uses <code>tool_calls</code> and <code>tool</code> role messages).</p>
           </div>
+
           <div id="memory-augmented-agents" class="guide-section space-y-3">
             <h3 class="text-lg font-semibold text-zinc-800">Memory-Augmented Agents</h3>
-            <p class="text-sm text-zinc-600 leading-relaxed">LLM agents can read from and write to Memory spaces using three built-in tool actions: MemoryRead, MemoryWrite, and MemorySearch. This enables persistent knowledge storage across conversations.</p>
+            <p class="text-sm text-zinc-600 leading-relaxed">Three built-in Memory actions are registered in the Action Registry and available in the Tool Whitelist:</p>
+            <ul class="text-sm text-zinc-600 list-disc pl-5 space-y-1">
+              <li><strong>Memory Read</strong> &mdash; retrieves a value by key from a named memory space.</li>
+              <li><strong>Memory Write</strong> &mdash; stores a key-value pair in a memory space.</li>
+              <li><strong>Memory Search</strong> &mdash; searches a memory space by pattern.</li>
+            </ul>
+            <p class="text-sm text-zinc-600 leading-relaxed">Enable these in the Tool Whitelist to give your LLM agent persistent knowledge storage. The agent can remember facts across conversations and recall them when relevant.</p>
+          </div>
+
+          <div id="conversation-persistence" class="guide-section space-y-3">
+            <h3 class="text-lg font-semibold text-zinc-800">Conversation Persistence</h3>
+            <p class="text-sm text-zinc-600 leading-relaxed">Chat messages are automatically persisted to the database. Each conversation is identified by a unique thread ID. The Agent Chat page saves every user message, tool call, tool result, and assistant reply as they occur. Use the <strong>New Chat</strong> button to start a fresh thread. When previous conversations exist, a sidebar lists them with message counts; click a thread to reload its full history. Threads can be deleted individually.</p>
           </div>
         </section>
 
