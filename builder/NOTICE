@@ -1,0 +1,36 @@
+JidoBuilder
+Copyright 2026 JidoBuilder Contributors
+https://github.com/TMDLRG/JidoBuilder
+
+Licensed under the PolyForm Noncommercial License 1.0.0.
+See LICENSE for terms.
+
+================================================================================
+
+This software is built for and integrates with:
+
+Jido - Autonomous Agent Framework for Elixir
+https://github.com/agentjido/jido
+https://jido.run
+
+Copyright 2019 Parker Selbert
+Copyright 2024-2026 Mike Hostetler and Jido Contributors
+
+Jido is licensed under the Apache License, Version 2.0.
+You may obtain a copy of the Apache License at:
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Releases of JidoBuilder may include or link to Jido code. Any such Jido
+code remains governed by the Apache License 2.0 and is copyright its
+respective authors. The PolyForm Noncommercial License applies only to
+original JidoBuilder code.
+
+================================================================================
+
+Third-party dependencies (see mix.lock for versions):
+
+Phoenix Framework - MIT License - https://phoenixframework.org/
+Phoenix LiveView - MIT License - https://github.com/phoenixframework/phoenix_live_view
+Ecto - Apache 2.0 License - https://github.com/elixir-ecto/ecto
+Tailwind CSS - MIT License - https://tailwindcss.com/
+D3.js - ISC License - https://d3js.org/

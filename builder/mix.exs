@@ -1,11 +1,16 @@
 defmodule Builder.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+
   def project do
     [
       apps_path: "apps",
-      version: "0.1.0",
+      version: @version,
       start_permanent: Mix.env() == :prod,
+      name: "JidoBuilder",
+      source_url: "https://github.com/TMDLRG/JidoBuilder",
+      homepage_url: "https://github.com/TMDLRG/JidoBuilder",
       aliases: aliases(),
       deps: deps(),
       releases: [
