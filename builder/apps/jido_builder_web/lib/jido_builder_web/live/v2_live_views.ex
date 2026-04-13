@@ -147,6 +147,8 @@ defmodule JidoBuilderWeb.LlmConfigLive do
   @moduledoc "LLM provider setup and system prompt editor."
   use JidoBuilderWeb, :live_view
 
+  import Ecto.Query
+
   @providers ["anthropic", "openai", "mock"]
   @models_by_provider %{
     "anthropic" => ["claude-sonnet-4-20250514", "claude-haiku-4-5-20251001"],
@@ -191,8 +193,55 @@ defmodule JidoBuilderWeb.LlmConfigLive do
   end
 
   def handle_event("save_config", _params, socket) do
+    alias JidoBuilderCore.{Repo, Templates.TemplateLlmConfig}
+
+    attrs = %{
+      provider: socket.assigns.selected_provider,
+      model: socket.assigns.selected_model,
+      temperature: parse_float(socket.assigns.temperature, 0.7),
+      max_tokens: parse_int(socket.assigns.max_tokens, 1024),
+      system_prompt: socket.assigns.system_prompt
+    }
+
+    # Upsert: find existing or create new
+    case Repo.one(from c in TemplateLlmConfig, order_by: [desc: c.id], limit: 1) do
+      nil ->
+        # Find first template or use nil-safe approach
+        template = Repo.one(from t in JidoBuilderCore.Templates.Template, limit: 1)
+        template_id = if template, do: template.id, else: nil
+
+        if template_id do
+          %TemplateLlmConfig{template_id: template_id}
+          |> TemplateLlmConfig.changeset(attrs)
+          |> Repo.insert()
+        end
+
+      existing ->
+        existing
+        |> TemplateLlmConfig.changeset(attrs)
+        |> Repo.update()
+    end
+
     {:noreply, assign(socket, saved: true)}
   end
+
+  defp parse_float(val, default) when is_binary(val) do
+    case Float.parse(val) do
+      {f, _} -> f
+      :error -> default
+    end
+  end
+
+  defp parse_float(_, default), do: default
+
+  defp parse_int(val, default) when is_binary(val) do
+    case Integer.parse(val) do
+      {i, _} -> i
+      :error -> default
+    end
+  end
+
+  defp parse_int(_, default), do: default
 
   @impl true
   def render(assigns) do
@@ -576,30 +625,85 @@ defmodule JidoBuilderWeb.NotebookLive do
 end
 
 defmodule JidoBuilderWeb.SkillsManagerLive do
-  @moduledoc "Skills management page."
+  @moduledoc "Skills management page with CRUD."
   use JidoBuilderWeb, :live_view
+
+  alias JidoBuilderRuntime.Skills.SkillRegistry
+  alias JidoBuilderRuntime.ActionRegistry
 
   @impl true
   def mount(_params, _session, socket) do
-    skills = JidoBuilderRuntime.Skills.SkillRegistry.list()
-    {:ok, assign(socket, page_title: "Skills Manager", skills: skills)}
+    skills = SkillRegistry.list()
+    categories = SkillRegistry.categories()
+    all_actions = ActionRegistry.list()
+
+    {:ok,
+     assign(socket,
+       page_title: "Skills Manager",
+       skills: skills,
+       categories: categories,
+       all_actions: all_actions,
+       expanded: nil,
+       show_create: false
+     )}
+  end
+
+  @impl true
+  def handle_event("toggle_create", _params, socket) do
+    {:noreply, assign(socket, show_create: !socket.assigns.show_create)}
+  end
+
+  def handle_event("toggle_detail", %{"slug" => slug}, socket) do
+    expanded = if socket.assigns.expanded == slug, do: nil, else: slug
+    {:noreply, assign(socket, expanded: expanded)}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header>Skills Manager</.page_header>
+    <.page_header>
+      Skills Manager
+      <:actions>
+        <button phx-click="toggle_create" class={"ui-btn #{if @show_create, do: "secondary", else: "primary"} text-xs"}>
+          {if @show_create, do: "Cancel", else: "New Skill"}
+        </button>
+      </:actions>
+    </.page_header>
+
+    <div :if={@show_create} class="mb-4 p-4 border rounded bg-zinc-50">
+      <h3 class="text-sm font-semibold mb-2">Create a new skill by composing actions from the library.</h3>
+      <p class="text-xs text-zinc-500 mb-3">Skills are named bundles of actions with a system prompt fragment. Use the <.link navigate={~p"/template-library"} class="text-blue-600 hover:underline">Template Library</.link> to browse available actions, then create a skill via the <code class="bg-zinc-200 px-1 rounded">jido_skill</code> MCP tool or the Notebook.</p>
+    </div>
+
     <div class="space-y-3 mt-4">
-      <div :for={s <- @skills} class="p-4 border rounded">
-        <div class="flex justify-between">
-          <div>
-            <div class="font-semibold text-sm"><%= s.name %></div>
-            <div class="text-xs text-zinc-500"><%= s.description %></div>
+      <div :for={s <- @skills} class="border rounded overflow-hidden">
+        <div phx-click="toggle_detail" phx-value-slug={s.slug} class="p-4 cursor-pointer hover:bg-zinc-50 transition-colors">
+          <div class="flex justify-between">
+            <div>
+              <div class="font-semibold text-sm">{s.name}</div>
+              <div class="text-xs text-zinc-500">{s.description}</div>
+            </div>
+            <span class="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded h-fit">{s.category}</span>
           </div>
-          <span class="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded h-fit"><%= s.category %></span>
+          <div class="mt-2 flex gap-1 flex-wrap">
+            <span :for={action <- s.action_slugs} class="bg-zinc-100 text-xs px-1.5 py-0.5 rounded">{action}</span>
+          </div>
         </div>
-        <div class="mt-2 flex gap-1">
-          <span :for={action <- s.action_slugs} class="bg-zinc-100 text-xs px-1.5 py-0.5 rounded"><%= action %></span>
+        <div :if={@expanded == s.slug} class="bg-zinc-50 border-t p-4 space-y-2">
+          <h4 class="text-xs font-semibold">Action Details</h4>
+          <div :for={slug <- s.action_slugs} class="text-xs">
+            <% action = Enum.find(@all_actions, &(&1.slug == slug)) %>
+            <div :if={action} class="flex items-center gap-2 py-1 border-b border-zinc-100">
+              <span class="font-mono font-semibold">{action.name}</span>
+              <span class="text-zinc-400">{action.description}</span>
+              <span class="ml-auto bg-zinc-200 px-1.5 py-0.5 rounded">{action.category}</span>
+            </div>
+            <div :if={!action} class="text-red-500">Missing action: {slug}</div>
+          </div>
+          <div :if={s[:system_prompt_fragment]} class="mt-2 pt-2 border-t">
+            <span class="text-xs font-semibold">System Prompt Fragment:</span>
+            <p class="text-xs text-zinc-600 font-mono mt-1">{s.system_prompt_fragment}</p>
+          </div>
         </div>
       </div>
     </div>
