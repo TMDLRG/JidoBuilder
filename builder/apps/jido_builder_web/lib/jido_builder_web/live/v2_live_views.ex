@@ -1,24 +1,33 @@
 defmodule JidoBuilderWeb.ActiveInferenceLive do
-  @moduledoc "Active Inference model visualization and belief state display."
+  @moduledoc "Active Inference model visualization, belief updates, and agent integration."
   use JidoBuilderWeb, :live_view
+
+  import Ecto.Query
 
   alias JidoBuilderRuntime.ActiveInference.PresetModels
   alias Jido.ActiveInference.{BeliefState, FreeEnergy}
+  alias JidoBuilderCore.{Repo, Templates, Templates.TemplateGenerativeModel}
+  alias JidoBuilderRuntime.Roster
 
   @impl true
   def mount(_params, _session, socket) do
     presets = PresetModels.list()
+    templates = Templates.list_templates(1)
 
     {:ok,
      assign(socket,
        page_title: "Active Inference",
        presets: presets,
+       templates: templates,
        selected: nil,
        model: nil,
        belief: nil,
        belief_data: [],
        policy_data: [],
-       step_count: 0
+       step_count: 0,
+       selected_template_id: nil,
+       attach_result: nil,
+       hire_result: nil
      )}
   end
 
@@ -67,6 +76,72 @@ defmodule JidoBuilderWeb.ActiveInferenceLive do
      |> push_event("update_beliefs", %{beliefs: belief_data})
      |> push_event("update_policies", %{policies: policy_data})}
   end
+
+  def handle_event("select_template", %{"template_id" => id}, socket) do
+    tid = case Integer.parse(id) do
+      {n, ""} -> n
+      _ -> nil
+    end
+
+    {:noreply, assign(socket, selected_template_id: tid)}
+  end
+
+  def handle_event("attach_model", _params, socket) do
+    model = socket.assigns.model
+    template_id = socket.assigns.selected_template_id
+    preset_name = socket.assigns.selected
+
+    if model && template_id do
+      # Serialize the GenerativeModel matrices to DB
+      gm_attrs = %{
+        template_id: template_id,
+        name: preset_name || "Custom Model",
+        description: "Active Inference #{preset_name} model",
+        matrices: %{
+          "a_matrix" => serialize_matrix(model.a_matrix),
+          "b_matrices" => serialize_matrix(model.b_matrices),
+          "num_states" => model.num_states,
+          "num_observations" => model.num_observations,
+          "num_actions" => model.num_actions
+        },
+        preferences: %{"c_vector" => model.c_vector},
+        priors: %{"d_vector" => model.d_vector},
+        policies: Enum.map(model.policies, fn actions -> %{"actions" => actions} end),
+        config: %{"preset" => preset_name, "strategy" => "active_inference"}
+      }
+
+      case %TemplateGenerativeModel{} |> TemplateGenerativeModel.changeset(gm_attrs) |> Repo.insert() do
+        {:ok, _gm} ->
+          {:noreply, assign(socket, attach_result: {:ok, "Model '#{preset_name}' attached to template"})}
+
+        {:error, changeset} ->
+          {:noreply, assign(socket, attach_result: {:error, "Failed: #{inspect(changeset.errors)}"})}
+      end
+    else
+      {:noreply, assign(socket, attach_result: {:error, "Select a model and template first"})}
+    end
+  end
+
+  def handle_event("hire_ai_agent", _params, socket) do
+    template_id = socket.assigns.selected_template_id
+
+    if template_id do
+      agent_name = "ai-agent-#{System.unique_integer([:positive])}"
+
+      case Roster.hire(1, agent_name, "web", template_id: template_id) do
+        {:ok, instance} ->
+          {:noreply, assign(socket, hire_result: {:ok, "Agent '#{instance.name}' hired with template ##{template_id}"})}
+
+        {:error, reason} ->
+          {:noreply, assign(socket, hire_result: {:error, "Hire failed: #{inspect(reason)}"})}
+      end
+    else
+      {:noreply, assign(socket, hire_result: {:error, "Select a template first"})}
+    end
+  end
+
+  defp serialize_matrix(matrix) when is_list(matrix), do: matrix
+  defp serialize_matrix(matrix), do: inspect(matrix)
 
   defp compute_visualization(belief, model) do
     belief_data = belief.posterior
@@ -138,6 +213,33 @@ defmodule JidoBuilderWeb.ActiveInferenceLive do
           </div>
         </div>
       </div>
+    </div>
+
+    <div :if={@model} class="mt-4 p-4 border rounded bg-zinc-50">
+      <h3 class="text-sm font-semibold mb-3">Deploy as Agent</h3>
+      <div class="flex items-end gap-3">
+        <div class="flex-1">
+          <label class="text-xs font-medium text-zinc-600 block mb-1">Attach to Template</label>
+          <form phx-change="select_template">
+            <select name="template_id" class="ui-input text-sm">
+              <option value="">Select template...</option>
+              <option :for={t <- @templates} value={t.id} selected={t.id == @selected_template_id}>{t.name}</option>
+            </select>
+          </form>
+        </div>
+        <button :if={@selected_template_id} phx-click="attach_model" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded transition-colors">
+          Attach Model
+        </button>
+        <button :if={@selected_template_id} phx-click="hire_ai_agent" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-2 rounded transition-colors">
+          Hire AI Agent
+        </button>
+      </div>
+      <p :if={@attach_result} class={"text-xs mt-2 #{if elem(@attach_result, 0) == :ok, do: "text-green-600", else: "text-red-600"}"}>
+        {elem(@attach_result, 1)}
+      </p>
+      <p :if={@hire_result} class={"text-xs mt-1 #{if elem(@hire_result, 0) == :ok, do: "text-green-600", else: "text-red-600"}"}>
+        {elem(@hire_result, 1)}
+      </p>
     </div>
     """
   end

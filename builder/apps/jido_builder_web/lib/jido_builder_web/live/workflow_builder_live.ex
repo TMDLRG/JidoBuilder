@@ -2,7 +2,7 @@ defmodule JidoBuilderWeb.WorkflowBuilderLive do
   use JidoBuilderWeb, :live_view
 
   alias JidoBuilderCore.Workflows
-  alias JidoBuilderRuntime.{EventBus, WorkflowExecutor}
+  alias JidoBuilderRuntime.{EventBus, Roster, WorkflowExecutor}
 
   @impl true
   def mount(params, _session, socket) do
@@ -28,7 +28,8 @@ defmodule JidoBuilderWeb.WorkflowBuilderLive do
        selected_node: nil,
        selected_step: nil,
        execution_result: nil,
-       running: false
+       running: false,
+       agents: Roster.list(workspace_id)
      )}
   end
 
@@ -123,15 +124,19 @@ defmodule JidoBuilderWeb.WorkflowBuilderLive do
     end
   end
 
-  def handle_event("add_step", %{"step" => %{"name" => name, "kind" => kind}}, socket) do
+  def handle_event("add_step", %{"step" => step_params}, socket) do
+    name = step_params["name"]
+    kind = step_params["kind"]
+    target_agent = step_params["target_agent"]
     user = socket.assigns.current_user
     wf = socket.assigns.current_workflow
 
-    if wf do
+    if wf && name && String.trim(name) != "" do
       order = length(socket.assigns.nodes) + 1
+      config = if target_agent && target_agent != "", do: %{"target_agent" => target_agent}, else: %{}
 
       case Workflows.create_workflow_step(
-             %{workflow_id: wf.id, name: String.trim(name), kind: kind, step_order: order, config: %{}},
+             %{workflow_id: wf.id, name: String.trim(name), kind: kind, step_order: order, config: config},
              user.email
            ) do
         {:ok, _step} ->
@@ -212,6 +217,13 @@ defmodule JidoBuilderWeb.WorkflowBuilderLive do
               <option value="condition">condition</option>
               <option value="transform">transform</option>
             </.select_field>
+            <label class="text-xs font-medium text-zinc-600 block">
+              Target Agent (optional)
+              <select name="step[target_agent]" class="ui-input text-xs mt-0.5">
+                <option value="">-- local execution --</option>
+                <option :for={a <- @agents} value={a.name}>{a.name}</option>
+              </select>
+            </label>
             <button type="submit" class="rounded bg-zinc-900 px-3 py-1 text-white text-xs w-full">Add Step</button>
           </form>
         </div>
