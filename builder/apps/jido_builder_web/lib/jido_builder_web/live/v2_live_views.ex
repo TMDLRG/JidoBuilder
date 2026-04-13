@@ -246,10 +246,12 @@ defmodule JidoBuilderWeb.ActiveInferenceLive do
 end
 
 defmodule JidoBuilderWeb.LlmConfigLive do
-  @moduledoc "LLM provider setup and system prompt editor."
+  @moduledoc "LLM provider setup, system prompt editor, and tool whitelist selector."
   use JidoBuilderWeb, :live_view
 
   import Ecto.Query
+
+  alias JidoBuilderRuntime.ActionRegistry
 
   @providers ["anthropic", "openai", "mock"]
   @models_by_provider %{
@@ -260,18 +262,37 @@ defmodule JidoBuilderWeb.LlmConfigLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    provider = "anthropic"
+    alias JidoBuilderCore.{Repo, Templates.TemplateLlmConfig}
+
+    existing = Repo.one(from c in TemplateLlmConfig, order_by: [desc: c.id], limit: 1)
+
+    {provider, model, temp, tokens, prompt, whitelist} =
+      case existing do
+        %TemplateLlmConfig{} = c ->
+          {c.provider, c.model, to_string(c.temperature || 0.7),
+           to_string(c.max_tokens || 1024), c.system_prompt || "", c.tool_whitelist || []}
+        nil ->
+          {"anthropic", "claude-sonnet-4-20250514", "0.7", "1024", "", []}
+      end
+
+    actions_by_category =
+      ActionRegistry.list()
+      |> Enum.reject(fn a -> a.slug == "llm_chat" end)
+      |> Enum.group_by(& &1.category)
+      |> Enum.sort_by(fn {cat, _} -> to_string(cat) end)
 
     {:ok,
      assign(socket,
-       page_title: "LLM Config",
+       page_title: "LLM Configuration",
        providers: @providers,
        selected_provider: provider,
-       model_options: @models_by_provider[provider],
-       selected_model: hd(@models_by_provider[provider]),
-       temperature: "0.7",
-       max_tokens: "1024",
-       system_prompt: "",
+       model_options: @models_by_provider[provider] || [],
+       selected_model: model,
+       temperature: temp,
+       max_tokens: tokens,
+       system_prompt: prompt,
+       tool_whitelist: MapSet.new(whitelist),
+       actions_by_category: actions_by_category,
        saved: false
      )}
   end
@@ -280,7 +301,7 @@ defmodule JidoBuilderWeb.LlmConfigLive do
   def handle_event("validate", %{"config" => params}, socket) do
     provider = params["provider"] || socket.assigns.selected_provider
     model_options = @models_by_provider[provider] || []
-    selected_model = if params["model"] in model_options, do: params["model"], else: hd(model_options)
+    selected_model = if params["model"] in model_options, do: params["model"], else: List.first(model_options)
 
     {:noreply,
      assign(socket,
@@ -294,6 +315,17 @@ defmodule JidoBuilderWeb.LlmConfigLive do
      )}
   end
 
+  def handle_event("toggle_tool", %{"slug" => slug}, socket) do
+    whitelist = socket.assigns.tool_whitelist
+
+    whitelist =
+      if MapSet.member?(whitelist, slug),
+        do: MapSet.delete(whitelist, slug),
+        else: MapSet.put(whitelist, slug)
+
+    {:noreply, assign(socket, tool_whitelist: whitelist, saved: false)}
+  end
+
   def handle_event("save_config", _params, socket) do
     alias JidoBuilderCore.{Repo, Templates.TemplateLlmConfig}
 
@@ -302,18 +334,15 @@ defmodule JidoBuilderWeb.LlmConfigLive do
       model: socket.assigns.selected_model,
       temperature: parse_float(socket.assigns.temperature, 0.7),
       max_tokens: parse_int(socket.assigns.max_tokens, 1024),
-      system_prompt: socket.assigns.system_prompt
+      system_prompt: socket.assigns.system_prompt,
+      tool_whitelist: MapSet.to_list(socket.assigns.tool_whitelist)
     }
 
-    # Upsert: find existing or create new
     case Repo.one(from c in TemplateLlmConfig, order_by: [desc: c.id], limit: 1) do
       nil ->
-        # Find first template or use nil-safe approach
         template = Repo.one(from t in JidoBuilderCore.Templates.Template, limit: 1)
-        template_id = if template, do: template.id, else: nil
-
-        if template_id do
-          %TemplateLlmConfig{template_id: template_id}
+        if template do
+          %TemplateLlmConfig{template_id: template.id}
           |> TemplateLlmConfig.changeset(attrs)
           |> Repo.insert()
         end
@@ -333,7 +362,6 @@ defmodule JidoBuilderWeb.LlmConfigLive do
       :error -> default
     end
   end
-
   defp parse_float(_, default), do: default
 
   defp parse_int(val, default) when is_binary(val) do
@@ -342,7 +370,6 @@ defmodule JidoBuilderWeb.LlmConfigLive do
       :error -> default
     end
   end
-
   defp parse_int(_, default), do: default
 
   @impl true
@@ -383,6 +410,27 @@ defmodule JidoBuilderWeb.LlmConfigLive do
           <textarea name="config[system_prompt]" class="w-full border rounded p-2 text-sm h-48 font-mono" placeholder="You are a helpful assistant...">{@system_prompt}</textarea>
         </div>
       </div>
+
+      <div class="p-4 border rounded">
+        <h3 class="text-sm font-semibold mb-2">Tool Whitelist</h3>
+        <p class="text-xs text-zinc-500 mb-3">Select which actions the LLM agent can invoke as tools. {MapSet.size(@tool_whitelist)} selected.</p>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-1">
+          <div :for={{category, actions} <- @actions_by_category} class="mb-3">
+            <h4 class="text-xs font-semibold text-zinc-500 uppercase mb-1">{category}</h4>
+            <label :for={a <- actions} class="flex items-center gap-1.5 text-xs py-0.5 cursor-pointer hover:bg-zinc-50 rounded px-1">
+              <input
+                type="checkbox"
+                checked={MapSet.member?(@tool_whitelist, a.slug)}
+                phx-click="toggle_tool"
+                phx-value-slug={a.slug}
+                class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span>{a.name}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
       <button type="button" phx-click="save_config" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded transition-colors">
         Save Configuration
       </button>
@@ -806,27 +854,38 @@ defmodule JidoBuilderWeb.SkillsManagerLive do
 end
 
 defmodule JidoBuilderWeb.AgentChatLive do
-  @moduledoc "LLM agent conversation UI with real provider support."
+  @moduledoc """
+  LLM agent conversation UI — dispatches chat through the LlmChat action
+  with agentic tool-use loop, conversation persistence, and thread management.
+  """
   use JidoBuilderWeb, :live_view
 
   import Ecto.Query
 
-  alias JidoBuilderRuntime.LLM.Providers.{Mock, Anthropic, OpenAI}
-  alias JidoBuilderRuntime.LLM.Conversation
+  alias JidoBuilderRuntime.LLM.{Conversation, ConversationStore, ToolWhitelist}
+  alias JidoBuilderRuntime.Actions.LlmChat
 
   @impl true
   def mount(_params, _session, socket) do
-    {provider_name, provider_mod, config} = load_llm_config()
+    {provider_name, llm_config, tool_modules, template_id} = load_agent_config()
+    conversation_id = Ecto.UUID.generate()
+
+    # Load existing conversations for this template
+    threads = if template_id, do: ConversationStore.list_conversations(template_id), else: []
 
     {:ok,
      assign(socket,
        page_title: "Agent Chat",
        messages: [],
        input: "",
+       loading: false,
        provider_name: provider_name,
-       provider_mod: provider_mod,
-       llm_config: config,
-       conversation: Conversation.new(system: config[:system] || "You are a helpful Jido agent.")
+       llm_config: llm_config,
+       tool_modules: tool_modules,
+       template_id: template_id,
+       conversation_id: conversation_id,
+       threads: threads,
+       conversation: Conversation.new(system: llm_config[:system] || "You are a helpful Jido agent.")
      )}
   end
 
@@ -836,80 +895,179 @@ defmodule JidoBuilderWeb.AgentChatLive do
   end
 
   def handle_event("send_message", %{"message" => msg}, socket) when byte_size(msg) > 0 do
-    conv = socket.assigns.conversation
-    messages = socket.assigns.messages
-    provider_mod = socket.assigns.provider_mod
-    config = socket.assigns.llm_config
+    messages = socket.assigns.messages ++ [%{role: "user", content: msg}]
 
-    # Add user message
-    conv = Conversation.add_user(conv, msg)
-    messages = messages ++ [%{role: "user", content: msg}]
+    socket =
+      socket
+      |> assign(messages: messages, input: "", loading: true)
 
-    # Send to configured LLM provider
-    case provider_mod.chat(Conversation.to_messages(conv), config) do
-      {:ok, response} ->
-        conv = Conversation.add_assistant(conv, response.content)
-        messages = messages ++ [%{role: "assistant", content: response.content}]
-
-        {:noreply,
-         socket
-         |> assign(messages: messages, conversation: conv, input: "")
-         |> push_event("add_message", %{role: "user", content: msg})
-         |> push_event("add_message", %{role: "assistant", content: response.content})}
-
-      {:error, reason} ->
-        error_msg = "Error: #{inspect(reason)}"
-        messages = messages ++ [%{role: "system", content: error_msg}]
-        {:noreply, assign(socket, messages: messages, conversation: conv, input: "")}
-    end
+    send(self(), {:dispatch_chat, msg})
+    {:noreply, socket}
   end
 
   def handle_event("send_message", _params, socket), do: {:noreply, socket}
 
-  defp load_llm_config do
-    alias JidoBuilderCore.{Repo, Templates.TemplateLlmConfig}
+  def handle_event("new_conversation", _params, socket) do
+    conversation_id = Ecto.UUID.generate()
+    threads = if socket.assigns.template_id, do: ConversationStore.list_conversations(socket.assigns.template_id), else: []
 
-    case Repo.one(from c in TemplateLlmConfig, order_by: [desc: c.id], limit: 1) do
-      %{provider: "anthropic", config: config} = llm_cfg ->
-        api_key = get_in(config || %{}, ["api_key"]) || System.get_env("ANTHROPIC_API_KEY")
+    {:noreply,
+     assign(socket,
+       messages: [],
+       conversation_id: conversation_id,
+       threads: threads,
+       conversation: Conversation.new(system: socket.assigns.llm_config[:system] || "You are a helpful Jido agent.")
+     )}
+  end
 
-        if api_key do
-          {"Anthropic (#{llm_cfg.model})", Anthropic, %{
-            provider: :anthropic,
-            model: llm_cfg.model,
-            api_key: api_key,
-            max_tokens: llm_cfg.max_tokens || 1024,
-            temperature: llm_cfg.temperature || 0.7,
-            system: llm_cfg.system_prompt || "You are a helpful assistant."
-          }}
-        else
-          mock_config()
-        end
+  def handle_event("load_conversation", %{"id" => conv_id}, socket) do
+    template_id = socket.assigns.template_id
 
-      %{provider: "openai", config: config} = llm_cfg ->
-        api_key = get_in(config || %{}, ["api_key"]) || System.get_env("OPENAI_API_KEY")
+    if template_id do
+      conv = ConversationStore.load_conversation(template_id, conv_id, system: socket.assigns.llm_config[:system])
+      display_messages = Enum.map(conv.messages, fn msg -> %{role: msg[:role] || msg.role, content: msg[:content] || msg.content} end)
 
-        if api_key do
-          {"OpenAI (#{llm_cfg.model})", OpenAI, %{
-            provider: :openai,
-            model: llm_cfg.model,
-            api_key: api_key,
-            max_tokens: llm_cfg.max_tokens || 1024,
-            temperature: llm_cfg.temperature || 0.7,
-            system: llm_cfg.system_prompt || "You are a helpful assistant."
-          }}
-        else
-          mock_config()
-        end
-
-      _ ->
-        mock_config()
+      {:noreply,
+       assign(socket,
+         messages: display_messages,
+         conversation_id: conv_id,
+         conversation: conv
+       )}
+    else
+      {:noreply, socket}
     end
   end
 
-  defp mock_config do
-    {"Mock (demo mode)", Mock, Mock.default_config()}
+  def handle_event("delete_conversation", %{"id" => conv_id}, socket) do
+    if socket.assigns.template_id do
+      ConversationStore.delete_conversation(socket.assigns.template_id, conv_id)
+      threads = ConversationStore.list_conversations(socket.assigns.template_id)
+
+      socket =
+        if socket.assigns.conversation_id == conv_id do
+          assign(socket,
+            messages: [],
+            conversation_id: Ecto.UUID.generate(),
+            conversation: Conversation.new(system: socket.assigns.llm_config[:system])
+          )
+        else
+          socket
+        end
+
+      {:noreply, assign(socket, threads: threads)}
+    else
+      {:noreply, socket}
+    end
   end
+
+  @impl true
+  def handle_info({:dispatch_chat, msg}, socket) do
+    params = %{
+      message: msg,
+      conversation: socket.assigns.conversation,
+      llm_config: socket.assigns.llm_config,
+      tool_modules: socket.assigns.tool_modules,
+      max_iterations: 10
+    }
+
+    case Jido.Exec.run(LlmChat, params, %{}) do
+      {:ok, %{reply: reply, conversation: conv, tool_calls: tool_calls}} ->
+        tool_msgs =
+          Enum.flat_map(tool_calls, fn tc ->
+            [%{role: "tool_call", content: "#{tc.tool}(#{inspect_args(tc.arguments)})", tool_data: tc}]
+          end)
+
+        assistant_msg = [%{role: "assistant", content: reply}]
+        messages = socket.assigns.messages ++ tool_msgs ++ assistant_msg
+
+        # Persist messages
+        persist_turn(socket.assigns.template_id, socket.assigns.conversation_id, msg, tool_calls, reply)
+
+        threads = if socket.assigns.template_id, do: ConversationStore.list_conversations(socket.assigns.template_id), else: []
+
+        {:noreply,
+         socket
+         |> assign(messages: messages, conversation: conv, loading: false, threads: threads)}
+
+      {:error, reason} ->
+        error_msg = "Error: #{inspect(reason)}"
+        messages = socket.assigns.messages ++ [%{role: "system", content: error_msg}]
+        {:noreply, assign(socket, messages: messages, loading: false)}
+    end
+  end
+
+  defp persist_turn(nil, _conv_id, _msg, _tool_calls, _reply), do: :ok
+  defp persist_turn(template_id, conversation_id, user_msg, tool_calls, reply) do
+    messages = [%{role: "user", content: user_msg}]
+
+    tool_messages =
+      Enum.flat_map(tool_calls, fn tc ->
+        [
+          %{role: "tool_call", content: "#{tc.tool}(#{inspect_args(tc.arguments)})",
+            tool_data: %{"id" => tc[:id], "name" => tc.tool, "arguments" => tc.arguments}},
+          %{role: "tool_result", content: tc.result,
+            tool_data: %{"tool_use_id" => tc[:id]}}
+        ]
+      end)
+
+    assistant_messages = [%{role: "assistant", content: reply}]
+
+    ConversationStore.save_messages(
+      template_id,
+      conversation_id,
+      messages ++ tool_messages ++ assistant_messages
+    )
+  end
+
+  defp inspect_args(args) when is_map(args) do
+    args
+    |> Enum.map(fn {k, v} -> "#{k}: #{inspect(v)}" end)
+    |> Enum.join(", ")
+  end
+
+  defp inspect_args(args), do: inspect(args)
+
+  defp load_agent_config do
+    alias JidoBuilderCore.{Repo, Templates.TemplateLlmConfig}
+
+    case Repo.one(from c in TemplateLlmConfig, order_by: [desc: c.id], limit: 1) do
+      %TemplateLlmConfig{} = llm_cfg ->
+        provider_atom = String.to_existing_atom(llm_cfg.provider)
+        api_key = resolve_api_key(llm_cfg.provider, llm_cfg.config)
+
+        config = %{
+          provider: provider_atom,
+          model: llm_cfg.model,
+          api_key: api_key,
+          max_tokens: llm_cfg.max_tokens || 1024,
+          temperature: llm_cfg.temperature || 0.7,
+          system: llm_cfg.system_prompt || "You are a helpful Jido agent."
+        }
+
+        provider_name =
+          if api_key,
+            do: "#{String.capitalize(llm_cfg.provider)} (#{llm_cfg.model})",
+            else: "Mock (no API key)"
+
+        config = if api_key, do: config, else: %{config | provider: :mock}
+        tool_modules = ToolWhitelist.resolve(llm_cfg.tool_whitelist || [])
+
+        {provider_name, config, tool_modules, llm_cfg.template_id}
+
+      nil ->
+        {"Mock (no config)", %{provider: :mock}, [], nil}
+    end
+  end
+
+  defp resolve_api_key("anthropic", config) do
+    get_in(config || %{}, ["api_key"]) || System.get_env("ANTHROPIC_API_KEY")
+  end
+
+  defp resolve_api_key("openai", config) do
+    get_in(config || %{}, ["api_key"]) || System.get_env("OPENAI_API_KEY")
+  end
+
+  defp resolve_api_key(_, _), do: nil
 
   @impl true
   def render(assigns) do
@@ -917,25 +1075,59 @@ defmodule JidoBuilderWeb.AgentChatLive do
     <.page_header>
       Agent Chat
       <:actions>
+        <button phx-click="new_conversation" class="text-xs bg-zinc-800 text-white px-3 py-1.5 rounded hover:bg-zinc-700 mr-2">New Chat</button>
         <span class="text-xs bg-zinc-200 text-zinc-600 px-2 py-1 rounded">{@provider_name}</span>
       </:actions>
     </.page_header>
-    <div class="mt-4 flex flex-col h-96">
-      <div id="chat-stream" phx-hook="ChatStream" class="flex-1 overflow-y-auto border rounded p-3 space-y-2 mb-3">
-        <div :for={msg <- @messages} class={"p-2 rounded text-sm #{case msg.role do; "user" -> "bg-blue-50 ml-8"; "assistant" -> "bg-zinc-50 mr-8"; _ -> "bg-red-50 text-red-700"; end}"}>
-          <span class="text-xs font-semibold">{msg.role}</span>
-          <p>{msg.content}</p>
+    <div class="mt-4 flex gap-4" style="height: calc(100vh - 180px);">
+      <%!-- Thread sidebar --%>
+      <div :if={@threads != []} class="w-48 shrink-0 border rounded p-2 overflow-y-auto">
+        <h3 class="text-xs font-semibold text-zinc-500 uppercase mb-2">Conversations</h3>
+        <div :for={t <- @threads} class={"text-xs p-1.5 rounded cursor-pointer mb-1 flex justify-between items-center #{if t.conversation_id == @conversation_id, do: "bg-blue-50 text-blue-700", else: "hover:bg-zinc-50"}"}>
+          <span phx-click="load_conversation" phx-value-id={t.conversation_id} class="truncate flex-1">
+            {t.message_count} msgs
+          </span>
+          <button phx-click="delete_conversation" phx-value-id={t.conversation_id} class="text-red-400 hover:text-red-600 ml-1 shrink-0">&times;</button>
         </div>
-        <p :if={@messages == []} class="text-zinc-400 text-sm text-center">Start a conversation...</p>
       </div>
-      <form phx-submit="send_message" phx-change="update_input" class="flex gap-2">
-        <input type="text" name="message" value={@input} class="flex-1 border rounded px-3 py-2 text-sm" placeholder="Type a message..." autocomplete="off" />
-        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors">Send</button>
-      </form>
-      <p class="text-xs text-zinc-400 mt-2">
-        Provider: {@provider_name}. Configure in <.link navigate={~p"/llm-config"} class="text-blue-600 hover:underline">LLM Config</.link>.
-      </p>
+
+      <%!-- Chat area --%>
+      <div class="flex-1 flex flex-col">
+        <div id="chat-stream" phx-hook="ChatStream" class="flex-1 overflow-y-auto border rounded p-3 space-y-2 mb-3">
+          <div :for={msg <- @messages} class={"p-2 rounded text-sm #{msg_class(msg.role)}"}>
+            <span :if={msg.role != "tool_call"} class="text-xs font-semibold">{msg.role}</span>
+            <div :if={msg.role == "tool_call"} class="flex items-center gap-2">
+              <span class="text-xs font-mono bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">tool</span>
+              <span class="text-xs font-mono">{msg.content}</span>
+            </div>
+            <p :if={msg.role != "tool_call"} class="mt-1 whitespace-pre-wrap">{msg.content}</p>
+          </div>
+          <div :if={@loading} class="p-2 rounded text-sm bg-zinc-50 mr-8 animate-pulse">
+            <span class="text-xs font-semibold text-zinc-400">thinking...</span>
+          </div>
+          <p :if={@messages == [] && !@loading} class="text-zinc-400 text-sm text-center mt-8">Start a conversation...</p>
+        </div>
+        <form phx-submit="send_message" phx-change="update_input" class="flex gap-2">
+          <input type="text" name="message" value={@input} class="flex-1 border rounded px-3 py-2 text-sm" placeholder="Type a message..." autocomplete="off" disabled={@loading} />
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors disabled:opacity-50" disabled={@loading}>
+            {if @loading, do: "...", else: "Send"}
+          </button>
+        </form>
+        <div class="flex items-center justify-between mt-2">
+          <p class="text-xs text-zinc-400">
+            Provider: {@provider_name}. Configure in <.link navigate={~p"/llm-config"} class="text-blue-600 hover:underline">LLM Config</.link>.
+          </p>
+          <p :if={@tool_modules != []} class="text-xs text-zinc-400">
+            {length(@tool_modules)} tool(s) available
+          </p>
+        </div>
+      </div>
     </div>
     """
   end
+
+  defp msg_class("user"), do: "bg-blue-50 ml-8"
+  defp msg_class("assistant"), do: "bg-zinc-50 mr-8"
+  defp msg_class("tool_call"), do: "bg-amber-50 mx-4 border border-amber-200"
+  defp msg_class(_), do: "bg-red-50 text-red-700"
 end

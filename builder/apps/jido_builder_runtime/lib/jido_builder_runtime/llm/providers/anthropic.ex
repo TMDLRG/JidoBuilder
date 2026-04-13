@@ -76,6 +76,32 @@ defmodule JidoBuilderRuntime.LLM.Providers.Anthropic do
       else: body
   end
 
+  defp format_message(%{tool_use: %ToolUse{} = tu} = msg) do
+    text_block = if msg[:content], do: [%{"type" => "text", "text" => msg[:content]}], else: []
+
+    tool_block = %{
+      "type" => "tool_use",
+      "id" => tu.id,
+      "name" => tu.name,
+      "input" => tu.arguments || %{}
+    }
+
+    %{"role" => "assistant", "content" => text_block ++ [tool_block]}
+  end
+
+  defp format_message(%{tool_use_id: tool_use_id} = msg) when is_binary(tool_use_id) do
+    result_block = %{
+      "type" => "tool_result",
+      "tool_use_id" => tool_use_id,
+      "content" => msg[:content] || ""
+    }
+
+    result_block =
+      if msg[:is_error], do: Map.put(result_block, "is_error", true), else: result_block
+
+    %{"role" => "user", "content" => [result_block]}
+  end
+
   defp format_message(msg) do
     %{
       "role" => msg[:role] || msg["role"],

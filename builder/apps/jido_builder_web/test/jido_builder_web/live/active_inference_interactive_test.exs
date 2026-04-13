@@ -3,8 +3,15 @@ defmodule JidoBuilderWeb.Live.ActiveInferenceInteractiveTest do
   use JidoBuilderWeb.ConnCase, async: false
 
   @moduletag :authenticated
+  @moduletag :active_inference
 
   import Phoenix.LiveViewTest
+
+  # These tests require Jido.ActiveInference.GenerativeModel to be available
+  # Skip when the module is not loaded (it's in a separate package)
+  if not Code.ensure_loaded?(Jido.ActiveInference.GenerativeModel) do
+    @moduletag :skip
+  end
 
   test "preset cards have phx-click handler", %{conn: conn} do
     {:ok, _lv, html} = live(conn, "/active-inference")

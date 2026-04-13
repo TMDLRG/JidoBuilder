@@ -123,6 +123,7 @@ defmodule JidoBuilderWeb.Router do
       live("/notebook/:id", NotebookLive, :show)
       live("/skills-manager", SkillsManagerLive, :index)
       live("/agents/:id/chat", AgentChatLive, :show)
+      live("/agents/new/llm", LlmAgentWizardLive, :new)
     end
   end
 end

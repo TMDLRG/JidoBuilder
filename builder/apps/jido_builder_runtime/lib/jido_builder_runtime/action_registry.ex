@@ -12,6 +12,7 @@ defmodule JidoBuilderRuntime.ActionRegistry do
     HttpRequest,
     IncrementCounter,
     JsonTransform,
+    LlmChat,
     LogMessage,
     StateMutation,
     TransformData,
@@ -20,6 +21,7 @@ defmodule JidoBuilderRuntime.ActionRegistry do
 
   alias JidoBuilderRuntime.Actions.Tools
   alias JidoBuilderRuntime.Integrations.{Slack, Email, HttpWebhook}
+  alias JidoBuilderRuntime.LLM.MemoryTools
 
   @actions [
     %{
@@ -152,7 +154,13 @@ defmodule JidoBuilderRuntime.ActionRegistry do
     %{slug: "s3_download", module: Tools.S3Download, name: "S3 Download", description: "Download a file from S3", category: :integration},
     %{slug: "database_query", module: Tools.DatabaseQuery, name: "Database Query", description: "Execute a database query", category: :integration},
     %{slug: "redis_get", module: Tools.RedisGet, name: "Redis Get", description: "Get a value from Redis", category: :integration},
-    %{slug: "redis_set", module: Tools.RedisSet, name: "Redis Set", description: "Set a value in Redis", category: :integration}
+    %{slug: "redis_set", module: Tools.RedisSet, name: "Redis Set", description: "Set a value in Redis", category: :integration},
+    # LLM
+    %{slug: "llm_chat", module: LlmChat, name: "LLM Chat", description: "Send a message through an LLM with agentic tool-use loop", category: :llm},
+    # Memory
+    %{slug: "memory_read", module: MemoryTools.MemoryRead, name: "Memory Read", description: "Read a value from agent memory", category: :memory},
+    %{slug: "memory_write", module: MemoryTools.MemoryWrite, name: "Memory Write", description: "Write a value to agent memory", category: :memory},
+    %{slug: "memory_search", module: MemoryTools.MemorySearch, name: "Memory Search", description: "Search agent memory by pattern", category: :memory}
   ]
 
   @action_map Map.new(@actions, fn a -> {a.slug, a} end)

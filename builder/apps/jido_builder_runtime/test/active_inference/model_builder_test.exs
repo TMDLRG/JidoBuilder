@@ -1,5 +1,6 @@
+if Code.ensure_loaded?(Jido.ActiveInference.GenerativeModel) do
 defmodule JidoBuilderRuntime.ActiveInference.ModelBuilderTest do
-  @moduledoc "Epic 1.5 — Model builder tests."
+  @moduledoc "Epic 1.5 — Model builder tests (skipped when GenerativeModel unavailable)."
   use ExUnit.Case, async: true
 
   alias JidoBuilderRuntime.ActiveInference.ModelBuilder
@@ -102,3 +103,4 @@ defmodule JidoBuilderRuntime.ActiveInference.ModelBuilderTest do
     end
   end
 end
+end # Code.ensure_loaded? guard
