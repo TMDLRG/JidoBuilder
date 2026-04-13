@@ -4,15 +4,45 @@ Copyright (c) 2026 Michael Polzin (mpolzin@zimzap.com)
 Licensed under the PolyForm Noncommercial License 1.0.0.
 See LICENSE for full terms. For commercial licensing, contact mpolzin@zimzap.com.
 
-THIRD-PARTY SOFTWARE
+This product is built for and integrates with the Jido autonomous agent
+framework. Releases of JidoBuilder may include code from the Jido project.
 
-JidoBuilder is built on the Jido agent framework:
-  https://github.com/agentjido/jido
-  Copyright 2024-2026 Agent Jido (Parker Selbert, Mike Hostetler)
-  Licensed under the Apache License, Version 2.0
+================================================================================
+
+Jido - Autonomous Agent Framework for Elixir
+https://github.com/agentjido/jido
+https://jido.run
+
+Copyright 2019 Parker Selbert
+Copyright 2024-2026 Mike Hostetler and Jido Contributors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use Jido files except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+The name "Jido" comes from the Japanese word meaning "automatic" or
+"automated". Jido is a trademark of its respective owners. Use of the Jido
+name in JidoBuilder is for descriptive purposes to indicate compatibility
+and is not intended to imply endorsement.
 
 Any Jido code included in JidoBuilder releases remains under Apache 2.0.
 Only original JidoBuilder code is covered by the PolyForm Noncommercial License.
+
+================================================================================
+
+Additional third-party notices:
+
+Phoenix Framework - https://phoenixframework.org/ - MIT License
+Phoenix LiveView - https://github.com/phoenixframework/phoenix_live_view - MIT License
+Ecto - https://github.com/elixir-ecto/ecto - Apache 2.0 License
 
 Additional dependencies are listed in builder/mix.lock and retain their
 original licenses (MIT, Apache-2.0, or as specified by each package).

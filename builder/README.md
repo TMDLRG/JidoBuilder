@@ -161,6 +161,28 @@ sqlite3 /path/to/backup.db "PRAGMA integrity_check;"
 - **D3.js** for workflow DAG visualization
 - **Jido** autonomous agent framework
 
+## Acknowledgments
+
+JidoBuilder is built for and integrates with the
+[Jido](https://github.com/agentjido/jido) autonomous agent framework,
+created by [Mike Hostetler](https://github.com/agentjido) and the Jido
+community. Jido is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
+Releases of JidoBuilder may include code from the Jido project. See the
+[NOTICE](../NOTICE) file for full attribution details.
+
 ## License
 
-Apache License 2.0 — see [LICENSE](LICENSE) for details.
+**PolyForm Noncommercial License 1.0.0** — see [LICENSE](LICENSE) for details.
+
+This software is free for non-commercial use, including personal projects,
+education, research, and use by non-profit organizations. **Commercial use
+is not permitted** without a separate license agreement.
+
+If you use or redistribute JidoBuilder, you must:
+- Include a copy of the [LICENSE](LICENSE)
+- Preserve the `Required Notice` lines from the license
+- Preserve the [NOTICE](../NOTICE) file with Jido attribution
+
+For commercial licensing inquiries, please open an issue or contact the
+maintainers.
