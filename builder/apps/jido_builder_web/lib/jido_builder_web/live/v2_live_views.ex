@@ -654,29 +654,21 @@ defmodule JidoBuilderWeb.NotebookLive do
     eval = socket.assigns.eval
 
     case Evaluator.eval(eval, code) do
-      {:ok, result, updated_eval} ->
-        {:noreply,
-         socket
-         |> assign(eval: updated_eval, cells: Evaluator.results(updated_eval))
-         |> push_event("cell_result", %{
-           result: inspect(result),
-           status: "ok",
-           cell: updated_eval.cell_count
-         })}
+      {:ok, _result, updated_eval} ->
+        {:noreply, assign(socket, eval: updated_eval, cells: Evaluator.results(updated_eval))}
 
-      {:error, reason, updated_eval} ->
-        {:noreply,
-         socket
-         |> assign(eval: updated_eval, cells: Evaluator.results(updated_eval))
-         |> push_event("cell_result", %{
-           result: reason,
-           status: "error",
-           cell: updated_eval.cell_count
-         })}
+      {:error, _reason, updated_eval} ->
+        {:noreply, assign(socket, eval: updated_eval, cells: Evaluator.results(updated_eval))}
     end
   end
 
   def handle_event("run_cell", _params, socket), do: {:noreply, socket}
+
+  def handle_event("run_cell_form", %{"code" => code}, socket) when byte_size(code) > 0 do
+    handle_event("run_cell", %{"code" => code}, socket)
+  end
+
+  def handle_event("run_cell_form", _params, socket), do: {:noreply, socket}
 
   def handle_event("reset", _params, socket) do
     {:noreply, assign(socket, eval: Evaluator.new(), cells: [])}
@@ -704,13 +696,13 @@ defmodule JidoBuilderWeb.NotebookLive do
       </:actions>
     </.page_header>
     <div class="mt-4 space-y-3">
-      <div id="code-editor" phx-hook="CodeEditor" phx-update="ignore" class="p-4 border rounded bg-zinc-50">
-        <textarea class="w-full border rounded p-2 text-sm font-mono h-24" placeholder="# Write Elixir code here... Try: Enum.map(1..5, &(&1 * &1))"></textarea>
+      <form id="notebook-form" phx-submit="run_cell_form" class="p-4 border rounded bg-zinc-50">
+        <textarea name="code" id="notebook-code" class="w-full border rounded p-2 text-sm font-mono h-24" placeholder="# Write Elixir code here... Try: Enum.map(1..5, &(&1 * &1))"></textarea>
         <div class="flex items-center gap-3 mt-2">
-          <button data-action="run" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded transition-colors">Run Cell</button>
-          <span class="text-xs text-zinc-400" data-role="cell-count">0 cells executed</span>
+          <button type="submit" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded transition-colors">Run Cell</button>
+          <span class="text-xs text-zinc-400">{length(@cells)} cells executed</span>
         </div>
-      </div>
+      </form>
       <div :for={cell <- @cells} class={"p-3 border rounded text-sm font-mono #{if cell.status == :ok, do: "bg-green-50", else: "bg-red-50"}"}>
         <div class="flex justify-between">
           <span class="text-zinc-500 text-xs">Cell {cell.cell}</span>
