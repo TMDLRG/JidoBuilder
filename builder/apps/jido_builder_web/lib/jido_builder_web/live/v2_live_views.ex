@@ -704,11 +704,11 @@ defmodule JidoBuilderWeb.NotebookLive do
       </:actions>
     </.page_header>
     <div class="mt-4 space-y-3">
-      <div id="code-editor" phx-hook="CodeEditor" class="p-4 border rounded bg-zinc-50">
+      <div id="code-editor" phx-hook="CodeEditor" phx-update="ignore" class="p-4 border rounded bg-zinc-50">
         <textarea class="w-full border rounded p-2 text-sm font-mono h-24" placeholder="# Write Elixir code here... Try: Enum.map(1..5, &(&1 * &1))"></textarea>
         <div class="flex items-center gap-3 mt-2">
           <button data-action="run" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded transition-colors">Run Cell</button>
-          <span class="text-xs text-zinc-400">{length(@cells)} cells executed</span>
+          <span class="text-xs text-zinc-400" data-role="cell-count">0 cells executed</span>
         </div>
       </div>
       <div :for={cell <- @cells} class={"p-3 border rounded text-sm font-mono #{if cell.status == :ok, do: "bg-green-50", else: "bg-red-50"}"}>

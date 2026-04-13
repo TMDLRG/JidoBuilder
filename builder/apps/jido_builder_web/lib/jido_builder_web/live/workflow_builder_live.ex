@@ -128,12 +128,16 @@ defmodule JidoBuilderWeb.WorkflowBuilderLive do
     name = step_params["name"]
     kind = step_params["kind"]
     target_agent = step_params["target_agent"]
+    action_module = step_params["action_module"]
     user = socket.assigns.current_user
     wf = socket.assigns.current_workflow
 
     if wf && name && String.trim(name) != "" do
       order = length(socket.assigns.nodes) + 1
-      config = if target_agent && target_agent != "", do: %{"target_agent" => target_agent}, else: %{}
+
+      config = %{}
+      config = if target_agent && target_agent != "", do: Map.put(config, "target_agent", target_agent), else: config
+      config = if action_module && action_module != "", do: Map.put(config, "action_module", action_module), else: config
 
       case Workflows.create_workflow_step(
              %{workflow_id: wf.id, name: String.trim(name), kind: kind, step_order: order, config: config},
@@ -217,6 +221,7 @@ defmodule JidoBuilderWeb.WorkflowBuilderLive do
               <option value="condition">condition</option>
               <option value="transform">transform</option>
             </.select_field>
+            <.input_field name="step[action_module]" placeholder="e.g. Elixir.JidoBuilderRuntime.Actions.Echo" label="Action Module (for action steps)" />
             <label class="text-xs font-medium text-zinc-600 block">
               Target Agent (optional)
               <select name="step[target_agent]" class="ui-input text-xs mt-0.5">

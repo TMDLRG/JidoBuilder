@@ -4,6 +4,11 @@ const WorkflowDag = {
   mounted() {
     this._scale = 1
     this.state = { nodes: [], edges: [], viewBox: [0, 0, 1200, 800], selected: null, drag: null, linkFrom: null, linkLine: null }
+    // Read initial data from data attributes
+    try {
+      this.state.nodes = JSON.parse(this.el.dataset.nodes || "[]")
+      this.state.edges = JSON.parse(this.el.dataset.edges || "[]")
+    } catch (_) {}
     this.svg = document.createElementNS(NS, "svg")
     this.svg.setAttribute("class", "w-full h-[560px] bg-white rounded border")
     this.svg.addEventListener("mousedown", (e) => this.onDown(e))
@@ -28,6 +33,11 @@ const WorkflowDag = {
       this.state.nodes = JSON.parse(this.el.dataset.nodes || "[]")
       this.state.edges = JSON.parse(this.el.dataset.edges || "[]")
     } catch (_) {}
+    // LiveView DOM patching removes the SVG child — re-attach if needed
+    if (!this.el.contains(this.svg)) {
+      this.el.innerHTML = ""
+      this.el.appendChild(this.svg)
+    }
     this.render()
   },
   colors(kind) {
@@ -72,7 +82,7 @@ const WorkflowDag = {
   onUp(e) {
     if (this.state.drag) {
       const node = this.state.nodes.find((n) => (n.id || n.name) === this.state.drag.id)
-      if (node) this.pushEvent("node_moved", { name: node.name, x: node.x, y: node.y, workflow_id: this.el.dataset.workflowId })
+      if (node) this.pushEvent("node_moved", { node_id: node.id || node.name, x: node.x, y: node.y, workflow_id: this.el.dataset.workflowId })
     } else if (this.state.linkFrom) {
       const p = this.point(e)
       const target = this.nodeAt(p)
