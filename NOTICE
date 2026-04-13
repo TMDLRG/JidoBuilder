@@ -1,0 +1,18 @@
+JidoBuilder
+Copyright (c) 2026 Michael Polzin (mpolzin@zimzap.com)
+
+Licensed under the PolyForm Noncommercial License 1.0.0.
+See LICENSE for full terms. For commercial licensing, contact mpolzin@zimzap.com.
+
+THIRD-PARTY SOFTWARE
+
+JidoBuilder is built on the Jido agent framework:
+  https://github.com/agentjido/jido
+  Copyright 2024-2026 Agent Jido (Parker Selbert, Mike Hostetler)
+  Licensed under the Apache License, Version 2.0
+
+Any Jido code included in JidoBuilder releases remains under Apache 2.0.
+Only original JidoBuilder code is covered by the PolyForm Noncommercial License.
+
+Additional dependencies are listed in builder/mix.lock and retain their
+original licenses (MIT, Apache-2.0, or as specified by each package).
