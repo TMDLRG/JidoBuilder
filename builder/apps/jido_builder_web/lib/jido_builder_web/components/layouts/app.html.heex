@@ -89,7 +89,7 @@
           <.icon name="document" class="w-4 h-4 mr-2" /><span class="sidebar-label">Notebook</span>
         </.link>
         <.link navigate={~p"/factory"} class={if String.starts_with?(cur, "/factory"), do: active, else: inactive}>
-          <.icon name="cube" class="w-4 h-4 mr-2" /><span class="sidebar-label">Factory</span>
+          <.icon name="wrench_screwdriver" class="w-4 h-4 mr-2" /><span class="sidebar-label">Factory</span>
         </.link>
       </section>
 
@@ -109,7 +109,10 @@
           <.icon name="bug" class="w-4 h-4 mr-2" /><span class="sidebar-label">Debug</span>
         </.link>
         <.link navigate={~p"/active-inference"} class={if String.starts_with?(cur, "/active-inference"), do: active, else: inactive}>
-          <.icon name="chart_bar" class="w-4 h-4 mr-2" /><span class="sidebar-label">Active Inference</span>
+          <.icon name="variable" class="w-4 h-4 mr-2" /><span class="sidebar-label">Active Inference</span>
+        </.link>
+        <.link navigate={~p"/metrics-dashboard"} class={if String.starts_with?(cur, "/metrics"), do: active, else: inactive}>
+          <.icon name="chart_bar" class="w-4 h-4 mr-2" /><span class="sidebar-label">Metrics</span>
         </.link>
       </section>
 
@@ -138,7 +141,10 @@
           <.icon name="archive_box" class="w-4 h-4 mr-2" /><span class="sidebar-label">Solutions</span>
         </.link>
         <.link navigate={~p"/template-library"} class={if String.starts_with?(cur, "/template-library"), do: active, else: inactive}>
-          <.icon name="puzzle_piece" class="w-4 h-4 mr-2" /><span class="sidebar-label">Template Library</span>
+          <.icon name="squares_2x2" class="w-4 h-4 mr-2" /><span class="sidebar-label">Template Library</span>
+        </.link>
+        <.link navigate={~p"/marketplace"} class={if String.starts_with?(cur, "/marketplace"), do: active, else: inactive}>
+          <.icon name="shopping_cart" class="w-4 h-4 mr-2" /><span class="sidebar-label">Marketplace</span>
         </.link>
       </section>
 

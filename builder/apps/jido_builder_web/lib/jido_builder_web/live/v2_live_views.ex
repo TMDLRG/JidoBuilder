@@ -712,20 +712,27 @@ defmodule JidoBuilderWeb.SkillsManagerLive do
 end
 
 defmodule JidoBuilderWeb.AgentChatLive do
-  @moduledoc "LLM agent conversation UI."
+  @moduledoc "LLM agent conversation UI with real provider support."
   use JidoBuilderWeb, :live_view
 
-  alias JidoBuilderRuntime.LLM.Providers.Mock
+  import Ecto.Query
+
+  alias JidoBuilderRuntime.LLM.Providers.{Mock, Anthropic, OpenAI}
   alias JidoBuilderRuntime.LLM.Conversation
 
   @impl true
   def mount(_params, _session, socket) do
+    {provider_name, provider_mod, config} = load_llm_config()
+
     {:ok,
      assign(socket,
        page_title: "Agent Chat",
        messages: [],
        input: "",
-       conversation: Conversation.new(system: "You are a helpful Jido agent.")
+       provider_name: provider_name,
+       provider_mod: provider_mod,
+       llm_config: config,
+       conversation: Conversation.new(system: config[:system] || "You are a helpful Jido agent.")
      )}
   end
 
@@ -737,13 +744,15 @@ defmodule JidoBuilderWeb.AgentChatLive do
   def handle_event("send_message", %{"message" => msg}, socket) when byte_size(msg) > 0 do
     conv = socket.assigns.conversation
     messages = socket.assigns.messages
+    provider_mod = socket.assigns.provider_mod
+    config = socket.assigns.llm_config
 
     # Add user message
     conv = Conversation.add_user(conv, msg)
     messages = messages ++ [%{role: "user", content: msg}]
 
-    # Get LLM response via Mock provider
-    case Mock.chat(Conversation.to_messages(conv), Mock.default_config()) do
+    # Send to configured LLM provider
+    case provider_mod.chat(Conversation.to_messages(conv), config) do
       {:ok, response} ->
         conv = Conversation.add_assistant(conv, response.content)
         messages = messages ++ [%{role: "assistant", content: response.content}]
@@ -754,20 +763,72 @@ defmodule JidoBuilderWeb.AgentChatLive do
          |> push_event("add_message", %{role: "user", content: msg})
          |> push_event("add_message", %{role: "assistant", content: response.content})}
 
-      {:error, _reason} ->
+      {:error, reason} ->
+        error_msg = "Error: #{inspect(reason)}"
+        messages = messages ++ [%{role: "system", content: error_msg}]
         {:noreply, assign(socket, messages: messages, conversation: conv, input: "")}
     end
   end
 
   def handle_event("send_message", _params, socket), do: {:noreply, socket}
 
+  defp load_llm_config do
+    alias JidoBuilderCore.{Repo, Templates.TemplateLlmConfig}
+
+    case Repo.one(from c in TemplateLlmConfig, order_by: [desc: c.id], limit: 1) do
+      %{provider: "anthropic", config: config} = llm_cfg ->
+        api_key = get_in(config || %{}, ["api_key"]) || System.get_env("ANTHROPIC_API_KEY")
+
+        if api_key do
+          {"Anthropic (#{llm_cfg.model})", Anthropic, %{
+            provider: :anthropic,
+            model: llm_cfg.model,
+            api_key: api_key,
+            max_tokens: llm_cfg.max_tokens || 1024,
+            temperature: llm_cfg.temperature || 0.7,
+            system: llm_cfg.system_prompt || "You are a helpful assistant."
+          }}
+        else
+          mock_config()
+        end
+
+      %{provider: "openai", config: config} = llm_cfg ->
+        api_key = get_in(config || %{}, ["api_key"]) || System.get_env("OPENAI_API_KEY")
+
+        if api_key do
+          {"OpenAI (#{llm_cfg.model})", OpenAI, %{
+            provider: :openai,
+            model: llm_cfg.model,
+            api_key: api_key,
+            max_tokens: llm_cfg.max_tokens || 1024,
+            temperature: llm_cfg.temperature || 0.7,
+            system: llm_cfg.system_prompt || "You are a helpful assistant."
+          }}
+        else
+          mock_config()
+        end
+
+      _ ->
+        mock_config()
+    end
+  end
+
+  defp mock_config do
+    {"Mock (demo mode)", Mock, Mock.default_config()}
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_header>Agent Chat</.page_header>
+    <.page_header>
+      Agent Chat
+      <:actions>
+        <span class="text-xs bg-zinc-200 text-zinc-600 px-2 py-1 rounded">{@provider_name}</span>
+      </:actions>
+    </.page_header>
     <div class="mt-4 flex flex-col h-96">
       <div id="chat-stream" phx-hook="ChatStream" class="flex-1 overflow-y-auto border rounded p-3 space-y-2 mb-3">
-        <div :for={msg <- @messages} class={"p-2 rounded text-sm #{if msg.role == "user", do: "bg-blue-50 ml-8", else: "bg-zinc-50 mr-8"}"}>
+        <div :for={msg <- @messages} class={"p-2 rounded text-sm #{case msg.role do; "user" -> "bg-blue-50 ml-8"; "assistant" -> "bg-zinc-50 mr-8"; _ -> "bg-red-50 text-red-700"; end}"}>
           <span class="text-xs font-semibold">{msg.role}</span>
           <p>{msg.content}</p>
         </div>
@@ -777,6 +838,9 @@ defmodule JidoBuilderWeb.AgentChatLive do
         <input type="text" name="message" value={@input} class="flex-1 border rounded px-3 py-2 text-sm" placeholder="Type a message..." autocomplete="off" />
         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors">Send</button>
       </form>
+      <p class="text-xs text-zinc-400 mt-2">
+        Provider: {@provider_name}. Configure in <.link navigate={~p"/llm-config"} class="text-blue-600 hover:underline">LLM Config</.link>.
+      </p>
     </div>
     """
   end

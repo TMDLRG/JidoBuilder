@@ -39,7 +39,8 @@ defmodule JidoBuilderWeb.CommandPalette do
     %{name: "Template Library", path: "/template-library", section: "Admin"},
     %{name: "Notebook", path: "/notebook", section: "Build"},
     %{name: "Skills Manager", path: "/skills-manager", section: "Configure"},
-    %{name: "Agents", path: "/roster", section: "Operate"}
+    %{name: "Metrics Dashboard", path: "/metrics-dashboard", section: "Observe"},
+    %{name: "Marketplace", path: "/marketplace", section: "Admin"}
   ]
 
   def on_mount(:default, _params, _session, socket) do
